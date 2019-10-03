@@ -9,9 +9,15 @@ import android.os.IBinder
 import android.os.Vibrator
 
 object MetronomeService: Service(), Runnable {
-    //TODO: make LiveData for configuration changes
+
     private val binder = LocalBinder()
     private lateinit var vibrator: Vibrator
+    private lateinit var configObserver: ConfigObserver
+
+    init {
+
+
+    }
 
     private class LocalBinder : Binder() {
         fun getService() : MetronomeService {
