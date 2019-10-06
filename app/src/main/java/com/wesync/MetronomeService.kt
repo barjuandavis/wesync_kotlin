@@ -18,6 +18,8 @@ class MetronomeService: IntentService(MetronomeService::class.simpleName) {
     private lateinit var vibrator: Vibrator
     private lateinit var configObserver: ConfigObserver
     private var intent:Intent? = null
+    private lateinit var mainTimer: Timer
+    private lateinit var subTimer: Timer
 
     private val MILLIS_IN_MINUTE:Long = 60000
     private var bpm: Long = 120
@@ -43,22 +45,26 @@ class MetronomeService: IntentService(MetronomeService::class.simpleName) {
                 playTheWholeThing()
             }
             "PAUSE_METRONOME" -> {
-
+                stopTheWholeThing()
             }
-
         }
     }
-    
+
     private fun playTheWholeThing() {
         Log.d("PLAY_METRONOME","Playing.")
-        val mainTimer = Timer()
-        val subTimer = Timer()
+        mainTimer = Timer()
+        subTimer = Timer()
         val mainTimerTask = MyTimerTask()
         val subTimerTask = MyTimerTask()
-
         mainTimer.schedule(mainTimerTask, 0, MILLIS_IN_MINUTE / bpm)
         subTimer.schedule(subTimerTask, 300 * (100) / bpm, MILLIS_IN_MINUTE / bpm)
+    }
 
+    private fun stopTheWholeThing() {
+        mainTimer.cancel()
+        subTimer.cancel()
+        mainTimer.purge()
+        subTimer.purge()
     }
 
     private fun playSound() {
@@ -84,4 +90,6 @@ class MetronomeService: IntentService(MetronomeService::class.simpleName) {
             this@MetronomeService.playVibrate()
         }
     }
+
+
 }
