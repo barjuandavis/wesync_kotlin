@@ -19,7 +19,7 @@
             android:id="@+id/play_button"
             android:layout_width="291dp"
             android:layout_height="65dp"
-            android:text="@{viewmodel.}"
+            android:text="@string/play_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -1,5 +1,7 @@
 package com.wesync.ui.main
 
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,7 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
+import com.wesync.MetronomeService
 import com.wesync.R
 
 class MainFragment : Fragment() {
@@ -33,7 +35,8 @@ class MainFragment : Fragment() {
 
     private fun onPlayClicked() {
         //access the metronome
-
+        var i:Intent = Intent(this.context,MetronomeService::class.java)
+        i.putExtra("command","PLAY_METRONOME")
+        this.activity?.startService(i)
     }
-
 }

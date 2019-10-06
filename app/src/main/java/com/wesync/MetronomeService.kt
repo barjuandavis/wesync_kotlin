@@ -1,5 +1,6 @@
 package com.wesync
 
+import android.app.IntentService
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -7,31 +8,56 @@ import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
 import android.os.Vibrator
+import android.util.Log
+import java.util.*
 
-object MetronomeService: Service(), Runnable {
+
+class MetronomeService: IntentService(MetronomeService::class.simpleName) {
 
     private val binder = LocalBinder()
     private lateinit var vibrator: Vibrator
     private lateinit var configObserver: ConfigObserver
+    private var intent:Intent? = null
 
-    init {
+    private val MILLIS_IN_MINUTE:Long = 60000
+    private var bpm: Long = 120
 
 
-    }
-
-    private class LocalBinder : Binder() {
+    inner class LocalBinder : Binder() {
         fun getService() : MetronomeService {
-            return MetronomeService
+            return this@MetronomeService
         }
     }
 
     override fun onBind(p0: Intent?): IBinder? {
-        return binder
+        return this.binder
     }
 
-    override fun run() {
-        //run this service on the background according to the config
+    override fun onHandleIntent(workIntent: Intent) {
+        Log.d("onHandleIntent","Is it handled?")
+        this.intent = workIntent
+        val dataString = workIntent.extras
 
+        when (dataString.get("command")) {
+            "PLAY_METRONOME" -> {
+                playTheWholeThing()
+            }
+            "PAUSE_METRONOME" -> {
+
+            }
+
+        }
+    }
+    
+    private fun playTheWholeThing() {
+        Log.d("PLAY_METRONOME","Playing.")
+        val mainTimer = Timer()
+        val subTimer = Timer()
+        val mainTimerTask = MyTimerTask()
+        val subTimerTask = MyTimerTask()
+
+        mainTimer.schedule(mainTimerTask, 0, MILLIS_IN_MINUTE / bpm)
+        subTimer.schedule(subTimerTask, 300 * (100) / bpm, MILLIS_IN_MINUTE / bpm)
 
     }
 
@@ -45,14 +71,17 @@ object MetronomeService: Service(), Runnable {
     private fun playVibrate() {
         //TODO: check if vibrate is available in the config
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        vibrator.vibrate(500)
+        vibrator.vibrate(50)
     }
 
     private fun playFlashScreen() {
         //TODO: find out how to communicate to the UI thread safely (and with the least latency possible)
     }
 
-    private var bpm: Int = 120
-
-
+    inner class MyTimerTask: TimerTask() {
+        override fun run() {
+            this@MetronomeService.playSound()
+            this@MetronomeService.playVibrate()
+        }
+    }
 }
