@@ -20,7 +20,6 @@ class MetronomeService: IntentService(MetronomeService::class.simpleName) {
     private var intent:Intent? = null
     private lateinit var mainTimer: Timer
     private lateinit var subTimer: Timer
-
     private val MILLIS_IN_MINUTE:Long = 60000
     private var bpm: Long = 120
 
@@ -33,6 +32,11 @@ class MetronomeService: IntentService(MetronomeService::class.simpleName) {
 
     override fun onBind(p0: Intent?): IBinder? {
         return this.binder
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        stopSelf()
+        return super.onUnbind(intent)
     }
 
     override fun onHandleIntent(workIntent: Intent) {

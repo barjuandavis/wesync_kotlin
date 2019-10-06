@@ -23,6 +23,7 @@ class MainFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.v = inflater.inflate(R.layout.main_fragment, container, false)
+        viewModel = MainViewModel(this.activity!!.application)
         return this.v
     }
 
@@ -34,9 +35,6 @@ class MainFragment : Fragment() {
     }
 
     private fun onPlayClicked() {
-        //access the metronome
-        var i:Intent = Intent(this.context,MetronomeService::class.java)
-        i.putExtra("command","PLAY_METRONOME")
-        this.activity?.startService(i)
+        viewModel.onPlayButtonPressed()
     }
 }
