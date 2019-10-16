@@ -1,8 +1,12 @@
 package com.wesync.ui.main
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.content.ServiceConnection
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.os.IBinder
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -19,12 +23,29 @@ class MetronomeFragment : Fragment() {
 
     private lateinit var viewModel: MetronomeViewModel
     private lateinit var v:View
-    private lateinit var metronomeConnnection: ServiceConnection
+
+    private var mBound: Boolean = false
+    private lateinit var mService: MetronomeService
+
+    /** Defines callbacks for service binding, passed to bindService()  */
+    private val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder = service as MetronomeService.LocalBinder
+            mService = binder.getService()
+            mBound = true
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            mBound = false
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         this.v = inflater.inflate(R.layout.main_fragment, container, false)
         viewModel = MetronomeViewModel()
-
+        doBindService()
         return this.v
     }
 
@@ -35,7 +56,23 @@ class MetronomeFragment : Fragment() {
         button.setOnClickListener { onPlayClicked() }
     }
 
-    private fun onPlayClicked() {
+    override fun onDestroy() {
+        super.onDestroy()
+        doUnbindService()
+    }
 
+    private fun onPlayClicked() {
+        mService.onPlay()
+    }
+
+    private fun doBindService() {
+        Intent(activity!!.applicationContext, MetronomeService::class.java).also { intent ->
+            activity!!.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    private fun doUnbindService() {
+        activity!!.unbindService(connection)
+        mBound = false
     }
 }
