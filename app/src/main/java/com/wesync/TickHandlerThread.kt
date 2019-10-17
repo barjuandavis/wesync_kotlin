@@ -29,7 +29,7 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
             START_METRONOME -> {
                 isPlaying = true
                 mp.start()
-                SystemClock.sleep(60000 / 120)
+                SystemClock.sleep(60000 / MetronomeConfig.bpm)
                 if (isPlaying) {
                     handler.sendEmptyMessage(START_METRONOME)
                 }

@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
+import androidx.databinding.DataBindingUtil
 import com.wesync.ui.main.MetronomeFragment
 
 class MainActivity : AppCompatActivity() {
@@ -41,11 +42,9 @@ class MainActivity : AppCompatActivity() {
         doBindService()
     }
 
-    override fun onStop() {
-        super.onStop()
-        doUnbindService()
+    override fun onPause() {
+        super.onPause()
     }
-
     override fun onDestroy() {
         super.onDestroy()
         doUnbindService()

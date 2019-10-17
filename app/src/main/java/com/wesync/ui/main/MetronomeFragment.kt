@@ -12,8 +12,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import com.wesync.MetronomeConfig
 import com.wesync.MetronomeService
 import com.wesync.R
+import com.wesync.databinding.MetronomeFragmentBinding
 
 class MetronomeFragment : Fragment() {
 
@@ -23,9 +27,15 @@ class MetronomeFragment : Fragment() {
 
     private lateinit var viewModel: MetronomeViewModel
     private lateinit var v:View
+    private lateinit var binding:MetronomeFragmentBinding
 
     private var mBound: Boolean = false
     private lateinit var mService: MetronomeService
+
+    private val changeObserver = Observer<Long> {
+        //make change on repo
+        MetronomeConfig.bpm = it
+    }
 
     /** Defines callbacks for service binding, passed to bindService()  */
     private val connection = object : ServiceConnection {
@@ -42,8 +52,9 @@ class MetronomeFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        this.v = inflater.inflate(R.layout.main_fragment, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View {
+        binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
         viewModel = MetronomeViewModel()
         doBindService()
         return this.v
@@ -51,7 +62,8 @@ class MetronomeFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(MetronomeViewModel::class.java)
+        viewModel = binding.viewmodel
+        viewModel.bpm.observe(this,changeObserver)
         val button = this.v.findViewById<Button>(R.id.play_button)
         button.setOnClickListener { onPlayClicked() }
     }
@@ -60,6 +72,7 @@ class MetronomeFragment : Fragment() {
         super.onDestroy()
         doUnbindService()
     }
+
 
     private fun onPlayClicked() {
         mService.onPlay()
