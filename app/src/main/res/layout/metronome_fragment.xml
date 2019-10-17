@@ -9,13 +9,11 @@
             name="viewmodel"
             type="com.wesync.ui.main.MetronomeViewModel"/>
     </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.main.MetronomeFragment">
-
         <Button
             android:id="@+id/play_button"
             android:layout_width="291dp"

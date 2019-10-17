@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -32,9 +33,10 @@ class MetronomeFragment : Fragment() {
     private var mBound: Boolean = false
     private lateinit var mService: MetronomeService
 
-    private val changeObserver = Observer<Long> {
+    private val changeObserver = Observer<String> {
         //make change on repo
-        MetronomeConfig.bpm = it
+        Log.d("changed","changed bpm to " + it)
+        MetronomeConfig.bpm = it.toLong()
     }
 
     /** Defines callbacks for service binding, passed to bindService()  */
@@ -52,20 +54,23 @@ class MetronomeFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
         viewModel = MetronomeViewModel()
-        doBindService()
-        return this.v
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = binding.viewmodel
-        viewModel.bpm.observe(this,changeObserver)
-        val button = this.v.findViewById<Button>(R.id.play_button)
+        val button = binding.root.findViewById<Button>(R.id.play_button)
+        binding.viewmodel = viewModel
         button.setOnClickListener { onPlayClicked() }
+        doBindService()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+       viewModel.bpmString.observe(this,changeObserver)
     }
 
     override fun onDestroy() {

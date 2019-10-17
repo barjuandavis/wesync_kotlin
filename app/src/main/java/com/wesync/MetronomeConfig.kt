@@ -5,6 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 
 object MetronomeConfig {
-    var bpm:Long = 120
+    var bpm:Long = 1
 }
 
