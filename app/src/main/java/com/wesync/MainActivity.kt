@@ -18,7 +18,6 @@ class MainActivity : AppCompatActivity() {
     private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder = service as MetronomeService.LocalBinder
             mService = binder.getService()
             mBound = true
@@ -42,9 +41,16 @@ class MainActivity : AppCompatActivity() {
         doBindService()
     }
 
+    override fun onResume() {
+        super.onResume()
+        doBindService()
+    }
+
     override fun onPause() {
         super.onPause()
+        doUnbindService()
     }
+
     override fun onDestroy() {
         super.onDestroy()
         doUnbindService()
@@ -54,7 +60,6 @@ class MainActivity : AppCompatActivity() {
         Intent(applicationContext, MetronomeService::class.java).also { intent ->
             bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
-
     }
 
     private fun doUnbindService() {

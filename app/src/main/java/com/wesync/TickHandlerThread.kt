@@ -8,6 +8,10 @@ import android.util.Log
 class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
     Process.THREAD_PRIORITY_DEFAULT) {
 
+    /*
+           TODO: try to reduce audio latency by using Oboe's AudioStream instead of MediaPlayer
+     */
+
     private lateinit var handler: Handler
     private var mp: MediaPlayer = MediaPlayer.create(context,R.raw.tick)
     private val START_METRONOME = 100
@@ -29,6 +33,7 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
             START_METRONOME -> {
                 isPlaying = true
                 mp.start()
+                Log.d("START_METRONOME","start on bpm = " + MetronomeConfig.bpm)
                 SystemClock.sleep(60000 / MetronomeConfig.bpm)
                 if (isPlaying) {
                     handler.sendEmptyMessage(START_METRONOME)

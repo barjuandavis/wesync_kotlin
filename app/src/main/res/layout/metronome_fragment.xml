@@ -8,6 +8,9 @@
         <variable
             name="viewmodel"
             type="com.wesync.ui.main.MetronomeViewModel"/>
+        <variable
+            name="config"
+            type="com.wesync.MetronomeConfig"/>
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
@@ -18,8 +21,8 @@
             android:id="@+id/play_button"
             android:layout_width="291dp"
             android:layout_height="65dp"
-            android:text="@string/play_button"
-            android:onClick="onPlayClicked"
+            android:text="@{viewmodel.isPlaying().booleanValue() ? @string/stop_button : @string/play_button}"
+            android:onClick="@{() -> viewmodel.onPlayClicked()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,11 +35,15 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="numberDecimal"
-            android:text="@{viewmodel.bpmString}"
+            android:text="@{String.valueOf(viewmodel.bpm)}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.377" />
+
+        <!--
+            TODO: this editText's ^ android:text value returns null. figure out how to pass this shyet to the VM.
+        -->
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -52,7 +52,7 @@ class MetronomeService: Service() {
      }
 
     private fun playFlashScreen() {
-        //TODO: find out how to communicate to the UI thread safely (and with the least latency possible)
+        //TODO: find out how to communicate to the UI thread safely and with the least latency possible. NOTE: might not make it to the release build
     }
 
     private fun cleanup() {

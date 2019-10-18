@@ -12,13 +12,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.wesync.MetronomeConfig
 import com.wesync.MetronomeService
 import com.wesync.R
 import com.wesync.databinding.MetronomeFragmentBinding
+
+
+
+
 
 class MetronomeFragment : Fragment() {
 
@@ -33,17 +36,14 @@ class MetronomeFragment : Fragment() {
     private var mBound: Boolean = false
     private lateinit var mService: MetronomeService
 
-    private val changeObserver = Observer<String> {
-        //make change on repo
-        Log.d("changed","changed bpm to " + it)
-        MetronomeConfig.bpm = it.toLong()
+    private val playObserver = Observer<Boolean> {
+        mService.onPlay()
     }
 
     /** Defines callbacks for service binding, passed to bindService()  */
     private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder = service as MetronomeService.LocalBinder
             mService = binder.getService()
             mBound = true
@@ -57,35 +57,36 @@ class MetronomeFragment : Fragment() {
    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
-        viewModel = MetronomeViewModel()
-        return binding.root
+        binding.viewmodel = viewModel
+        subscribeToViewModel()
+       return binding.root
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = ViewModelProviders.of(this)
+            .get(MetronomeViewModel::class.java)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        val button = binding.root.findViewById<Button>(R.id.play_button)
-        binding.viewmodel = viewModel
-        button.setOnClickListener { onPlayClicked() }
         doBindService()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-       viewModel.bpmString.observe(this,changeObserver)
-    }
 
     override fun onDestroy() {
         super.onDestroy()
         doUnbindService()
     }
 
-
-    private fun onPlayClicked() {
-        mService.onPlay()
+    private fun subscribeToViewModel() {
+        viewModel.isPlaying.observe(viewLifecycleOwner,playObserver)
+        viewModel.bpm.observe(viewLifecycleOwner,MetronomeConfig.observer)
     }
 
     private fun doBindService() {
-        Intent(activity!!.applicationContext, MetronomeService::class.java).also { intent ->
-            activity!!.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        Intent(activity?.applicationContext, MetronomeService::class.java).also { intent ->
+            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
     }
 
