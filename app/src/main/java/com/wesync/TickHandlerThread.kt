@@ -18,7 +18,7 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
     private val START_METRONOME = 100
     private val STOP_METRONOME = 101
     private val ON_BPM_CHANGED = 123
-    private var isPlaying = true
+    private var isPlaying:Boolean? = null
 
     override fun run() {
         if (Looper.myLooper() == null) {
@@ -27,6 +27,7 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
         else
             Looper.loop()
         mp.prepareAsync()
+
         Log.d("ThreadStart","Thread has been started!")
     }
 
@@ -35,18 +36,19 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
             when (it.what) {
             START_METRONOME -> {
                 this.isPlaying = true
+                Log.d("IS_PLAYING","is_playing = playing")
                 mp.start()
                 Log.d("START_METRONOME","tick = " + this.bpm)
                 SystemClock.sleep(60000 / this.bpm)
-                if (this.isPlaying) {
-                    Log.d("START_METRONOME_resend","Resending tick")
+                if (this.isPlaying == true) {
                     handler.sendEmptyMessage(START_METRONOME)
                 }
             }
             STOP_METRONOME -> {
+                Log.d("IS_STOPPING","is_playing = NOPE")
+                isPlaying = false
                 handler.removeMessages(START_METRONOME)
                 handler.removeMessages(ON_BPM_CHANGED)
-                isPlaying = false
             }
             ON_BPM_CHANGED -> {
                 this.bpm = it.obj as Long

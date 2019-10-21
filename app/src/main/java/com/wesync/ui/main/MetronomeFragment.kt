@@ -44,6 +44,8 @@ class MetronomeFragment : Fragment() {
             mService = binder.getService()
             playObserver = Observer {
                 mService.onPlay()
+                if (it) binding.playButton.setText(R.string.stop_button)
+                else binding.playButton.setText(R.string.play_button)
             }
             bpmObserver = Observer {
                  mService.onBPMChanged(it)
