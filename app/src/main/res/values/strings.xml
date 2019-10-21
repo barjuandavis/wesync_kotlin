@@ -2,4 +2,11 @@
     <string name="app_name">WeSync</string>
     <string name="play_button">Play</string>
     <string name="stop_button">Stop</string>
+    <string name="plus_50">+50</string>
+    <string name="plus_10">+10</string>
+    <string name="plus_1">+1</string>
+    <string name="minus_50">-50</string>
+    <string name="minus_10">-10</string>
+    <string name="minus_1">-1</string>
+    <string name="bpm_s">bpm</string>
 </resources>

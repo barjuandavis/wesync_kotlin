@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.IBinder
+import android.text.Editable
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,9 +19,6 @@ import com.wesync.MetronomeConfig
 import com.wesync.MetronomeService
 import com.wesync.R
 import com.wesync.databinding.MetronomeFragmentBinding
-
-
-
 
 
 class MetronomeFragment : Fragment() {
@@ -35,10 +33,8 @@ class MetronomeFragment : Fragment() {
 
     private var mBound: Boolean = false
     private lateinit var mService: MetronomeService
-
-    private val playObserver = Observer<Boolean> {
-        mService.onPlay()
-    }
+    private lateinit var playObserver: Observer<Boolean>
+    private lateinit var bpmObserver : Observer<Long>
 
     /** Defines callbacks for service binding, passed to bindService()  */
     private val connection = object : ServiceConnection {
@@ -46,6 +42,14 @@ class MetronomeFragment : Fragment() {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as MetronomeService.LocalBinder
             mService = binder.getService()
+            playObserver = Observer {
+                mService.onPlay()
+            }
+            bpmObserver = Observer {
+                 mService.onBPMChanged(it)
+                binding.bpmTextView.text = "$it"
+            }
+            subscribeToViewModel()
             mBound = true
         }
 
@@ -58,7 +62,7 @@ class MetronomeFragment : Fragment() {
                               savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
         binding.viewmodel = viewModel
-        subscribeToViewModel()
+
        return binding.root
     }
 
@@ -73,7 +77,6 @@ class MetronomeFragment : Fragment() {
         doBindService()
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         doUnbindService()
@@ -81,7 +84,8 @@ class MetronomeFragment : Fragment() {
 
     private fun subscribeToViewModel() {
         viewModel.isPlaying.observe(viewLifecycleOwner,playObserver)
-        viewModel.bpm.observe(viewLifecycleOwner,MetronomeConfig.observer)
+        viewModel.bpm.observe(viewLifecycleOwner,bpmObserver)
+
     }
 
     private fun doBindService() {

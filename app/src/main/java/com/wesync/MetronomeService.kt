@@ -17,7 +17,9 @@ class MetronomeService: Service() {
     private lateinit var vibrator: Vibrator
     private val START_METRONOME = 100
     private val STOP_METRONOME = 101
-    var isPlaying = false
+    private val ON_BPM_CHANGED = 123
+    private var bpm:Long = 120
+    private var isPlaying = false
 
     inner class LocalBinder : Binder() {
         fun getService() : MetronomeService {
@@ -26,8 +28,6 @@ class MetronomeService: Service() {
     }
 
     override fun onBind(p0: Intent?): IBinder? {
-        Log.d("onBind","service bound to:" + p0.toString())
-        Log.d("pid","App created on pid:"+Thread.currentThread().id)
         handlerThread = TickHandlerThread(this.applicationContext)
         handlerThread.start()
         return this.binder
@@ -38,18 +38,26 @@ class MetronomeService: Service() {
         return super.onUnbind(intent)
     }
 
-    fun onPlay(){
+    fun onPlay(){ //asumsi: pasti dipanggil setelah onBind
         if (!isPlaying) {
-            Log.d("playing","playing")
-            handlerThread.start()
             handlerThread.getHandler().sendEmptyMessage(START_METRONOME)
         }
         else {
-            Log.d("stopping","stopping")
             handlerThread.getHandler().sendEmptyMessage(STOP_METRONOME)
         }
         isPlaying = !isPlaying //flip the switch
      }
+
+     fun onBPMChanged(bpm: Long) {
+        if (handlerThread.isAlive) {
+            val m = Message()
+            m.what = ON_BPM_CHANGED
+            m.obj = bpm
+            handlerThread.getHandler().sendMessage(m)
+            this.bpm = bpm
+        }
+
+    }
 
     private fun playFlashScreen() {
         //TODO: find out how to communicate to the UI thread safely and with the least latency possible. NOTE: might not make it to the release build
