@@ -1,9 +1,6 @@
-package com.wesync
+package com.wesync.metronome
 
-import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
-import android.util.Log
 import android.app.Service
 import android.os.*
 
@@ -15,9 +12,6 @@ class MetronomeService: Service() {
     private val binder = LocalBinder()
     private lateinit var handlerThread: TickHandlerThread
     private lateinit var vibrator: Vibrator
-    private val START_METRONOME = 100
-    private val STOP_METRONOME = 101
-    private val ON_BPM_CHANGED = 123
     private var bpm:Long = 120
     private var isPlaying = false
 
@@ -26,6 +20,8 @@ class MetronomeService: Service() {
             return this@MetronomeService
         }
     }
+
+    fun isPlaying() = isPlaying
 
     override fun onBind(p0: Intent?): IBinder? {
         handlerThread = TickHandlerThread(this.applicationContext)
@@ -38,12 +34,12 @@ class MetronomeService: Service() {
         return super.onUnbind(intent)
     }
 
-    fun onPlay(){ //asumsi: pasti dipanggil setelah onBind
+    fun onPlay(){
         if (!isPlaying) {
-            handlerThread.getHandler().sendEmptyMessage(START_METRONOME)
+            handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME.v)
         }
         else {
-            handlerThread.getHandler().sendEmptyMessage(STOP_METRONOME)
+            handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME.v)
         }
         isPlaying = !isPlaying //flip the switch
      }
@@ -51,16 +47,12 @@ class MetronomeService: Service() {
      fun onBPMChanged(bpm: Long) {
         if (handlerThread.isAlive) {
             val m = Message()
-            m.what = ON_BPM_CHANGED
+            m.what = MetronomeCodes.ON_BPM_CHANGED.v
             m.obj = bpm
             handlerThread.getHandler().sendMessage(m)
             this.bpm = bpm
         }
 
-    }
-
-    private fun playFlashScreen() {
-        //TODO: find out how to communicate to the UI thread safely and with the least latency possible. NOTE: might not make it to the release build
     }
 
     private fun cleanup() {

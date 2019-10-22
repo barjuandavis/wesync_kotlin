@@ -1,9 +1,10 @@
-package com.wesync
+package com.wesync.metronome
 
 import android.content.Context
 import android.media.MediaPlayer
 import android.os.*
 import android.util.Log
+import com.wesync.R
 
 class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
     Process.THREAD_PRIORITY_DEFAULT) {
@@ -13,12 +14,9 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
      */
 
     private lateinit var handler: Handler
-    private var mp: MediaPlayer = MediaPlayer.create(context,R.raw.tick)
+    private var mp: MediaPlayer = MediaPlayer.create(context, R.raw.tick)
     private var bpm:Long = 120
-    private val START_METRONOME = 100
-    private val STOP_METRONOME = 101
-    private val ON_BPM_CHANGED = 123
-    private var isPlaying:Boolean? = null
+    private var isPlaying:Boolean? = false
 
     override fun run() {
         if (Looper.myLooper() == null) {
@@ -26,33 +24,29 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
         }
         else
             Looper.loop()
-        mp.prepareAsync()
-
+        mp.prepare()
         Log.d("ThreadStart","Thread has been started!")
     }
 
     override fun onLooperPrepared() {
-        handler = Handler() {
+        handler = Handler {
             when (it.what) {
-            START_METRONOME -> {
+            MetronomeCodes.START_METRONOME.v -> {
                 this.isPlaying = true
-                Log.d("IS_PLAYING","is_playing = playing")
                 mp.start()
-                Log.d("START_METRONOME","tick = " + this.bpm)
                 SystemClock.sleep(60000 / this.bpm)
                 if (this.isPlaying == true) {
-                    handler.sendEmptyMessage(START_METRONOME)
+                    handler.sendEmptyMessage(MetronomeCodes.START_METRONOME.v)
                 }
             }
-            STOP_METRONOME -> {
-                Log.d("IS_STOPPING","is_playing = NOPE")
+            MetronomeCodes.STOP_METRONOME.v -> {
                 isPlaying = false
-                handler.removeMessages(START_METRONOME)
-                handler.removeMessages(ON_BPM_CHANGED)
+                handler.removeMessages(MetronomeCodes.START_METRONOME.v)
+                handler.removeMessages(MetronomeCodes.ON_BPM_CHANGED.v)
+                handler.removeMessages(MetronomeCodes.STOP_METRONOME.v)
             }
-            ON_BPM_CHANGED -> {
+            MetronomeCodes.ON_BPM_CHANGED.v -> {
                 this.bpm = it.obj as Long
-                Log.d("ON_CHANGED_BPM","Changed to ${this.bpm}")
             }
         }
             return@Handler true

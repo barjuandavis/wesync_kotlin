@@ -7,9 +7,7 @@ import androidx.lifecycle.*
 
 class MetronomeViewModel : ViewModel() {
 
-
-
-    private val _isPlaying              = MutableLiveData<Boolean>()
+    private val _isPlaying              = MutableLiveData<Boolean>(false)
 
     private val _bpm                    = MutableLiveData<Long>(120)
     val isPlaying: LiveData<Boolean>    = _isPlaying
@@ -17,8 +15,6 @@ class MetronomeViewModel : ViewModel() {
 
 
     fun onPlayClicked() {
-        if (_isPlaying.value == null)
-            _isPlaying.value = false
         val p = _isPlaying.value
         _isPlaying.value = !p!!
     }

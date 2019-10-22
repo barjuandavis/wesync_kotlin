@@ -7,7 +7,7 @@ import android.content.ServiceConnection
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
-import androidx.databinding.DataBindingUtil
+import com.wesync.metronome.MetronomeService
 import com.wesync.ui.main.MetronomeFragment
 
 class MainActivity : AppCompatActivity() {
@@ -38,22 +38,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        doBindService()
+       // doBindService()
     }
 
-    override fun onResume() {
-        super.onResume()
-        doBindService()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        doUnbindService()
-    }
 
     override fun onDestroy() {
         super.onDestroy()
-        doUnbindService()
+       // doUnbindService()
     }
 
     private fun doBindService() {
