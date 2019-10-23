@@ -17,6 +17,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.wesync.metronome.MetronomeService
 import com.wesync.R
+import com.wesync.SharedViewModel
 import com.wesync.databinding.MetronomeFragmentBinding
 
 
@@ -29,7 +30,7 @@ class MetronomeFragment : Fragment() {
     private lateinit var viewModel: MetronomeViewModel
     private lateinit var v:View
     private lateinit var binding: MetronomeFragmentBinding
-
+    private val sharedViewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
     private var mBound: Boolean = false
     private lateinit var mService: MetronomeService
     private val playObserver = Observer<Boolean>() {
@@ -50,6 +51,7 @@ class MetronomeFragment : Fragment() {
     private val bpmObserver = Observer<Long> {
         try {
             mService.onBPMChanged(it)
+            sharedViewModel.config.postValue(it)
             binding.bpmTextView.text = "$it"
         }
         catch (e: Exception) {

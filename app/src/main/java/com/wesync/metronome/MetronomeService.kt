@@ -47,7 +47,6 @@ class MetronomeService: Service() {
         else {
             handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME.v)
         }
-        //flip the switch
      }
 
      fun onBPMChanged(bpm: Long) {

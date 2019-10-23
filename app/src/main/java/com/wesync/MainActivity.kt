@@ -1,32 +1,14 @@
 package com.wesync
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.IBinder
-import com.wesync.metronome.MetronomeService
+import androidx.lifecycle.ViewModelProviders
 import com.wesync.ui.main.MetronomeFragment
 
 class MainActivity : AppCompatActivity() {
-    private var mBound: Boolean = false
-    private lateinit var mService: MetronomeService
 
-    /** Defines callbacks for service binding, passed to bindService()  */
-    private val connection = object : ServiceConnection {
-
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as MetronomeService.LocalBinder
-            mService = binder.getService()
-            mBound = true
-        }
-
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            mBound = false
-        }
-    }
+    private val sharedViewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,25 +18,5 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-       // doBindService()
-    }
 
-
-    override fun onDestroy() {
-        super.onDestroy()
-       // doUnbindService()
-    }
-
-    private fun doBindService() {
-        Intent(applicationContext, MetronomeService::class.java).also { intent ->
-            bindService(intent, connection, Context.BIND_AUTO_CREATE)
-        }
-    }
-
-    private fun doUnbindService() {
-        unbindService(connection)
-        mBound = false
-    }
 }
