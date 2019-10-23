@@ -1,4 +1,4 @@
-package com.wesync.ui.main
+package com.wesync.ui.connection
 
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle

@@ -1,14 +1,10 @@
 package com.wesync.ui.main
 
-import android.util.Log
-import androidx.databinding.Bindable
 import androidx.lifecycle.*
-
 
 class MetronomeViewModel : ViewModel() {
 
-    private val _isPlaying              = MutableLiveData<Boolean>(false)
-
+    private val _isPlaying              = MutableLiveData<Boolean>( false)
     private val _bpm                    = MutableLiveData<Long>(120)
     val isPlaying: LiveData<Boolean>    = _isPlaying
     val bpm: LiveData<Long> = _bpm

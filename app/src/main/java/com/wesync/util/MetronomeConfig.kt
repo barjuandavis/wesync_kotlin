@@ -1,4 +1,4 @@
-package com.wesync.metronome
+package com.wesync.util
 
 import androidx.lifecycle.Observer
 

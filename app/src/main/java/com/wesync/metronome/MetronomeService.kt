@@ -3,6 +3,7 @@ package com.wesync.metronome
 import android.content.Intent
 import android.app.Service
 import android.os.*
+import com.wesync.util.MetronomeCodes
 
 
 class MetronomeService: Service() {
@@ -29,19 +30,24 @@ class MetronomeService: Service() {
         return this.binder
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        cleanup()
+    }
     override fun onUnbind(intent: Intent?): Boolean {
         cleanup()
         return super.onUnbind(intent)
     }
 
     fun onPlay(){
-        if (!isPlaying) {
+        isPlaying = !isPlaying
+        if (isPlaying) {
             handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME.v)
         }
         else {
             handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME.v)
         }
-        isPlaying = !isPlaying //flip the switch
+        //flip the switch
      }
 
      fun onBPMChanged(bpm: Long) {

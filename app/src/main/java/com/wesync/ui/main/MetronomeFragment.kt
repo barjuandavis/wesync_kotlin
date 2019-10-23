@@ -7,10 +7,12 @@ import android.content.ServiceConnection
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.wesync.metronome.MetronomeService
@@ -30,33 +32,42 @@ class MetronomeFragment : Fragment() {
 
     private var mBound: Boolean = false
     private lateinit var mService: MetronomeService
-    private lateinit var playObserver: Observer<Boolean>
-    private lateinit var bpmObserver : Observer<Long>
+    private val playObserver = Observer<Boolean>() {
+        try {
+            Log.d("playObserver","playObserved:$it")
+            if (it) {
+                binding.playButton.setText(R.string.stop_button)
+            } else binding.playButton.setText(R.string.play_button)
+            mService.onPlay()
+        }
+        catch (e: Exception) {
+            Toast.makeText(this@MetronomeFragment.context,
+                "Preparing...",
+                Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+    private val bpmObserver = Observer<Long> {
+        try {
+            mService.onBPMChanged(it)
+            binding.bpmTextView.text = "$it"
+        }
+        catch (e: Exception) {
+            Toast.makeText(this@MetronomeFragment.context,
+                "Preparing...",
+                Toast.LENGTH_SHORT).
+                show()
+        }
+    }
 
 
     private val connection = object : ServiceConnection {
-
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as MetronomeService.LocalBinder
             mService = binder.getService()
-            playObserver = Observer {
-                if (mService.isPlaying()) {
-
-                    binding.playButton.setText(R.string.stop_button)
-                }
-                else binding.playButton.setText(R.string.play_button)
-                mService.onPlay()
-            }
-            bpmObserver = Observer {
-                mService.onBPMChanged(it)
-                binding.bpmTextView.text = "$it"
-            }
-            subscribeToViewModel()
             mBound = true
+
         }
-
-
-
         override fun onServiceDisconnected(arg0: ComponentName) {
             mBound = false
         }
@@ -66,7 +77,6 @@ class MetronomeFragment : Fragment() {
                               savedInstanceState: Bundle?): View {
        binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
        binding.viewmodel = viewModel
-
        return binding.root
     }
 
@@ -74,7 +84,6 @@ class MetronomeFragment : Fragment() {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProviders.of(this)
             .get(MetronomeViewModel::class.java)
-
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -88,13 +97,14 @@ class MetronomeFragment : Fragment() {
     }
 
     private fun subscribeToViewModel() {
-        viewModel.isPlaying.observe(viewLifecycleOwner,playObserver)
         viewModel.bpm.observe(viewLifecycleOwner,bpmObserver)
+        viewModel.isPlaying.observe(viewLifecycleOwner,playObserver)
     }
 
     private fun doBindService() {
         Intent(activity?.applicationContext, MetronomeService::class.java).also { intent ->
             activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+            subscribeToViewModel()
         }
 
     }
@@ -103,4 +113,6 @@ class MetronomeFragment : Fragment() {
         activity!!.unbindService(connection)
         mBound = false
     }
+
+
 }

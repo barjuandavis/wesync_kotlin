@@ -5,6 +5,7 @@ import android.media.MediaPlayer
 import android.os.*
 import android.util.Log
 import com.wesync.R
+import com.wesync.util.MetronomeCodes
 
 class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
     Process.THREAD_PRIORITY_DEFAULT) {
@@ -16,7 +17,7 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
     private lateinit var handler: Handler
     private var mp: MediaPlayer = MediaPlayer.create(context, R.raw.tick)
     private var bpm:Long = 120
-    private var isPlaying:Boolean? = false
+    private var _isPlaying:Boolean? = false
 
     override fun run() {
         if (Looper.myLooper() == null) {
@@ -24,7 +25,7 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
         }
         else
             Looper.loop()
-        mp.prepare()
+        mp.prepareAsync()
         Log.d("ThreadStart","Thread has been started!")
     }
 
@@ -32,15 +33,16 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
         handler = Handler {
             when (it.what) {
             MetronomeCodes.START_METRONOME.v -> {
-                this.isPlaying = true
+                _isPlaying = true
                 mp.start()
                 SystemClock.sleep(60000 / this.bpm)
-                if (this.isPlaying == true) {
+                Log.d("tick","tick")
+                if (_isPlaying == true) {
                     handler.sendEmptyMessage(MetronomeCodes.START_METRONOME.v)
                 }
             }
             MetronomeCodes.STOP_METRONOME.v -> {
-                isPlaying = false
+                _isPlaying = false
                 handler.removeMessages(MetronomeCodes.START_METRONOME.v)
                 handler.removeMessages(MetronomeCodes.ON_BPM_CHANGED.v)
                 handler.removeMessages(MetronomeCodes.STOP_METRONOME.v)
@@ -54,7 +56,6 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
     }
 
     override fun quitSafely(): Boolean {
-        mp.stop()
         mp.release()
         return super.quitSafely()
     }
@@ -62,4 +63,6 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
     fun getHandler(): Handler {
         return handler
     }
+
+    fun isPlaying() = _isPlaying
 }

@@ -3,13 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
-            type="com.wesync.ui.main.ConnectionViewModel"
+            type="com.wesync.ui.connection.ConnectionViewModel"
             name="viewmodel"/>
     </data>
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.main.ConnectionFragment">
+        tools:context=".ui.connection.ConnectionFragment">
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
