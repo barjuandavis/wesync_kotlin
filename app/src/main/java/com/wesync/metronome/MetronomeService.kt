@@ -7,9 +7,7 @@ import com.wesync.util.MetronomeCodes
 
 
 class MetronomeService: Service() {
-    /*
-          TODO: every call goes DIRECTLY HERE, but every config changes GOES TO MetronomeConfig
-     */
+
     private val binder = LocalBinder()
     private lateinit var handlerThread: TickHandlerThread
     private lateinit var vibrator: Vibrator

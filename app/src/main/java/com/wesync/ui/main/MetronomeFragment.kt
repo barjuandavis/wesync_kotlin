@@ -42,10 +42,7 @@ class MetronomeFragment : Fragment() {
             mService.onPlay()
         }
         catch (e: Exception) {
-            Toast.makeText(this@MetronomeFragment.context,
-                "Preparing...",
-                Toast.LENGTH_SHORT)
-                .show()
+           // Toast.makeText(this@MetronomeFragment.context, "Preparing...", Toast.LENGTH_SHORT).show() # for debug purposes
         }
     }
     private val bpmObserver = Observer<Long> {
@@ -54,12 +51,7 @@ class MetronomeFragment : Fragment() {
             sharedViewModel.config.postValue(it)
             binding.bpmTextView.text = "$it"
         }
-        catch (e: Exception) {
-            Toast.makeText(this@MetronomeFragment.context,
-                "Preparing...",
-                Toast.LENGTH_SHORT).
-                show()
-        }
+        catch (e: Exception) { }
     }
 
 
