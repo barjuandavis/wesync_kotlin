@@ -17,16 +17,103 @@
         android:backgroundTint="@android:color/transparent"
         tools:context=".ui.main.MetronomeFragment">
 
+        <Button
+            android:id="@+id/plus_"
+            android:layout_width="118dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginBottom="40dp"
+            android:layout_weight="1"
+            android:background="@color/colorSubtractTempo"
+            android:backgroundTint="@color/colorAddTempo"
+            android:onClick="@{() -> viewmodel.modifyBPM(50)}"
+            android:text="@string/new_session"
+            android:textColor="#ffffff"
+            app:layout_constraintBottom_toTopOf="@+id/plus_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.947" />
+
+        <Button
+            android:id="@+id/plus_2"
+            android:layout_width="118dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="92dp"
+            android:layout_marginBottom="40dp"
+            android:layout_weight="1"
+            android:background="@color/colorSubtractTempo"
+            android:backgroundTint="@color/colorAddTempo"
+            android:onClick="@{() -> viewmodel.modifyBPM(50)}"
+            android:text="@string/join_session"
+            android:textColor="#ffffff"
+            app:layout_constraintBottom_toTopOf="@+id/plus_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.069"
+            app:layout_constraintStart_toEndOf="@+id/plus_"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.955" />
+
+        <LinearLayout
+            android:id="@+id/minus_layout"
+            android:layout_width="348sp"
+            android:layout_height="65sp"
+            android:layout_marginTop="4dp"
+            android:gravity="center|fill"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.492"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/bpm_textView">
+
+            <Button
+                android:id="@+id/minus_50"
+                android:layout_width="42sp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/colorSubtractTempo"
+                android:onClick="@{() -> viewmodel.modifyBPM(-50)}"
+                android:text="@string/minus_50"
+                android:textColor="#ffffff"
+                tools:layout_editor_absoluteX="36dp"
+                tools:layout_editor_absoluteY="380dp" />
+
+            <Button
+                android:id="@+id/minus_10"
+                android:layout_width="42sp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/colorSubtractTempo"
+                android:backgroundTint="@color/colorSubtractTempo"
+                android:onClick="@{() -> viewmodel.modifyBPM(-10)}"
+                android:text="@string/minus_10"
+                android:textColor="#ffffff"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="380dp" />
+
+            <Button
+                android:id="@+id/minus_1"
+                android:layout_width="42sp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/colorSubtractTempo"
+                android:backgroundTint="@color/colorSubtractTempo"
+                android:onClick="@{() -> viewmodel.modifyBPM(-1)}"
+                android:text="@string/minus_1"
+                android:textColor="#ffffff"
+                tools:layout_editor_absoluteX="268dp"
+                tools:layout_editor_absoluteY="380dp" />
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/plus_layout"
             android:layout_width="348sp"
             android:layout_height="69dp"
-            android:layout_marginTop="100sp"
+            android:layout_marginTop="164dp"
             android:layout_marginEnd="2sp"
             android:gravity="center|fill"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.571"
+            app:layout_constraintHorizontal_bias="0.491"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -37,39 +124,42 @@
                 android:layout_weight="1"
                 android:background="@color/colorSubtractTempo"
                 android:backgroundTint="@color/colorAddTempo"
-                android:insetLeft="6dp"
-                android:insetRight="6dp"
                 android:onClick="@{() -> viewmodel.modifyBPM(50)}"
-                android:text="@string/plus_50" />
+                android:text="@string/plus_50"
+                android:textColor="#ffffff"
+                tools:layout_editor_absoluteX="35dp"
+                tools:layout_editor_absoluteY="166dp" />
 
             <Button
                 android:id="@+id/plus_10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="@color/colorAddTempo"
-                android:insetLeft="6dp"
-                android:insetRight="6dp"
+                android:background="@color/colorAddTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(10)}"
-                android:text="@string/plus_10" />
+                android:text="@string/plus_10"
+                android:textColor="#ffffff"
+                tools:layout_editor_absoluteX="151dp"
+                tools:layout_editor_absoluteY="166dp" />
 
             <Button
                 android:id="@+id/plus_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="@color/colorAddTempo"
-                android:insetLeft="6dp"
-                android:insetRight="6dp"
+                android:background="@color/colorAddTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(1)}"
-                android:text="@string/plus_1" />
+                android:text="@string/plus_1"
+                android:textColor="#ffffff"
+                tools:layout_editor_absoluteX="267dp"
+                tools:layout_editor_absoluteY="166dp" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/bpm_textView"
             android:layout_width="197dp"
             android:layout_height="137dp"
-            android:layout_marginStart="60dp"
+            android:layout_marginStart="56dp"
             android:ems="10"
             android:fontFamily="sans-serif-black"
             android:text='@{"" + viewmodel.bpm}'
@@ -83,8 +173,8 @@
 
         <TextView
             android:id="@+id/bpm_textView2"
-            android:layout_width="100dp"
-            android:layout_height="135dp"
+            android:layout_width="100sp"
+            android:layout_height="135sp"
             android:ems="10"
             android:fontFamily="sans-serif-smallcaps"
             android:text="@string/bpm_s"
@@ -95,72 +185,25 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/bpm_textView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="0.051"
             app:layout_constraintStart_toEndOf="@+id/bpm_textView"
             app:layout_constraintTop_toTopOf="@+id/bpm_textView"
             app:layout_constraintVertical_bias="0.0" />
 
-        <LinearLayout
-            android:id="@+id/minus_layout"
-            android:layout_width="348sp"
-            android:layout_height="65sp"
-            android:layout_marginTop="8sp"
-            android:gravity="center|fill"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.571"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/bpm_textView">
-
-            <Button
-                android:id="@+id/minus_50"
-                android:layout_width="42sp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:backgroundTint="@color/colorSubtractTempo"
-                android:insetLeft="6dp"
-                android:insetRight="6dp"
-                android:onClick="@{() -> viewmodel.modifyBPM(-50)}"
-                android:text="@string/minus_50" />
-
-            <Button
-                android:id="@+id/minus_10"
-                android:layout_width="42sp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@color/colorSubtractTempo"
-                android:backgroundTint="@color/colorSubtractTempo"
-                android:insetLeft="6dp"
-                android:insetRight="6dp"
-                android:onClick="@{() -> viewmodel.modifyBPM(-10)}"
-                android:text="@string/minus_10" />
-
-            <Button
-                android:id="@+id/minus_1"
-                android:layout_width="42sp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@color/colorSubtractTempo"
-                android:backgroundTint="@color/colorSubtractTempo"
-                android:insetLeft="6dp"
-                android:insetRight="6dp"
-                android:onClick="@{() -> viewmodel.modifyBPM(-1)}"
-                android:text="@string/minus_1" />
-        </LinearLayout>
-
         <Button
             android:id="@+id/play_button"
             android:layout_width="150sp"
-            android:layout_height="150sp"
+            android:layout_height="75sp"
             android:layout_marginTop="40sp"
             android:layout_marginBottom="136sp"
             android:onClick="@{() -> viewmodel.onPlayClicked()}"
             android:text="@string/play_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/minus_layout"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.146" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.Resources
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.IBinder
@@ -28,9 +29,10 @@ class MetronomeFragment : Fragment() {
     }
 
     private lateinit var viewModel: MetronomeViewModel
+    private lateinit var sharedViewModel: SharedViewModel
     private lateinit var v:View
     private lateinit var binding: MetronomeFragmentBinding
-    private val sharedViewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
+
     private var mBound: Boolean = false
     private lateinit var mService: MetronomeService
     private val playObserver = Observer<Boolean>() {
@@ -38,7 +40,11 @@ class MetronomeFragment : Fragment() {
             Log.d("playObserver","playObserved:$it")
             if (it) {
                 binding.playButton.setText(R.string.stop_button)
-            } else binding.playButton.setText(R.string.play_button)
+                binding.playButton.setBackgroundColor(resources.getColor(R.color.colorStop))
+            } else {
+                binding.playButton.setText(R.string.play_button)
+                binding.playButton.setBackgroundColor(resources.getColor(R.color.colorPlay))
+            }
             mService.onPlay()
         }
         catch (e: Exception) {
@@ -71,6 +77,7 @@ class MetronomeFragment : Fragment() {
                               savedInstanceState: Bundle?): View {
        binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
        binding.viewmodel = viewModel
+       sharedViewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
        return binding.root
     }
 

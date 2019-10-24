@@ -22,11 +22,11 @@ class ConnectionManagerService : Service() {
                 .setTitle("Accept connection to " + info.endpointName)
                 .setMessage("Confirm the code matches on both devices: " + info.authenticationToken)
 
-                .setPositiveButton("Accept") { dialog: DialogInterface, which: Int ->
+                .setPositiveButton("Accept") { _: DialogInterface, _: Int ->
                     // The user confirmed, so we can accept the connection.
                     Nearby.getConnectionsClient(applicationContext).acceptConnection(endpointId, payloadCallback)
                 }
-                .setNegativeButton(android.R.string.cancel) { dialog: DialogInterface, which: Int ->
+                .setNegativeButton(android.R.string.cancel) { _: DialogInterface, _: Int ->
                     // The user canceled, so we should reject the connection.
                     Nearby.getConnectionsClient(applicationContext).rejectConnection(endpointId)
                 }

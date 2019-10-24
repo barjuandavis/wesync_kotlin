@@ -9,4 +9,7 @@
     <string name="minus_1" translatable="false">-1</string>
     <string name="bpm_s" translatable="false">bpm</string>
     <string name="play_button" translatable="false">Play</string>
+    <string name="new_session">New Session</string>
+    <string name="join_session">Join Session</string>
+    <string name="not_connected">You are playing by yourself. Create a new Session or join an existing Session around you.</string>
 </resources>

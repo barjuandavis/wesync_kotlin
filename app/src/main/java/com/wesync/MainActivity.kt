@@ -8,13 +8,14 @@ import com.wesync.ui.main.MetronomeFragment
 
 class MainActivity : AppCompatActivity() {
 
-    private val sharedViewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
+    private lateinit var sharedViewModel: SharedViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction().replace(R.id.container, MetronomeFragment.newInstance()).commitNow()
+            sharedViewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
         }
     }
 

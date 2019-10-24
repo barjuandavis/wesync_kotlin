@@ -4,6 +4,9 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="colorBackground">#424242</color>
-    <color name="colorAddTempo">#2e7d32</color>
-    <color name="colorSubtractTempo">#c62828</color>
+    <color name="colorBackgroundDark">#363636</color>
+    <color name="colorAddTempo">#5C6BC0</color>
+    <color name="colorSubtractTempo">#EF5350</color>
+    <color name="colorPlay">#43A047</color>
+    <color name="colorStop">#D81B60</color>
 </resources>
