@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@+id/metronomeFragment">
+
+    <fragment
+        android:id="@+id/metronomeFragment"
+        android:name="com.wesync.ui.main.MetronomeFragment"
+        android:label="MetronomeFragment"
+        tools:layout="@layout/metronome_fragment">
+        <action
+            android:id="@+id/action_metronomeFragment_to_connectionFragment"
+            app:destination="@+id/connectionFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@+id/metronomeFragment"
+            app:popUpToInclusive="false">
+
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/connectionFragment"
+        android:name="com.wesync.ui.connection.ConnectionFragment"
+        android:label="ConnectionFragment"
+        tools:layout="@layout/connection_fragment">
+        <argument
+            android:name="connectionType"
+            android:defaultValue="1"
+            app:argType="integer" />
+    </fragment>
+</navigation>

@@ -15,11 +15,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.findNavController
 import com.wesync.metronome.MetronomeService
 import com.wesync.R
 import com.wesync.SharedViewModel
 import com.wesync.databinding.MetronomeFragmentBinding
+import com.wesync.util.ConnectionCodes
+import java.util.*
 
 
 class MetronomeFragment : Fragment() {
@@ -28,11 +32,9 @@ class MetronomeFragment : Fragment() {
         fun newInstance() = MetronomeFragment()
     }
 
-    private lateinit var viewModel: MetronomeViewModel
+    private  var viewModel: MetronomeViewModel by viewModels()
     private lateinit var sharedViewModel: SharedViewModel
-    private lateinit var v:View
     private lateinit var binding: MetronomeFragmentBinding
-
     private var mBound: Boolean = false
     private lateinit var mService: MetronomeService
     private val playObserver = Observer<Boolean>() {
@@ -60,7 +62,6 @@ class MetronomeFragment : Fragment() {
         catch (e: Exception) { }
     }
 
-
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as MetronomeService.LocalBinder
@@ -73,47 +74,64 @@ class MetronomeFragment : Fragment() {
         }
     }
 
-   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
        binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
        binding.viewmodel = viewModel
-       sharedViewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
-       return binding.root
+       binding.root
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProviders.of(this)
             .get(MetronomeViewModel::class.java)
     }
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        activity?.let {
+            sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
+        }
+    }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        Log.d("activity","activity${activity.toString()}")
         doBindService()
     }
-
     override fun onDestroy() {
         super.onDestroy()
         doUnbindService()
     }
 
-    private fun subscribeToViewModel() {
-        viewModel.bpm.observe(viewLifecycleOwner,bpmObserver)
-        viewModel.isPlaying.observe(viewLifecycleOwner,playObserver)
-    }
-
     private fun doBindService() {
         Intent(activity?.applicationContext, MetronomeService::class.java).also { intent ->
             activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-            subscribeToViewModel()
+          subscribeToViewModel()
         }
-
     }
-
+    private fun subscribeToViewModel() {
+        viewModel.bpm.observe(this,bpmObserver)
+        viewModel.isPlaying.observe(this,playObserver)
+        binding.newSession.setOnClickListener(OnConnectionFragmentClickListener())
+        binding.joinSession.setOnClickListener(OnConnectionFragmentClickListener())
+    }
+    private class OnConnectionFragmentClickListener: View.OnClickListener {
+        override fun onClick(v: View) {
+            var args = 0
+            when (v.id) {
+                R.id.new_session -> args = ConnectionCodes.NEW_SESSION.v
+                R.id.join_session -> args = ConnectionCodes.JOIN_SESSION.v
+            }
+            val action = MetronomeFragmentDirections.
+                actionMetronomeFragmentToConnectionFragment()
+            action.connectionType = args
+            v.findNavController().navigate(action)
+        }
+    }
     private fun doUnbindService() {
         activity!!.unbindService(connection)
         mBound = false
     }
+
+
+
+
 
 
 }

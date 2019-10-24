@@ -11,17 +11,23 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.fragment.navArgs
 
 import com.wesync.R
 import com.wesync.SharedViewModel
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.ConnectionFragmentBinding
 import com.wesync.metronome.MetronomeService
+import com.wesync.ui.main.MetronomeFragment
+import com.wesync.ui.main.MetronomeFragmentDirections
+import com.wesync.util.ConnectionCodes
+import java.lang.Exception
 
 class ConnectionFragment : Fragment() {
 
-    private var sharedViewModel: SharedViewModel? = null
+    private lateinit var sharedViewModel: SharedViewModel
     private lateinit var binding: ConnectionFragmentBinding
     private var mBound: Boolean = false
     private lateinit var mService: ConnectionManagerService
@@ -36,24 +42,35 @@ class ConnectionFragment : Fragment() {
             mBound = false
         }
     }
-
-
-    companion object {
-        fun newInstance() = ConnectionFragment()
-    }
+    val args: ConnectionFragmentArgs by navArgs()
 
     private lateinit var viewModel: ConnectionViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater,R.layout.connection_fragment,container,false)
         binding.viewmodel = viewModel
-        return binding.root
-
+        return null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
             sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
+        }
+        when (args.connectionType) {
+            ConnectionCodes.NEW_SESSION.v -> {
+                try {mService.startAdvertising()}
+                catch(e:Exception) {
+                    Toast.makeText(this.context,"preparing",
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
+            ConnectionCodes.JOIN_SESSION.v -> {
+                try {mService.startAdvertising()}
+                catch(e:Exception) {
+                    Toast.makeText(this.context,"preparing",
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
