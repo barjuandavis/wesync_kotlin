@@ -32,7 +32,7 @@ class MetronomeFragment : Fragment() {
         fun newInstance() = MetronomeFragment()
     }
 
-    private  var viewModel: MetronomeViewModel by viewModels()
+    private lateinit var viewModel: MetronomeViewModel
     private lateinit var sharedViewModel: SharedViewModel
     private lateinit var binding: MetronomeFragmentBinding
     private var mBound: Boolean = false
@@ -50,7 +50,7 @@ class MetronomeFragment : Fragment() {
             mService.onPlay()
         }
         catch (e: Exception) {
-           // Toast.makeText(this@MetronomeFragment.context, "Preparing...", Toast.LENGTH_SHORT).show() # for debug purposes
+           Toast.makeText(this@MetronomeFragment.context, "Preparing...", Toast.LENGTH_SHORT).show()
         }
     }
     private val bpmObserver = Observer<Long> {
@@ -74,14 +74,28 @@ class MetronomeFragment : Fragment() {
         }
     }
 
+    private class OnConnectionFragmentClickListener: View.OnClickListener {
+        override fun onClick(v: View) {
+            var args = 0
+            when (v.id) {
+                R.id.new_session -> args = ConnectionCodes.NEW_SESSION.v
+                R.id.join_session -> args = ConnectionCodes.JOIN_SESSION.v
+            }
+            val action = MetronomeFragmentDirections.
+                actionMetronomeFragmentToConnectionFragment()
+            action.connectionType = args
+            v.findNavController().navigate(action)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
        binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
        binding.viewmodel = viewModel
-       binding.root
+       return binding.root
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProviders.of(this)
+        viewModel = ViewModelProviders.of(this.requireActivity())
             .get(MetronomeViewModel::class.java)
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -111,19 +125,7 @@ class MetronomeFragment : Fragment() {
         binding.newSession.setOnClickListener(OnConnectionFragmentClickListener())
         binding.joinSession.setOnClickListener(OnConnectionFragmentClickListener())
     }
-    private class OnConnectionFragmentClickListener: View.OnClickListener {
-        override fun onClick(v: View) {
-            var args = 0
-            when (v.id) {
-                R.id.new_session -> args = ConnectionCodes.NEW_SESSION.v
-                R.id.join_session -> args = ConnectionCodes.JOIN_SESSION.v
-            }
-            val action = MetronomeFragmentDirections.
-                actionMetronomeFragmentToConnectionFragment()
-            action.connectionType = args
-            v.findNavController().navigate(action)
-        }
-    }
+
     private fun doUnbindService() {
         activity!!.unbindService(connection)
         mBound = false

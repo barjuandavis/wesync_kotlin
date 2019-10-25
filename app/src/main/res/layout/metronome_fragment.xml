@@ -16,7 +16,6 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:backgroundTint="@android:color/transparent"
         tools:context=".ui.main.MetronomeFragment">
 
         <TextView
@@ -26,7 +25,7 @@
             android:layout_marginStart="64dp"
             android:ems="10"
             android:fontFamily="sans-serif-black"
-            android:text="@string/bpm_placeholder"
+            android:text="@{``+viewmodel.bpm}"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textColor="@android:color/primary_text_dark"
@@ -101,41 +100,40 @@
             <Button
                 android:id="@+id/minus_50"
                 android:layout_width="42sp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8sp"
                 android:layout_marginEnd="8sp"
-                android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/colorSubtractTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(-50)}"
                 android:text="@string/minus_50"
-                android:textColor="#ffffff"
-                 />
+                android:textColor="#ffffff" />
 
             <Button
                 android:id="@+id/minus_10"
                 android:layout_width="42sp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8sp"
+                android:layout_marginEnd="8sp"
                 android:layout_weight="1"
                 android:background="@color/colorSubtractTempo"
                 android:backgroundTint="@color/colorSubtractTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(-10)}"
                 android:text="@string/minus_10"
-                android:textColor="#ffffff"
-                android:layout_marginStart="8sp"
-                android:layout_marginEnd="8sp" />
+                android:textColor="#ffffff" />
 
             <Button
                 android:id="@+id/minus_1"
                 android:layout_width="42sp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8sp"
+                android:layout_marginEnd="8sp"
                 android:layout_weight="1"
                 android:background="@color/colorSubtractTempo"
                 android:backgroundTint="@color/colorSubtractTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(-1)}"
                 android:text="@string/minus_1"
-                android:textColor="#ffffff"
-                android:layout_marginStart="8sp"
-                android:layout_marginEnd="8sp" />
+                android:textColor="#ffffff" />
         </LinearLayout>
 
         <LinearLayout
@@ -154,38 +152,38 @@
                 android:id="@+id/plus_50"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8sp"
+                android:layout_marginEnd="8sp"
                 android:layout_weight="1"
                 android:background="@color/colorSubtractTempo"
                 android:backgroundTint="@color/colorAddTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(50)}"
                 android:text="@string/plus_50"
-                android:textColor="#ffffff"
-                android:layout_marginStart="8sp"
-                android:layout_marginEnd="8sp" />
+                android:textColor="#ffffff" />
 
             <Button
                 android:id="@+id/plus_10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8sp"
+                android:layout_marginEnd="8sp"
                 android:layout_weight="1"
                 android:background="@color/colorAddTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(10)}"
                 android:text="@string/plus_10"
-                android:textColor="#ffffff"
-                android:layout_marginStart="8sp"
-                android:layout_marginEnd="8sp" />
+                android:textColor="#ffffff" />
 
             <Button
                 android:id="@+id/plus_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8sp"
+                android:layout_marginEnd="8sp"
                 android:layout_weight="1"
                 android:background="@color/colorAddTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(1)}"
                 android:text="@string/plus_1"
-                android:textColor="#ffffff"
-                android:layout_marginStart="8sp"
-                android:layout_marginEnd="8sp" />
+                android:textColor="#ffffff" />
         </LinearLayout>
 
         <Button

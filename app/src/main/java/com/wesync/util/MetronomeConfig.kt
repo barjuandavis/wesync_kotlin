@@ -10,3 +10,6 @@ enum class ConnectionCodes(val v:Int){
     NEW_SESSION(1), JOIN_SESSION(10)
 }
 
+enum class UserTypes {
+    SESSION_DIRECTOR, SLAVE
+}
