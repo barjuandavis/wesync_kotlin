@@ -3,10 +3,13 @@ package com.wesync.metronome
 import android.content.Intent
 import android.app.Service
 import android.os.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleService
+import com.wesync.MainActivity
 import com.wesync.util.MetronomeCodes
 
 
-class MetronomeService: Service() {
+class MetronomeService: LifecycleService() {
 
     private val binder = LocalBinder()
     private lateinit var handlerThread: TickHandlerThread
@@ -22,7 +25,8 @@ class MetronomeService: Service() {
 
     fun isPlaying() = isPlaying
 
-    override fun onBind(p0: Intent?): IBinder? {
+    override fun onBind(p0: Intent): IBinder? {
+        super.onBind(p0)
         handlerThread = TickHandlerThread(this.applicationContext)
         handlerThread.start()
         return this.binder
