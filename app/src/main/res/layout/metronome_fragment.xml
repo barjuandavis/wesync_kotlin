@@ -25,7 +25,6 @@
             android:layout_marginStart="64dp"
             android:ems="10"
             android:fontFamily="sans-serif-black"
-            android:text="@{``+viewmodel.bpm}"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textColor="@android:color/primary_text_dark"

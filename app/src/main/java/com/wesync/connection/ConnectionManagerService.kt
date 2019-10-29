@@ -16,15 +16,8 @@ class ConnectionManagerService : LifecycleService() {
     private val strategy: Strategy = Strategy.P2P_STAR
     private val SERVICE_ID = "com.wesync"
     private val payloadCallback = MyPayloadCallback() //responsible for receiving payload
-    private val connectionLifecycleCallback =
-        MyConnectionLifecycleCallback(
-            applicationContext,
-            payloadCallback
-        )
-    private val endpointDiscoveryCallback = MyEndpointCallback(
-        applicationContext,
-        connectionLifecycleCallback
-    )
+    private lateinit var connectionLifecycleCallback: MyConnectionLifecycleCallback
+    private lateinit var endpointDiscoveryCallback : MyEndpointCallback
 
 
     inner class LocalBinder : Binder() {
@@ -35,6 +28,8 @@ class ConnectionManagerService : LifecycleService() {
 
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
+        connectionLifecycleCallback = MyConnectionLifecycleCallback(applicationContext,payloadCallback)
+        endpointDiscoveryCallback = MyEndpointCallback(applicationContext,connectionLifecycleCallback)
         return _binder
     }
 

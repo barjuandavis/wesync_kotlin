@@ -36,7 +36,6 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
                 _isPlaying = true
                 mp.start()
                 SystemClock.sleep(60000 / this.bpm)
-                Log.d("tick","tick")
                 if (_isPlaying == true) {
                     handler.sendEmptyMessage(MetronomeCodes.START_METRONOME.v)
                 }
