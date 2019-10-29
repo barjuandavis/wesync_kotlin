@@ -24,6 +24,8 @@ import java.lang.NullPointerException
 
 class MetronomeFragment : Fragment() {
 
+    //TODO : IMPLEMENT TWO-WAY DATABINDING!!!!!111!!! PRIORITY FOR 30/10/2019
+
     companion object {
         fun newInstance() = MetronomeFragment()
     }
