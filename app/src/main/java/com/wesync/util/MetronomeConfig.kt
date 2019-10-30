@@ -11,5 +11,5 @@ enum class ConnectionCodes(val v:Int){
 }
 
 enum class UserTypes {
-    SESSION_DIRECTOR, SLAVE
+    SESSION_HOST, SLAVE, SOLO
 }

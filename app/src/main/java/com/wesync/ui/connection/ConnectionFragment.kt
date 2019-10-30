@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.Observer
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -23,39 +24,22 @@ import com.wesync.SharedViewModel
 import com.wesync.adapter.SessionAdapter
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.ConnectionFragmentBinding
+import com.wesync.metronome.MetronomeService
 import com.wesync.util.ConnectionCodes
+import com.wesync.util.ServiceSubscriber
 import com.wesync.util.UserTypes
-
+import java.lang.IllegalStateException
+import java.lang.NullPointerException
 
 
 class ConnectionFragment : Fragment() {
 
     private lateinit var sharedViewModel: SharedViewModel
     private lateinit var binding: ConnectionFragmentBinding
-    private var mBound: Boolean = false
     private lateinit var userType: UserTypes
-    private lateinit var mService: ConnectionManagerService
-    private val connection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as ConnectionManagerService.LocalBinder
-            mService = binder.getService()
-            mBound = true
-            when (userType) {
-                UserTypes.SESSION_DIRECTOR -> {
-                    //mService.startAdvertising()
-                    Toast.makeText(this@ConnectionFragment.context,"advertising!",Toast.LENGTH_SHORT).show()
-                }
-                UserTypes.SLAVE -> {
-                    //mService.startDiscovery()
-                    Toast.makeText(this@ConnectionFragment.context,"discovering!",Toast.LENGTH_SHORT).show()
-                }
-            }
-
-        }
-        override fun onServiceDisconnected(arg0: ComponentName) {
-            mBound = false
-        }
-    }
+    private var mCService: ConnectionManagerService? = null
+    private var mService: MetronomeService? = null
+    private lateinit var subscriber: ServiceSubscriber
     private val args: ConnectionFragmentArgs by navArgs()
     private lateinit var sessionAdapter: SessionAdapter
     private val sessionObserver = Observer<List<String>> {
@@ -87,7 +71,7 @@ class ConnectionFragment : Fragment() {
         }
         when (args.connectionType) {
             ConnectionCodes.NEW_SESSION.v -> {
-                userType = UserTypes.SESSION_DIRECTOR
+                userType = UserTypes.SESSION_HOST
             }
             ConnectionCodes.JOIN_SESSION.v -> {
                 userType = UserTypes.SLAVE
@@ -110,18 +94,29 @@ class ConnectionFragment : Fragment() {
     }
 
     private fun getAllSessions() {viewModel.getAllSessions().
-        observe(this.viewLifecycleOwner, sessionObserver)}
+        observe(this, sessionObserver)}
 
     private fun doBindService() {
-        Intent(activity?.applicationContext, ConnectionManagerService::class.java).also { intent ->
-            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-            subscribeToViewModel()
+        try {
+            subscriber = ServiceSubscriber(activity!!.applicationContext, activity)
+            subscriber.connServiceConnected.observe(this, Observer {
+                if (it) mCService = subscriber.connectionService!!
+            })
+            subscriber.metronomeConnected.observe(this, Observer {
+                if (it) mService = subscriber.metronomeService!!
+            })
+            subscriber.subscribe()
+        } catch (e: NullPointerException) {
+            Log.d("ServiceMightBeNull","NullPointerException thrown. Service might be null.")
+        } catch (e: IllegalStateException) {
+            Log.d("IllegalState_found","IllegalStateException thrown. Eh?")
         }
+        subscribeToViewModel()
     }
 
     private fun doUnbindService() {
-        activity!!.unbindService(connection)
-        mBound = false
+       subscriber.unsubscribe()
+       mService = null
     }
 
 

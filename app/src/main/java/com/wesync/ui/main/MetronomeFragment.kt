@@ -51,10 +51,10 @@ class MetronomeFragment : Fragment() {
             var args = 0
             when (v.id) {
                 R.id.new_session -> {
-                    mCService.startAdvertising()
-                    binding.newSession.visibility = View.GONE
-                    binding.joinSession.visibility = View.GONE
-                    binding.notification.text = "You are leading a new Session."
+                    //mCService.startAdvertising()
+                   // binding.newSession.visibility = View.GONE
+                  //  binding.joinSession.visibility = View.GONE
+                  //  binding.notification.text = "You are leading a new Session."
                 }
                 R.id.join_session -> {
                     args = ConnectionCodes.JOIN_SESSION.v
@@ -70,7 +70,6 @@ class MetronomeFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
        binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
        binding.viewmodel = viewModel
-       //binding.bpmTextView.text = "120"
        return binding.root
     }
     override fun onCreate(savedInstanceState: Bundle?) {
