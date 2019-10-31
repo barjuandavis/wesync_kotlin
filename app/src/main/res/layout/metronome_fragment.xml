@@ -10,6 +10,9 @@
             name="sharedvm"
             type="com.wesync.SharedViewModel"
             />
+        <variable
+            name="Converters"
+            type="com.wesync.util.Converters" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -29,6 +32,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textColor="@android:color/primary_text_dark"
             android:textSize="100sp"
+            android:text="@{String.valueOf(viewmodel.bpm)}"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/plus_layout" />
@@ -38,14 +42,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/not_connected"
-            android:goneUnless=""
             android:textAlignment="center"
             android:textColor="@android:color/primary_text_dark"
             android:textSize="12sp"
             android:textStyle="bold|italic"
             app:layout_constraintBottom_toTopOf="@+id/plus_layout"
             app:layout_constraintEnd_toEndOf="parent"
-
             app:layout_constraintHorizontal_bias="0.494"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

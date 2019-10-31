@@ -32,21 +32,21 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
     override fun onLooperPrepared() {
         handler = Handler {
             when (it.what) {
-            MetronomeCodes.START_METRONOME.v -> {
+            MetronomeCodes.START_METRONOME -> {
                 _isPlaying = true
                 mp.start()
                 SystemClock.sleep(60000 / this.bpm)
                 if (_isPlaying == true) {
-                    handler.sendEmptyMessage(MetronomeCodes.START_METRONOME.v)
+                    handler.sendEmptyMessage(MetronomeCodes.START_METRONOME)
                 }
             }
-            MetronomeCodes.STOP_METRONOME.v -> {
+            MetronomeCodes.STOP_METRONOME -> {
                 _isPlaying = false
-                handler.removeMessages(MetronomeCodes.START_METRONOME.v)
-                handler.removeMessages(MetronomeCodes.ON_BPM_CHANGED.v)
-                handler.removeMessages(MetronomeCodes.STOP_METRONOME.v)
+                handler.removeMessages(MetronomeCodes.START_METRONOME)
+                handler.removeMessages(MetronomeCodes.ON_BPM_CHANGED)
+                handler.removeMessages(MetronomeCodes.STOP_METRONOME)
             }
-            MetronomeCodes.ON_BPM_CHANGED.v -> {
+            MetronomeCodes.ON_BPM_CHANGED -> {
                 this.bpm = it.obj as Long
             }
         }

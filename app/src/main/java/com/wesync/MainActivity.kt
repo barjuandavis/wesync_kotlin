@@ -14,10 +14,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         sharedViewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction().replace(R.id.fragmentNavHost, MetronomeFragment.newInstance()).commitNow()
-        }
-
     }
 
 }

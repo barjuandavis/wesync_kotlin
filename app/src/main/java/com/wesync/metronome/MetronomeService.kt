@@ -13,7 +13,6 @@ class MetronomeService: LifecycleService() {
 
     private val binder = LocalBinder()
     private lateinit var handlerThread: TickHandlerThread
-    private lateinit var vibrator: Vibrator
     private var bpm:Long = 120
     private var isPlaying = false
 
@@ -22,8 +21,6 @@ class MetronomeService: LifecycleService() {
             return this@MetronomeService
         }
     }
-
-    fun isPlaying() = isPlaying
 
     override fun onBind(p0: Intent): IBinder? {
         super.onBind(p0)
@@ -44,17 +41,17 @@ class MetronomeService: LifecycleService() {
     fun onPlay(){
         isPlaying = !isPlaying
         if (isPlaying) {
-            handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME.v)
+            handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME)
         }
         else {
-            handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME.v)
+            handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME)
         }
      }
 
      fun onBPMChanged(bpm: Long) {
         if (handlerThread.isAlive) {
             val m = Message()
-            m.what = MetronomeCodes.ON_BPM_CHANGED.v
+            m.what = MetronomeCodes.ON_BPM_CHANGED
             m.obj = bpm
             handlerThread.getHandler().sendMessage(m)
             this.bpm = bpm
