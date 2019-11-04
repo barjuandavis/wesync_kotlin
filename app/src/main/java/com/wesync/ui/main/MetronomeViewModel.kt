@@ -1,6 +1,7 @@
 package com.wesync.ui.main
 
 import android.util.Log
+import androidx.arch.core.util.Function
 import androidx.databinding.Bindable
 import androidx.lifecycle.*
 import com.wesync.util.UserTypes
@@ -12,7 +13,9 @@ class MetronomeViewModel : ViewModel() {
     private val _isPlaying              = MutableLiveData<Boolean>( false)
     private val _bpm                    = MutableLiveData<Long>(120)
     val isPlaying: LiveData<Boolean>     = _isPlaying
-    val userType: LiveData<UserTypes> = _userType
+    val userType: LiveData<Int> = Transformations.map(_userType, Function {
+        return@Function it.ordinal
+    })
     val session: LiveData<String>        = _session
 
     val bpm: LiveData<Long>

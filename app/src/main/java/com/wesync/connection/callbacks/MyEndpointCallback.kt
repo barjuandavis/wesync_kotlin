@@ -1,29 +1,34 @@
 package com.wesync.connection.callbacks
 
-import android.content.Context
-import com.google.android.gms.nearby.Nearby
+import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
 import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback
+import com.wesync.connection.Endpoint
 
-class MyEndpointCallback(private val context: Context,
-                         private val con: MyConnectionLifecycleCallback
-)
-    : EndpointDiscoveryCallback() {
+class MyEndpointCallback : EndpointDiscoveryCallback() {
+
+    val endpoints = MutableLiveData<MutableList<Endpoint>>()
+
+    init {
+        endpoints.value = mutableListOf()
+    }
+
 
     override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
-        // An endpoint was found. We request a connection to it.
-        Nearby.getConnectionsClient(context)
-            .requestConnection("Slave", endpointId, con)
-            .addOnSuccessListener {
-                // We successfully requested a connection. Now both sides
-                // must accept before the connection is established.
-            }
-            .addOnFailureListener {
-                // Nearby Connections failed to request the connection.
-            }
+        val cl = endpoints.value!!
+        if (!cl.any{ it.endpointId == endpointId && it.info == info }) {
+            cl.add(Endpoint(endpointId,info))
+        }
+        endpoints.value = cl
     }
     override fun onEndpointLost(endpointId: String) {
-        // A previously discovered endpoint has gone away.
+        val cl = endpoints.value!!
+        val removee = cl.find {it.endpointId == endpointId }
+        if (removee != null) {
+            cl.remove(removee)
+        }
+        endpoints.value = cl
     }
+
 
 }

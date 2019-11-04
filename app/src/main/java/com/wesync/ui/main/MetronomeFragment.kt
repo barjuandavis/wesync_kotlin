@@ -99,6 +99,9 @@ class MetronomeFragment : Fragment() {
             when (v.id) {
                 R.id.new_session -> {
                     //mCService.startAdvertising()
+                    binding.newSession.visibility = View.GONE
+                    binding.joinSession.visibility = View.GONE
+                    binding.notification.text = "henlo"
                 }
                 R.id.join_session -> {
                     args = ConnectionCodes.JOIN_SESSION.v

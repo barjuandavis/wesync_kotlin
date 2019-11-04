@@ -21,6 +21,7 @@ class Config {
     companion object {
         val MINIMUM_BPM: Long = 40
         val MAXIMUM_BPM: Long = 300
+        val DEFAULT_BPM: Long = 120
     }
 }
 

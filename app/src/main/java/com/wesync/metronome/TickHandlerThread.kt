@@ -12,6 +12,7 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
 
     /*
            TODO: try to reduce audio latency by using Oboe's AudioStream instead of MediaPlayer
+           TODO: DO IT IN EXPERIMENTAL BRANCH.
      */
 
     private lateinit var handler: Handler

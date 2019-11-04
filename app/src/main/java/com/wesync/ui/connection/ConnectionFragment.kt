@@ -30,20 +30,23 @@ import java.lang.NullPointerException
 
 class ConnectionFragment : Fragment() {
 
-    private lateinit var sharedViewModel: SharedViewModel
-    private lateinit var binding: ConnectionFragmentBinding
-    private lateinit var userType: UserTypes
-    private var mCService: ConnectionManagerService? = null
-    private var mService: MetronomeService? = null
-    private lateinit var subscriber: ServiceSubscriber
-    private val args: ConnectionFragmentArgs by navArgs()
-    private lateinit var sessionAdapter: SessionAdapter
+    private lateinit var sharedViewModel    : SharedViewModel
+    private lateinit var viewModel          : ConnectionViewModel
+    private lateinit var binding            : ConnectionFragmentBinding
+    private lateinit var userType           : UserTypes
+    private var mCService                   : ConnectionManagerService? = null
+    private var mService                    : MetronomeService? = null
+    private lateinit var subscriber         : ServiceSubscriber
+    private val args                        : ConnectionFragmentArgs by navArgs()
+    private lateinit var sessionAdapter     : SessionAdapter
+
     private val sessionObserver = Observer<List<String>> {
         sessionAdapter.sessions = viewModel.getAllSessions()
-        try {binding.recyclerView.recycledViewPool.clear()
-        sessionAdapter.notifyDataSetChanged()} catch (e:Exception) {}
+        try {
+            binding.recyclerView.recycledViewPool.clear()
+            sessionAdapter.notifyDataSetChanged()
+        } catch (e:Exception) {}
     }
-    private lateinit var viewModel: ConnectionViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater,R.layout.connection_fragment,container,false)

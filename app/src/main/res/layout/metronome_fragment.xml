@@ -13,6 +13,12 @@
         <variable
             name="Converters"
             type="com.wesync.util.Converters" />
+        <variable
+            name="UserTypes"
+            type="com.wesync.util.UserTypes"/>
+        <variable
+            name="View"
+            type="android.view.View"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -79,7 +85,6 @@
             android:layout_marginBottom="40dp"
             android:layout_weight="1"
             android:background="@color/colorSubtractTempo"
-
             android:backgroundTint="#3C4AC4"
             android:text="@string/join_session"
             android:textColor="#ffffff"
