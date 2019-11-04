@@ -1,23 +1,28 @@
-# Sets the minimum version of CMake required to build your native library.
-# This ensures that a certain set of CMake features is available to
-# your build.
+cmake_minimum_required(VERSION 3.4.1)
 
+# Build our own native library
+add_library (native-lib
+        SHARED
+        src/main/cpp/SoundGenerator.cpp
+        src/main/cpp/SoundGenerator.h
+        )
 
-cmake_minimum_required(VERSION 3.10.2)
-set (OBOE_DIR ./
+# Set the path to the Oboe directory.
+set (OBOE_DIR ../oboe)
 
+# Add the Oboe library as a subdirectory in your project.
+# add_subdirectory tells CMake to look in this directory to
+# compile oboe source files using oboe's CMake file.
+# ./oboe specifies where the compiled binaries will be stored
+add_subdirectory (${OBOE_DIR} ./oboe)
 
-# Specifies a library name, specifies whether the library is STATIC or
-# SHARED, and provides relative paths to the source code. You can
-# define multiple libraries by adding multiple add_library() commands,
-# and CMake builds them for you. When you build your app, Gradle
-# automatically packages shared libraries with your APK.
+# Specify the path to the Oboe header files.
+# This allows targets compiled with this CMake (application code)
+# to see public Oboe headers, in order to access its API.
+include_directories (${OBOE_DIR}/include)
 
-add_library( # Specifies the name of the library.
-             native-lib
-
-             # Sets the library as a shared library.
-             SHARED
-
-             # Provides a relative path to your source file(s).
-             src/main/cpp/native-lib.cpp )
+# Specify the libraries which our native library is dependent on, including Oboe
+target_link_libraries (
+        native-lib
+        log
+        oboe)

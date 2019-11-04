@@ -18,9 +18,6 @@ class MetronomeViewModel : ViewModel() {
     val bpm: LiveData<Long>
         get() = _bpm
 
-
-
-
     fun onPlayClicked() {
         val p = _isPlaying.value
         _isPlaying.value = !p!!
