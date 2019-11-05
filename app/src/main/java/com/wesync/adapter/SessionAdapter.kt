@@ -4,12 +4,14 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import com.wesync.R
+import com.wesync.connection.Endpoint
 import com.wesync.databinding.CardViewBinding
 import com.wesync.ui.connection.ConnectionViewModel
 import java.lang.Exception
@@ -21,12 +23,9 @@ class CardViewHolder(val binding: CardViewBinding)
 class SessionAdapter: RecyclerView.Adapter<CardViewHolder>() {
 
     private var layoutId = 0
-    lateinit var sessions : LiveData<List<String>>
+    var sessions = listOf<Endpoint>()
     private lateinit var viewmodel: ConnectionViewModel
-
-    override fun getItemCount(): Int {
-        return try {sessions.value!!.size} catch (e:Exception) {0}
-    }
+    override fun getItemCount() = sessions.size
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int):
             CardViewHolder {
@@ -37,11 +36,8 @@ class SessionAdapter: RecyclerView.Adapter<CardViewHolder>() {
         return CardViewHolder(binding)
     }
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        /*
-        TODO: get current session, and then set the current
-         CardViewBinding with the corresponding Session Maker ("Music Director")
-        */
-        holder.binding.sessionName.text = sessions.value!![position]
+        holder.binding.sessionName.text = sessions[position].toString()
     }
 }
+
 

@@ -41,10 +41,10 @@ class ConnectionFragment : Fragment() {
     private lateinit var sessionAdapter     : SessionAdapter
 
     private val sessionObserver = Observer<List<String>> {
-        sessionAdapter.sessions = viewModel.getAllSessions()
+       // sessionAdapter.sessions = viewModel.getAllSessions()
         try {
             binding.recyclerView.recycledViewPool.clear()
-            sessionAdapter.notifyDataSetChanged()
+         //   sessionAdapter.notifyDataSetChanged()
         } catch (e:Exception) {}
     }
 

@@ -4,46 +4,52 @@ import android.util.Log
 import androidx.arch.core.util.Function
 import androidx.databinding.Bindable
 import androidx.lifecycle.*
+import com.wesync.util.Tempo
 import com.wesync.util.UserTypes
 
 class MetronomeViewModel : ViewModel() {
 
-    private val _session                = MutableLiveData<String>("MusicDirector")
-    private val _userType               = MutableLiveData<UserTypes>(UserTypes.SOLO)
+    private val session                = MutableLiveData<String>("MusicDirector")
+    private val userType               = MutableLiveData<UserTypes>(UserTypes.SOLO)
     private val _isPlaying              = MutableLiveData<Boolean>( false)
-    private val _bpm                    = MutableLiveData<Long>(120)
+    private val _bpm                    = MutableLiveData<Long>(Tempo.DEFAULT_BPM)
     val isPlaying: LiveData<Boolean>     = _isPlaying
-    val userType: LiveData<Int> = Transformations.map(_userType, Function {
-        return@Function it.ordinal
-    })
-    val session: LiveData<String>        = _session
+
+
 
     val bpm: LiveData<Long>
         get() = _bpm
-
-
-
 
     fun onPlayClicked() {
         val p = _isPlaying.value
         _isPlaying.value = !p!!
     }
 
-    fun onNewSessionClicked() {
-        //TODO: replace new session with "Dismiss session(?)"
-        _userType.value = UserTypes.SESSION_HOST
+    fun onNewSessionClicked(sessionName: String?) {
+        if (sessionName != null) {
+            session.value = sessionName
+        } else {
+            session.value = "MusicDirector"
+        }
+        userType.value = UserTypes.SESSION_HOST
     }
 
     fun onJoinSessionClicked() {
-        _userType.value = UserTypes.SLAVE
+        userType.value = UserTypes.SLAVE
     }
+
+    fun dismissSession() {
+        userType.value = UserTypes.SOLO
+    }
+
+    fun getSessionName() = session.value
 
     fun modifyBPM(plus:Long) {
         val r = _bpm.value!!
 
         when {
-            r+plus < 20 -> _bpm.value = 20
-            r+plus > 400 -> _bpm.value = 400
+            r+plus < Tempo.MINIMUM_BPM -> _bpm.value = Tempo.MINIMUM_BPM
+            r+plus > Tempo.MAXIMUM_BPM -> _bpm.value = Tempo.MAXIMUM_BPM
             else -> _bpm.value = r + plus
         }
     }

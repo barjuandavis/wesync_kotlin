@@ -1,13 +1,16 @@
 package com.wesync.ui.main
 
 
+import android.app.AlertDialog
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
@@ -18,8 +21,10 @@ import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.MetronomeFragmentBinding
 import com.wesync.util.ConnectionCodes
 import com.wesync.util.ServiceSubscriber
-import java.lang.IllegalStateException
-import java.lang.NullPointerException
+
+
+
+
 
 
 class MetronomeFragment : Fragment() {
@@ -98,10 +103,21 @@ class MetronomeFragment : Fragment() {
             val args: Int
             when (v.id) {
                 R.id.new_session -> {
+                    val builder = AlertDialog.Builder(context)
+                    builder.setTitle("What is your Name?")
+                    val input = EditText(context)
+                    input.inputType = InputType.TYPE_CLASS_TEXT
+                    builder.setView(input)
+                    builder.setPositiveButton("OK") { _, _ ->
+                        viewModel.onNewSessionClicked(input.text?.toString())
+                        binding.notification.text = "This is ${viewModel.getSessionName()}'s Session."
+                        binding.newSession.visibility = View.GONE
+                        binding.joinSession.visibility = View.GONE
+                        if (viewModel.isPlaying.value!!) viewModel.onPlayClicked()
+                    }
+                    builder.setNegativeButton("Cancel") {dialog,_ ->dialog.cancel() }
+                    builder.show()
                     //mCService.startAdvertising()
-                    binding.newSession.visibility = View.GONE
-                    binding.joinSession.visibility = View.GONE
-                    binding.notification.text = "henlo"
                 }
                 R.id.join_session -> {
                     args = ConnectionCodes.JOIN_SESSION.v

@@ -12,5 +12,6 @@
     <string name="new_session">New Session</string>
     <string name="join_session">Join Session</string>
     <string name="bpm_placeholder">120</string>
+    <string name="dismiss_session">Dismiss Session</string>
     <string name="not_connected">You are playing by yourself.\nCreate a new Session or join an existing Session around you.</string>
 </resources>
