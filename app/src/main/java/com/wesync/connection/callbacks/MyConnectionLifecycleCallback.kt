@@ -23,7 +23,7 @@ class MyConnectionLifecycleCallback(private val context: Context,private val pay
                 // The user canceled, so we should reject the connection.
                 Nearby.getConnectionsClient(context).rejectConnection(endpointId)
             }
-            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setIcon(android.R.drawable.ic_dialog_info)
             .show()
     }
     override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {

@@ -60,14 +60,30 @@
             app:layout_constraintTop_toBottomOf="@+id/plus_layout" />
 
         <Button
-            android:id="@+id/join_session"
-            android:layout_width="118dp"
+            android:id="@+id/new_session"
+            android:layout_width="130sp"
             android:layout_height="56dp"
-            android:layout_marginEnd="48dp"
-            android:layout_marginBottom="40dp"
+            android:layout_marginStart="48sp"
+            android:layout_marginBottom="40sp"
             android:layout_weight="1"
-            android:background="@color/colorSubtractTempo"
-            android:backgroundTint="#3C4AC4"
+            android:background="@color/colorPrimary"
+            android:text="@string/new_session"
+            android:textColor="#ffffff"
+            app:layout_constraintBottom_toTopOf="@+id/plus_layout"
+            app:layout_constraintEnd_toStartOf="@+id/join_session"
+            app:layout_constraintHorizontal_bias="0.076"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <Button
+            android:id="@+id/join_session"
+            android:layout_width="130sp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="48sp"
+            android:layout_marginBottom="40sp"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
             android:text="@string/join_session"
             android:textColor="#ffffff"
             app:layout_constraintBottom_toTopOf="@+id/plus_layout"
@@ -107,7 +123,6 @@
                 android:layout_margin="5sp"
                 android:layout_weight="1"
                 android:background="@color/colorSubtractTempo"
-                android:backgroundTint="@color/colorSubtractTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(-10)}"
                 android:text="@string/minus_10"
                 android:textColor="#ffffff"
@@ -216,23 +231,6 @@
             app:layout_constraintTop_toTopOf="@+id/bpm_textView"
             app:layout_constraintVertical_bias="1.0" />
 
-        <Button
-            android:id="@+id/new_session"
-            android:layout_width="118dp"
-            android:layout_height="56dp"
-            android:layout_marginStart="36dp"
-            android:layout_marginBottom="40dp"
-            android:layout_weight="1"
-            android:background="@color/colorSubtractTempo"
-            android:backgroundTint="#32692F"
-            android:text="@string/new_session"
-            android:textColor="#ffffff"
-            app:layout_constraintBottom_toTopOf="@+id/plus_layout"
-            app:layout_constraintEnd_toStartOf="@+id/join_session"
-            app:layout_constraintHorizontal_bias="0.076"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

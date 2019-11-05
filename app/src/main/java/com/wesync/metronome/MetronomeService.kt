@@ -3,6 +3,7 @@ package com.wesync.metronome
 import android.content.Intent
 import android.app.Service
 import android.os.*
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleService
 import com.wesync.MainActivity
@@ -24,7 +25,8 @@ class MetronomeService: LifecycleService() {
 
     override fun onBind(p0: Intent): IBinder? {
         super.onBind(p0)
-        handlerThread = TickHandlerThread(this.applicationContext)
+        //Log.d("clientBinding","client is BINDING - MetronomeService")
+        handlerThread = TickHandlerThread(applicationContext)
         handlerThread.start()
         return this.binder
     }
@@ -34,6 +36,7 @@ class MetronomeService: LifecycleService() {
         cleanup()
     }
     override fun onUnbind(intent: Intent?): Boolean {
+       // Log.d("clientBinding","client is UNBINDING - MetronomeService")
         cleanup()
         return super.onUnbind(intent)
     }

@@ -9,12 +9,10 @@ import com.wesync.util.UserTypes
 
 class MetronomeViewModel : ViewModel() {
 
-    private val session                = MutableLiveData<String>("MusicDirector")
-    private val userType               = MutableLiveData<UserTypes>(UserTypes.SOLO)
+
     private val _isPlaying              = MutableLiveData<Boolean>( false)
     private val _bpm                    = MutableLiveData<Long>(Tempo.DEFAULT_BPM)
     val isPlaying: LiveData<Boolean>     = _isPlaying
-
 
 
     val bpm: LiveData<Long>
@@ -24,25 +22,6 @@ class MetronomeViewModel : ViewModel() {
         val p = _isPlaying.value
         _isPlaying.value = !p!!
     }
-
-    fun onNewSessionClicked(sessionName: String?) {
-        if (sessionName != null) {
-            session.value = sessionName
-        } else {
-            session.value = "MusicDirector"
-        }
-        userType.value = UserTypes.SESSION_HOST
-    }
-
-    fun onJoinSessionClicked() {
-        userType.value = UserTypes.SLAVE
-    }
-
-    fun dismissSession() {
-        userType.value = UserTypes.SOLO
-    }
-
-    fun getSessionName() = session.value
 
     fun modifyBPM(plus:Long) {
         val r = _bpm.value!!

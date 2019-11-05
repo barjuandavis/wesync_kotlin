@@ -28,9 +28,15 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     override fun onBind(intent: Intent): IBinder {
+        //Log.d("clientBinding","client is BINDING - ConnectionManagerService")
         super.onBind(intent)
         con = MyConnectionLifecycleCallback(applicationContext,payloadCallback)
         return _binder
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        //Log.d("clientBinding","client is UNBINDING - ConnectionManagerService")
+        return super.onUnbind(intent)
     }
 
     fun startAdvertising() {
@@ -48,7 +54,7 @@ class ConnectionManagerService : LifecycleService() {
             .addOnFailureListener { throw it }
     }
 
-    fun sendPayload(s: String, p: Payload) {
+    suspend fun sendPayload(s: String, p: Payload) {
         Nearby.getConnectionsClient(applicationContext).sendPayload(s,p)
     }
     fun getPayload(): Payload? {

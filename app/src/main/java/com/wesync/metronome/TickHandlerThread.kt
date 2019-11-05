@@ -6,6 +6,8 @@ import android.os.*
 import android.util.Log
 import com.wesync.R
 import com.wesync.util.MetronomeCodes
+import com.wesync.util.Tempo
+import java.lang.IllegalStateException
 
 class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
     Process.THREAD_PRIORITY_DEFAULT) {
@@ -26,8 +28,14 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
         }
         else
             Looper.loop()
-        mp.prepareAsync()
-        Log.d("ThreadStart","Thread has been started!")
+
+        try {
+            mp.prepareAsync()
+
+        } catch(e: IllegalStateException) {
+           // Log.d("prepareAsync","eh ketangkep")
+        }
+        //Log.d("ThreadStart","Thread has been started!")
     }
 
     override fun onLooperPrepared() {
@@ -36,7 +44,8 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
             MetronomeCodes.START_METRONOME -> {
                 _isPlaying = true
                 mp.start()
-                SystemClock.sleep(60000 / this.bpm)
+                SystemClock.sleep((60000 / this.bpm) - Tempo.OFFSET_IN_MILLIS)
+                //Log.d("tick","tick")
                 if (_isPlaying == true) {
                     handler.sendEmptyMessage(MetronomeCodes.START_METRONOME)
                 }
