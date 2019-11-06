@@ -33,7 +33,6 @@ class ConnectionManagerService : LifecycleService() {
 
     private val endpointCallback = MyEndpointCallback()
 
-
     private val _endpoints = MutableLiveData<MutableList<Endpoint>>() //TODO: observed by ConnectionFragment
         val endpoints = _endpoints
     private val _payload = MutableLiveData<Payload>() //TODO: observed by MetronomeFragment
@@ -65,6 +64,10 @@ class ConnectionManagerService : LifecycleService() {
             .startAdvertising("MusicDirector",SERVICE_ID, con, advertisingOptions)
             .addOnSuccessListener { Log.d("startAdvertising","Accepting User...") }
             .addOnFailureListener { throw it }
+    }
+
+    fun stopAdvertising() {
+        Nearby.getConnectionsClient(applicationContext).stopAdvertising()
     }
 
     fun startDiscovery() {
