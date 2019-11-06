@@ -7,27 +7,28 @@ import com.wesync.connection.Endpoint
 
 class MyEndpointCallback : EndpointDiscoveryCallback() {
 
-    val endpoints = MutableLiveData<MutableList<Endpoint>>()
+    private val _endpoints = MutableLiveData<MutableList<Endpoint>>()
+        val endpoints = _endpoints
 
     init {
-        endpoints.value = mutableListOf()
+        _endpoints.value = mutableListOf()
     }
 
 
     override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
-        val cl = endpoints.value!!
+        val cl = _endpoints.value!!
         if (!cl.any{ it.endpointId == endpointId && it.info == info }) {
             cl.add(Endpoint(endpointId,info))
         }
-        endpoints.value = cl
+        _endpoints.value = cl
     }
     override fun onEndpointLost(endpointId: String) {
-        val cl = endpoints.value!!
+        val cl = _endpoints.value!!
         val removee = cl.find {it.endpointId == endpointId }
         if (removee != null) {
             cl.remove(removee)
         }
-        endpoints.value = cl
+        _endpoints.value = cl
     }
 
 

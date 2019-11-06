@@ -1,16 +1,22 @@
 package com.wesync.metronome
 
+import android.content.Context
 import android.content.Intent
-import android.app.Service
 import android.os.*
-import android.util.Log
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleService
-import com.wesync.MainActivity
+import com.wesync.util.ForegroundServiceLauncher
 import com.wesync.util.MetronomeCodes
 
 
 class MetronomeService: LifecycleService() {
+
+    companion object {
+        private val LAUNCHER = ForegroundServiceLauncher(MetronomeService::class.java)
+        @JvmStatic
+        fun start(context: Context) = LAUNCHER.startService(context)
+        @JvmStatic
+        fun stop(context: Context) = LAUNCHER.stopService(context)
+    }
 
     private val binder = LocalBinder()
     private lateinit var handlerThread: TickHandlerThread

@@ -1,5 +1,6 @@
 package com.wesync.connection
 
+import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
@@ -7,18 +8,36 @@ import com.google.android.gms.nearby.Nearby
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.google.android.gms.nearby.connection.*
 import com.wesync.connection.callbacks.*
+import com.wesync.util.ForegroundServiceLauncher
+import com.wesync.util.ServiceUtil.Companion.SERVICE_ID
 
 
 class ConnectionManagerService : LifecycleService() {
 
+    companion object {
+        private val LAUNCHER = ForegroundServiceLauncher(ConnectionManagerService::class.java)
+        @JvmStatic
+        fun start(context: Context) = LAUNCHER.startService(context)
+        @JvmStatic
+        fun stop(context: Context) = LAUNCHER.stopService(context)
+    }
+
     private val _binder = LocalBinder()
     private val strategy: Strategy = Strategy.P2P_STAR
-    private val SERVICE_ID = "com.wesync"
-    private val payloadCallback = MyPayloadCallback() //responsible for receiving payload
+    private val payloadCallback = MyPayloadCallback()
     private lateinit var con: MyConnectionLifecycleCallback
+
     private val endpointCallback = MyEndpointCallback()
+
+
+    private val _endpoints = MutableLiveData<MutableList<Endpoint>>() //TODO: observed by ConnectionFragment
+        val endpoints = _endpoints
+    private val _payload = MutableLiveData<Payload>() //TODO: observed by MetronomeFragment
+        val payload = _payload
 
 
     inner class LocalBinder : Binder() {
@@ -31,6 +50,7 @@ class ConnectionManagerService : LifecycleService() {
         //Log.d("clientBinding","client is BINDING - ConnectionManagerService")
         super.onBind(intent)
         con = MyConnectionLifecycleCallback(applicationContext,payloadCallback)
+        observePayloadAndEndpoints()
         return _binder
     }
 
@@ -43,9 +63,10 @@ class ConnectionManagerService : LifecycleService() {
         val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
         Nearby.getConnectionsClient(applicationContext)
             .startAdvertising("MusicDirector",SERVICE_ID, con, advertisingOptions)
-            .addOnSuccessListener { Log.d("startAdvertising","advertising...") }
+            .addOnSuccessListener { Log.d("startAdvertising","Accepting User...") }
             .addOnFailureListener { throw it }
     }
+
     fun startDiscovery() {
         val discoveryOptions = DiscoveryOptions.Builder().setStrategy(strategy).build()
         Nearby.getConnectionsClient(applicationContext)
@@ -54,11 +75,17 @@ class ConnectionManagerService : LifecycleService() {
             .addOnFailureListener { throw it }
     }
 
-    suspend fun sendPayload(s: String, p: Payload) {
+    fun sendPayload(s: String, p: Payload) {
         Nearby.getConnectionsClient(applicationContext).sendPayload(s,p)
     }
-    fun getPayload(): Payload? {
-        return payloadCallback.payload
+
+    private fun observePayloadAndEndpoints() {
+        payloadCallback.payload.observe(this, Observer {
+            this@ConnectionManagerService._payload.value = it
+        })
+        endpointCallback.endpoints.observe(this, Observer {
+            this@ConnectionManagerService._endpoints.value = it
+        })
     }
 
     fun connect(endpointId: String) { //placeholder

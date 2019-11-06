@@ -71,14 +71,14 @@ class MetronomeFragment : Fragment() {
         subscribeToViewModel()
     }
     private fun subscribeToViewModel() {
-        viewModel.bpm.observe(this, Observer {
+        viewModel.bpm.observe(viewLifecycleOwner, Observer {
             try {
                 mService?.onBPMChanged(it)
                 sharedViewModel.config.value = it
             }
             catch (e: Exception) {}
         })
-        viewModel.isPlaying.observe( this, Observer { try {
+        viewModel.isPlaying.observe( viewLifecycleOwner, Observer { try {
             Log.d("playObserver","playObserved:$it")
             if (it) {
                 binding.playButton.setText(R.string.stop_button)
@@ -89,7 +89,7 @@ class MetronomeFragment : Fragment() {
             }
             mService?.onPlay()
         } catch (e: Exception) {Log.d("playObserver", "Preparing...")}})
-        sharedViewModel.userTypes.observe(this, Observer {
+        sharedViewModel.userTypes.observe(viewLifecycleOwner, Observer {
             @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
             when (it) {
                 UserTypes.SOLO -> {
@@ -111,7 +111,7 @@ class MetronomeFragment : Fragment() {
                 UserTypes.SLAVE -> TODO("lupa mau ngapain")
             }
         })
-        sharedViewModel.isAdvertising.observe(this, Observer {
+        sharedViewModel.isAdvertising.observe(viewLifecycleOwner, Observer {
             if (sharedViewModel.userTypes.value == UserTypes.SESSION_HOST) {
                 if (it) {
                     binding.joinSession.setText(R.string.advertising)

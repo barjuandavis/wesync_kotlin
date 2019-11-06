@@ -9,6 +9,12 @@ class MetronomeCodes {
     }
 }
 
+class ServiceUtil {
+    companion object {
+        const val SERVICE_ID = "com.wesync"
+    }
+}
+
 enum class ConnectionCodes(val v:Int){
     NEW_SESSION(1), JOIN_SESSION(10)
 }

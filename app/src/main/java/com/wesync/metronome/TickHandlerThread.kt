@@ -28,14 +28,12 @@ class TickHandlerThread( context:Context ): HandlerThread("TickHandlerThread",
         }
         else
             Looper.loop()
-
         try {
             mp.prepareAsync()
-
         } catch(e: IllegalStateException) {
-           // Log.d("prepareAsync","eh ketangkep")
+           Log.d("prepareAsync","eh ketangkep")
         }
-        //Log.d("ThreadStart","Thread has been started!")
+        Log.d("ThreadStart","Thread has been started!")
     }
 
     override fun onLooperPrepared() {
