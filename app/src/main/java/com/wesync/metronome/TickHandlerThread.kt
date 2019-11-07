@@ -14,7 +14,7 @@ import java.lang.IllegalStateException
 import java.lang.NullPointerException
 
 class TickHandlerThread(private val context:Context ): HandlerThread("TickHandlerThread",
-    Process.THREAD_PRIORITY_DEFAULT) {
+    Process.THREAD_PRIORITY_URGENT_AUDIO) {
 
     /*
            TODO: try to reduce audio latency by using Oboe's AudioStream instead of SoundPool
@@ -40,15 +40,9 @@ class TickHandlerThread(private val context:Context ): HandlerThread("TickHandle
             when (it.what) {
             MetronomeCodes.START_METRONOME -> {
                 _isPlaying = true
-                try {
-                    sp.play(tickSound,1.0f,1.0f, Thread.NORM_PRIORITY,0,1.0f)
-                } catch (e: NullPointerException) {}
-                SystemClock.sleep((60000 / this.bpm)
-                        - Tempo.OFFSET_IN_MILLIS
-                )
-                if (_isPlaying == true) {
-                    handler.sendEmptyMessage(MetronomeCodes.START_METRONOME)
-                }
+                sp.play(tickSound,1.0f,1.0f, Thread.NORM_PRIORITY,0,1.0f)
+                SystemClock.sleep((60000 / this.bpm) - Tempo.OFFSET_IN_MILLIS)
+                if (_isPlaying == true) handler.sendEmptyMessage(MetronomeCodes.START_METRONOME)
             }
             MetronomeCodes.STOP_METRONOME -> {
                 _isPlaying = false

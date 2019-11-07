@@ -9,23 +9,22 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 
 
 import com.wesync.R
 import com.wesync.SharedViewModel
 import com.wesync.adapter.SessionAdapter
+import com.wesync.adapter.SessionClickListener
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.ConnectionFragmentBinding
 import com.wesync.metronome.MetronomeService
-import com.wesync.util.ConnectionCodes
 import com.wesync.util.ServiceSubscriber
 import com.wesync.util.UserTypes
-import java.lang.IllegalStateException
 import java.lang.NullPointerException
 
 
@@ -48,6 +47,7 @@ class ConnectionFragment : Fragment() {
             .get(ConnectionViewModel::class.java)
         binding.viewmodel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
+
         return binding.root
     }
 
@@ -60,7 +60,9 @@ class ConnectionFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         doBindService()
-        sessionAdapter = SessionAdapter(viewModel)
+        sessionAdapter = SessionAdapter(SessionClickListener {
+            Toast.makeText(this.context,"${it.endpointId} clicked",Toast.LENGTH_SHORT).show()
+        })
         binding.recyclerView.adapter = sessionAdapter
         binding.recyclerView.apply {
             addItemDecoration(DividerItemDecoration(context,
@@ -79,9 +81,9 @@ class ConnectionFragment : Fragment() {
 
     private fun subscribeToConnectionManagerService() {
         mCService?.endpoints?.observe(this, Observer {
-            sessionAdapter.sessions = it
-            for (i in sessionAdapter.sessions) {
-                Log.d("endpoints",i.toString())
+            it.let {
+                sessionAdapter.submitList(it)
+                Log.d("submitList","list submitted!")
             }
         })
     }

@@ -85,8 +85,8 @@ class ConnectionManagerService : LifecycleService() {
 
     private fun observePayloadAndEndpoints() {
         payloadCallback.payload.observe(this, Observer {this@ConnectionManagerService._payload.value = it})
-        //endpointCallback.endpoints.observe(this, Observer {this@ConnectionManagerService._endpoints.value = it}) todo:replace mocklist with this at production
-        _endpoints.value = mockListFORTESTINGPURPOSES()
+        endpointCallback.endpoints.observe(this, Observer {this@ConnectionManagerService._endpoints.value = it})
+        //_endpoints.value = mockListFORTESTINGPURPOSES()
     }
 
     private fun mockListFORTESTINGPURPOSES(): MutableList<Endpoint> {

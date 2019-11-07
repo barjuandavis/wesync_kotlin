@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.wesync.connection.Endpoint
 
 class ConnectionViewModel : ViewModel() {
-    private val _sessions = MutableLiveData<List<Endpoint>>()
+    private val _ConnectedSession = MutableLiveData<Endpoint>()
 
     fun getAllSessions(): LiveData<List<String>> {
         val ld =  MutableLiveData<List<String>>()
@@ -15,7 +15,7 @@ class ConnectionViewModel : ViewModel() {
         return ld
     }
 
-    fun onSessionClicked() {
+    fun onSessionClicked(it: String) {
         Log.d("henlo","henlo")
     }
 

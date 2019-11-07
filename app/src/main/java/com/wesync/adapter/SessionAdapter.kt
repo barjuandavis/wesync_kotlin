@@ -15,37 +15,56 @@ import com.wesync.connection.Endpoint
 import com.wesync.databinding.CardViewBinding
 import com.wesync.ui.connection.ConnectionViewModel
 
-class SessionAdapter(private val viewmodel: ConnectionViewModel):
+class SessionAdapter(private val clickListener: SessionClickListener):
     ListAdapter<Endpoint, SessionAdapter.CardViewHolder>(SessionDiffCallback()) {
 
-    inner class CardViewHolder internal constructor(val binding: CardViewBinding)
-        : RecyclerView.ViewHolder(binding.root) {}
+    override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
+        Log.d("bindViewHolder","bounding session$position to view")
+        holder.bind(getItem(position)!!,clickListener)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
+        return CardViewHolder.from(parent)
+    }
+
+    class CardViewHolder private constructor(
+        private val binding: CardViewBinding)
+        : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(endpoint: Endpoint, clickListener: SessionClickListener) {
+            binding.endpoint = endpoint
+            binding.clickListener = clickListener
+            binding.executePendingBindings()
+        }
+
+        companion object {
+            fun from(parent: ViewGroup): CardViewHolder {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val binding = CardViewBinding
+                    .inflate(layoutInflater, parent, false)
+                return CardViewHolder(binding)
+            }
+        }
+    }
 
     private var layoutId = 0
     var sessions = mutableListOf<Endpoint>()
 
-    override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): CardViewHolder {
-        val binding =
-            DataBindingUtil.inflate<CardViewBinding>(LayoutInflater.from(viewGroup.context),
-            R.layout.card_view,viewGroup,false)
-        return CardViewHolder(binding)
-    }
-
-    override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        Log.d("bindViewHolder","bounding session$position to view")
-        holder.binding.sessionName.text = sessions[position].endpointId
-    }
 
 
 }
 
 class SessionDiffCallback : DiffUtil.ItemCallback<Endpoint> () {
     override fun areItemsTheSame(oldItem: Endpoint, newItem: Endpoint): Boolean {
-        return oldItem == newItem
+        return oldItem.endpointId == newItem.endpointId
     }
     override fun areContentsTheSame(oldItem: Endpoint, newItem: Endpoint): Boolean {
         return oldItem == newItem
     }
+}
+
+class SessionClickListener(val clickListener: (endpoint: Endpoint) -> Unit) {
+    fun onClick(endpoint: Endpoint) = clickListener(endpoint)
 }
 
 

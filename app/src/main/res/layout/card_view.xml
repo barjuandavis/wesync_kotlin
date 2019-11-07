@@ -3,14 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
+            name="endpoint"
             type="com.wesync.connection.Endpoint"
-            name="endpoint"/>
+            />
+        <variable
+            name="clickListener"
+            type="com.wesync.adapter.SessionClickListener" />
+
     </data>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="@{() -> clickListener.onClick(endpoint)}"
         >
 
         <RelativeLayout
@@ -23,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:text="@string/plus_1"
+                android:text="@{endpoint.component1() +` (`+ endpoint.component2().endpointName + `)`}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <TextView
