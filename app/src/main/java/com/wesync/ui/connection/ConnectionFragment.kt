@@ -12,6 +12,7 @@ import android.view.ViewGroup
 
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 
 
@@ -33,54 +34,38 @@ class ConnectionFragment : Fragment() {
     private lateinit var sharedViewModel    : SharedViewModel
     private lateinit var viewModel          : ConnectionViewModel
     private lateinit var binding            : ConnectionFragmentBinding
-    private lateinit var userType           : UserTypes
+    private val userType                    = UserTypes.SLAVE
     private var mCService                   : ConnectionManagerService? = null
     private var mService                    : MetronomeService? = null
     private lateinit var subscriber         : ServiceSubscriber
     private val args                        : ConnectionFragmentArgs by navArgs()
     private lateinit var sessionAdapter     : SessionAdapter
 
-    private val sessionObserver = Observer<List<String>> {
-       // sessionAdapter.sessions = viewModel.getAllSessions()
-        try {
-            binding.recyclerView.recycledViewPool.clear()
-         //   sessionAdapter.notifyDataSetChanged()
-        } catch (e:Exception) {}
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater,R.layout.connection_fragment,container,false)
-        binding.viewmodel = viewModel
-        val rv = binding.recyclerView
-        rv.layoutManager = LinearLayoutManager(this.context)
-        rv.setHasFixedSize(true)
-        rv.adapter = sessionAdapter
-        return binding.root
-    }
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         viewModel = ViewModelProviders.of(this)
             .get(ConnectionViewModel::class.java)
-        sessionAdapter = SessionAdapter()
+        binding.viewmodel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
             sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
         }
-        when (args.connectionType) {
-            ConnectionCodes.NEW_SESSION.v -> {
-                userType = UserTypes.SESSION_HOST
-            }
-            ConnectionCodes.JOIN_SESSION.v -> {
-                userType = UserTypes.SLAVE
-            }
-        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         doBindService()
+        sessionAdapter = SessionAdapter(viewModel)
+        binding.recyclerView.adapter = sessionAdapter
+        binding.recyclerView.apply {
+            addItemDecoration(DividerItemDecoration(context,
+                DividerItemDecoration.VERTICAL))
+        }
     }
 
     override fun onDestroy() {
@@ -89,20 +74,28 @@ class ConnectionFragment : Fragment() {
     }
 
     private fun subscribeToViewModel() {
-        getAllSessions()
+        subscribeToConnectionManagerService() //also listen changes of ConnectionManagerService's found Endpoints
     }
 
-    private fun getAllSessions() {viewModel.getAllSessions().
-        observe(this, sessionObserver)}
+    private fun subscribeToConnectionManagerService() {
+        mCService?.endpoints?.observe(this, Observer {
+            sessionAdapter.sessions = it
+            for (i in sessionAdapter.sessions) {
+                Log.d("endpoints",i.toString())
+            }
+        })
+    }
 
     private fun doBindService() {
         try {
             subscriber = ServiceSubscriber(activity!!.applicationContext, activity)
             subscriber.connServiceConnected.observe(this, Observer {
-                if (it) mCService = subscriber.connectionService!!
+                if (it) mCService = subscriber.connectionService
+                subscribeToConnectionManagerService()
+                startDiscovery()
             })
             subscriber.metronomeConnected.observe(this, Observer {
-                if (it) mService = subscriber.metronomeService!!
+                if (it) mService = subscriber.metronomeService
             })
             subscriber.subscribe()
         } catch (e: NullPointerException) {}
@@ -111,8 +104,13 @@ class ConnectionFragment : Fragment() {
 
     private fun doUnbindService() {
        subscriber.unsubscribe()
+       mCService?.stopDiscovering()
        mService = null
        mCService = null
+    }
+
+    private fun startDiscovery() {
+        mCService?.startDiscovery()
     }
 
 

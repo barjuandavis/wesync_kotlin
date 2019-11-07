@@ -30,6 +30,8 @@ class ConnectionManagerService : LifecycleService() {
     private val strategy: Strategy = Strategy.P2P_STAR
     private val payloadCallback = MyPayloadCallback()
     private lateinit var con: MyConnectionLifecycleCallback
+    private var _advertising: Boolean = false
+    private var _discovering: Boolean = false
 
     private val endpointCallback = MyEndpointCallback()
 
@@ -46,23 +48,18 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     override fun onBind(intent: Intent): IBinder {
-        //Log.d("clientBinding","client is BINDING - ConnectionManagerService")
         super.onBind(intent)
         con = MyConnectionLifecycleCallback(applicationContext,payloadCallback)
         observePayloadAndEndpoints()
         return _binder
     }
 
-    override fun onUnbind(intent: Intent?): Boolean {
-        //Log.d("clientBinding","client is UNBINDING - ConnectionManagerService")
-        return super.onUnbind(intent)
-    }
 
     fun startAdvertising() {
         val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
         Nearby.getConnectionsClient(applicationContext)
             .startAdvertising("MusicDirector",SERVICE_ID, con, advertisingOptions)
-            .addOnSuccessListener { Log.d("startAdvertising","Accepting User...") }
+            .addOnSuccessListener { Toast.makeText(this,"Accepting User...",Toast.LENGTH_SHORT).show()}
             .addOnFailureListener { throw it }
     }
 
@@ -74,8 +71,12 @@ class ConnectionManagerService : LifecycleService() {
         val discoveryOptions = DiscoveryOptions.Builder().setStrategy(strategy).build()
         Nearby.getConnectionsClient(applicationContext)
             .startDiscovery(SERVICE_ID, endpointCallback, discoveryOptions)
-            .addOnSuccessListener {Log.d("startDiscovery","discovering...")}
+            .addOnSuccessListener {Toast.makeText(this,"Finding nearby session...",Toast.LENGTH_SHORT).show()}
             .addOnFailureListener { throw it }
+    }
+
+    fun stopDiscovering() {
+        Nearby.getConnectionsClient(applicationContext).stopDiscovery()
     }
 
     fun sendPayload(s: String, p: Payload) {
@@ -83,12 +84,18 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     private fun observePayloadAndEndpoints() {
-        payloadCallback.payload.observe(this, Observer {
-            this@ConnectionManagerService._payload.value = it
-        })
-        endpointCallback.endpoints.observe(this, Observer {
-            this@ConnectionManagerService._endpoints.value = it
-        })
+        payloadCallback.payload.observe(this, Observer {this@ConnectionManagerService._payload.value = it})
+        //endpointCallback.endpoints.observe(this, Observer {this@ConnectionManagerService._endpoints.value = it}) todo:replace mocklist with this at production
+        _endpoints.value = mockListFORTESTINGPURPOSES()
+    }
+
+    private fun mockListFORTESTINGPURPOSES(): MutableList<Endpoint> {
+        val mock = mutableListOf<Endpoint>()
+        mock.add(Endpoint("test1",DiscoveredEndpointInfo("test1","test1")))
+        mock.add(Endpoint("test2",DiscoveredEndpointInfo("test2","test2")))
+        mock.add(Endpoint("test3",DiscoveredEndpointInfo("test3","test3")))
+        mock.add(Endpoint("test4",DiscoveredEndpointInfo("test4","test4")))
+        return mock
     }
 
     fun connect(endpointId: String) { //placeholder

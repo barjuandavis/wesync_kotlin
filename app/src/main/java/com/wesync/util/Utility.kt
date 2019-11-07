@@ -26,7 +26,7 @@ enum class UserTypes {
 class Tempo {
     companion object {
         const val MINIMUM_BPM: Long = 20
-        const val MAXIMUM_BPM: Long = 300
+        const val MAXIMUM_BPM: Long = 400
         const val DEFAULT_BPM: Long = 120
         const val OFFSET_IN_MILLIS: Long = 5
     }

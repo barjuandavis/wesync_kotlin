@@ -43,7 +43,6 @@ class MetronomeFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d("onViewCreated","MetronomeFragment Created!")
         activity?.let {
             sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
         }
@@ -79,7 +78,6 @@ class MetronomeFragment : Fragment() {
             catch (e: Exception) {}
         })
         viewModel.isPlaying.observe( viewLifecycleOwner, Observer { try {
-            Log.d("playObserver","playObserved:$it")
             if (it) {
                 binding.playButton.setText(R.string.stop_button)
                 binding.playButton.setBackgroundColor(ContextCompat.getColor(context!!, R.color.colorStop))
@@ -88,7 +86,7 @@ class MetronomeFragment : Fragment() {
                 binding.playButton.setBackgroundColor(ContextCompat.getColor(context!!, R.color.colorPlay))
             }
             mService?.onPlay()
-        } catch (e: Exception) {Log.d("playObserver", "Preparing...")}})
+        } catch (e: Exception) {}})
         sharedViewModel.userTypes.observe(viewLifecycleOwner, Observer {
             @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
             when (it) {
@@ -167,6 +165,7 @@ class MetronomeFragment : Fragment() {
             builder.setPositiveButton("OK") { _, _ ->
                 sharedViewModel.endSession() //TODO: PERHATIKANNNNN INIII
                 if (viewModel.isPlaying.value!!) viewModel.onPlayClicked()
+                if (sharedViewModel.isAdvertising.value!!) sharedViewModel.toggleAdvertise()
             }
             builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
             builder.show()

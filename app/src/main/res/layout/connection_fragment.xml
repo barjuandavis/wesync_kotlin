@@ -8,6 +8,7 @@
             name="viewmodel"/>
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/card_view_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#ffffff">
@@ -23,7 +24,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.3"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/card_view" />
+            tools:listitem="@layout/card_view"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

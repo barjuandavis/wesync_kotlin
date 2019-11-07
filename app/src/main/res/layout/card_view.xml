@@ -3,13 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
-            type="com.wesync.ui.connection.ConnectionViewModel"
-            name="viewmodel"/>
+            type="com.wesync.connection.Endpoint"
+            name="endpoint"/>
     </data>
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        >
 
         <RelativeLayout
             android:layout_width="match_parent"

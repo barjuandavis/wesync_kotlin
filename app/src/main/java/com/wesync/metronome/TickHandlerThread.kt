@@ -17,8 +17,8 @@ class TickHandlerThread(private val context:Context ): HandlerThread("TickHandle
     Process.THREAD_PRIORITY_DEFAULT) {
 
     /*
-           TODO: try to reduce audio latency by using Oboe's AudioStream instead of MediaPlayer
-           TODO: DO IT IN EXPERIMENTAL BRANCH.
+           TODO: try to reduce audio latency by using Oboe's AudioStream instead of SoundPool
+           TODO: DO IT IN EXPERIMENTAL BRANCH. By now, SoundPool is PERCEIVING-LY good enough. Using Oboe can improve this A LOT.
      */
 
     private lateinit var handler: Handler
@@ -33,12 +33,6 @@ class TickHandlerThread(private val context:Context ): HandlerThread("TickHandle
         }
         else
             Looper.loop()
-        try {
-            buildSoundPool()
-        } catch(e: IllegalStateException) {
-           Log.d("prepareAsync","eh ketangkep")
-        }
-        Log.d("ThreadStart","Thread has been started!")
     }
 
     override fun onLooperPrepared() {
@@ -47,12 +41,11 @@ class TickHandlerThread(private val context:Context ): HandlerThread("TickHandle
             MetronomeCodes.START_METRONOME -> {
                 _isPlaying = true
                 try {
-                    sp.play(tickSound,1.0f,1.0f, Thread.MAX_PRIORITY,0,1.0f)
+                    sp.play(tickSound,1.0f,1.0f, Thread.NORM_PRIORITY,0,1.0f)
                 } catch (e: NullPointerException) {}
                 SystemClock.sleep((60000 / this.bpm)
                         - Tempo.OFFSET_IN_MILLIS
                 )
-                Log.d("tick","tick")
                 if (_isPlaying == true) {
                     handler.sendEmptyMessage(MetronomeCodes.START_METRONOME)
                 }
@@ -74,7 +67,7 @@ class TickHandlerThread(private val context:Context ): HandlerThread("TickHandle
     private fun buildSoundPool(): SoundPool {
         val sp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val aa = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build()
             SoundPool.Builder()
@@ -85,12 +78,17 @@ class TickHandlerThread(private val context:Context ): HandlerThread("TickHandle
             SoundPool(1, AudioManager.STREAM_MUSIC,0)
         }
         tickSound = sp.load(context,R.raw.tick,1)
+
         return sp
     }
 
-
     fun getHandler(): Handler {
         return handler
+    }
+
+    override fun quitSafely(): Boolean {
+        sp.release() //please rebuild soundpool to reuse
+        return super.quitSafely()
     }
 
     fun isPlaying() = _isPlaying

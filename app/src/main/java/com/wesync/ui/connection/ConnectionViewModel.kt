@@ -1,5 +1,6 @@
 package com.wesync.ui.connection
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,10 @@ class ConnectionViewModel : ViewModel() {
         val ld =  MutableLiveData<List<String>>()
         ld.postValue(listOf("Ayam","Bebek","Kucing","Ikan","Tikus"))
         return ld
+    }
+
+    fun onSessionClicked() {
+        Log.d("henlo","henlo")
     }
 
 }
