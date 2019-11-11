@@ -1,6 +1,7 @@
 package com.wesync.ui.connection
 
 
+
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.Observer
 import android.os.Bundle
@@ -9,12 +10,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
-
 
 import com.wesync.R
 import com.wesync.SharedViewModel
@@ -43,7 +42,8 @@ class ConnectionFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater,R.layout.connection_fragment,container,false)
-        viewModel = ViewModelProviders.of(this)
+        val viewModelFactory = ConnectionViewModelFactory(mCService?.endpointCallback,mCService?.payloadCallback)
+        viewModel = ViewModelProviders.of(this,viewModelFactory)
             .get(ConnectionViewModel::class.java)
         binding.viewmodel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
@@ -60,9 +60,7 @@ class ConnectionFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         doBindService()
-        sessionAdapter = SessionAdapter(SessionClickListener {
-            Toast.makeText(this.context,"${it.endpointId} clicked",Toast.LENGTH_SHORT).show()
-        })
+        sessionAdapter = SessionAdapter(SessionClickListener {mCService?.connect(it)})
         binding.recyclerView.adapter = sessionAdapter
         binding.recyclerView.apply {
             addItemDecoration(DividerItemDecoration(context,
@@ -76,16 +74,13 @@ class ConnectionFragment : Fragment() {
     }
 
     private fun subscribeToViewModel() {
-        subscribeToConnectionManagerService() //also listen changes of ConnectionManagerService's found Endpoints
-    }
-
-    private fun subscribeToConnectionManagerService() {
-        mCService?.endpoints?.observe(this, Observer {
+        viewModel.availableSessions?.observe(this, Observer {
             it.let {
                 sessionAdapter.submitList(it)
                 Log.d("submitList","list submitted!")
             }
         })
+
     }
 
     private fun doBindService() {
@@ -93,7 +88,7 @@ class ConnectionFragment : Fragment() {
             subscriber = ServiceSubscriber(activity!!.applicationContext, activity)
             subscriber.connServiceConnected.observe(this, Observer {
                 if (it) mCService = subscriber.connectionService
-                subscribeToConnectionManagerService()
+
                 startDiscovery()
             })
             subscriber.metronomeConnected.observe(this, Observer {

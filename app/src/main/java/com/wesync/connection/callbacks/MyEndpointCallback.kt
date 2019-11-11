@@ -1,5 +1,6 @@
 package com.wesync.connection.callbacks
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
 import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback
@@ -17,6 +18,7 @@ class MyEndpointCallback : EndpointDiscoveryCallback() {
 
     override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
         val cl = _endpoints.value!!
+        Log.d("onEndpointFound","Endpoint found: $endpointId (${info.endpointName})")
         if (!cl.any{ it.endpointId == endpointId && it.info == info }) {
             cl.add(Endpoint(endpointId,info))
         }

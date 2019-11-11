@@ -28,12 +28,12 @@ class ConnectionManagerService : LifecycleService() {
 
     private val _binder = LocalBinder()
     private val strategy: Strategy = Strategy.P2P_STAR
-    private val payloadCallback = MyPayloadCallback()
+    val payloadCallback = MyPayloadCallback()
     private lateinit var con: MyConnectionLifecycleCallback
     private var _advertising: Boolean = false
     private var _discovering: Boolean = false
 
-    private val endpointCallback = MyEndpointCallback()
+    val endpointCallback = MyEndpointCallback()
 
     private val _endpoints = MutableLiveData<MutableList<Endpoint>>() //TODO: observed by ConnectionFragment
         val endpoints = _endpoints
@@ -98,19 +98,15 @@ class ConnectionManagerService : LifecycleService() {
         return mock
     }
 
-    fun connect(endpointId: String) { //placeholder
-        Nearby.getConnectionsClient(application).requestConnection("Slave", endpointId, con)
+    fun connect(endpoint: Endpoint) { //placeholder
+        Nearby.getConnectionsClient(application).requestConnection("Slave", endpoint.endpointId, con)
             .addOnSuccessListener {
-                Toast.makeText(applicationContext,"Connecting to $endpointId",
+                Toast.makeText(applicationContext,"Connecting to ${endpoint.endpointId}",
                     Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener {
-                Toast.makeText(applicationContext,"Failed to request connection to $endpointId",
+                Toast.makeText(applicationContext,"Failed to request connection to ${endpoint.endpointId}",
                     Toast.LENGTH_SHORT).show()
             }
     }
-
-
-
-
 }

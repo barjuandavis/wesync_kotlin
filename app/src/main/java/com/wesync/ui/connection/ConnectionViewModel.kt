@@ -5,15 +5,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wesync.connection.Endpoint
+import com.wesync.connection.callbacks.MyConnectionLifecycleCallback
+import com.wesync.connection.callbacks.MyEndpointCallback
+import com.wesync.connection.callbacks.MyPayloadCallback
 
-class ConnectionViewModel : ViewModel() {
-    /*
-           TODO: Create a ViewModel.Factory for this ViewModel that accept MyEndpointCallback as parameter.
-            Shared reference between the service and this VM will AB-SO-LUTE-LY USEFUL.
-            In short: use the Callback as a data source for this VM.
-     */
+class ConnectionViewModel(
+    private val endpointCallback: MyEndpointCallback?,
+    private val payloadCallback: MyPayloadCallback?
+) : ViewModel() {
 
-    private val _ConnectedSession = MutableLiveData<Endpoint>()
+    private val _availableSessions = endpointCallback?.endpoints
+        val availableSessions = _availableSessions
+
+
 
     fun getAllSessions(): LiveData<List<String>> {
         val ld =  MutableLiveData<List<String>>()
@@ -21,7 +25,7 @@ class ConnectionViewModel : ViewModel() {
         return ld
     }
 
-    fun onSessionClicked(it: String) {
+    fun onSessionClicked(it: Endpoint) {
         Log.d("henlo","henlo")
     }
 

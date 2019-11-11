@@ -31,5 +31,9 @@
             android:name="connectionType"
             android:defaultValue="1"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_connectionFragment_to_metronomeFragment"
+            app:destination="@id/metronomeFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>
