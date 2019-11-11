@@ -1,16 +1,22 @@
 package com.wesync.connection
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import com.google.android.gms.nearby.Nearby
-import android.util.Log
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.google.android.gms.nearby.connection.*
+import com.wesync.MainActivity
+import com.wesync.R
 import com.wesync.connection.callbacks.*
 import com.wesync.util.ForegroundServiceLauncher
 import com.wesync.util.ServiceUtil.Companion.SERVICE_ID
@@ -29,6 +35,7 @@ class ConnectionManagerService : LifecycleService() {
     private val _binder = LocalBinder()
     private val strategy: Strategy = Strategy.P2P_STAR
     val payloadCallback = MyPayloadCallback()
+    private val CHANNEL_ID = "wesync_notification_bar"
     private lateinit var con: MyConnectionLifecycleCallback
     private var _advertising: Boolean = false
     private var _discovering: Boolean = false
@@ -47,10 +54,38 @@ class ConnectionManagerService : LifecycleService() {
         }
     }
 
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        createNotificationChannel()
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0, notificationIntent, 0
+        )
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Wesync Metronome")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentIntent(pendingIntent)
+            .build()
+        startForeground(2, notification)
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceChannel = NotificationChannel(
+                CHANNEL_ID,
+                "Wesync Notification Channel",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val manager: NotificationManager? = getSystemService(NotificationManager::class.java)
+            manager?.createNotificationChannel(serviceChannel)
+        }
+    }
+
     override fun onBind(intent: Intent): IBinder {
-        super.onBind(intent)
         con = MyConnectionLifecycleCallback(applicationContext,payloadCallback)
         observePayloadAndEndpoints()
+        super.onBind(intent)
         return _binder
     }
 
@@ -85,7 +120,7 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     private fun observePayloadAndEndpoints() {
-        payloadCallback.payload.observe(this, Observer {this@ConnectionManagerService._payload.value = it})
+        payloadCallback.payload.observe(this , Observer {this@ConnectionManagerService._payload.value = it})
         endpointCallback.endpoints.observe(this, Observer {this@ConnectionManagerService._endpoints.value = it})
         //_endpoints.value = mockListFORTESTINGPURPOSES()
     }

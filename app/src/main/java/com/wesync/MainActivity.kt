@@ -20,9 +20,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         this.checkForPermission()
-       // MetronomeService.start(applicationContext)
-        // *ConnectionManagerService.start(applicationContext)
         sharedViewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
     private fun checkForPermission() {

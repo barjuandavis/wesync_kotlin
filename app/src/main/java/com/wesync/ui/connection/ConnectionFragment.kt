@@ -43,10 +43,6 @@ class ConnectionFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater,R.layout.connection_fragment,container,false)
-        val viewModelFactory = ConnectionViewModelFactory(mCService?.endpointCallback,mCService?.payloadCallback)
-        viewModel = ViewModelProviders.of(this,viewModelFactory)
-            .get(ConnectionViewModel::class.java)
-        binding.viewmodel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
         return binding.root
@@ -75,7 +71,7 @@ class ConnectionFragment : Fragment() {
     }
 
     private fun subscribeToViewModel() {
-        viewModel.availableSessions?.observe(this, Observer {
+        viewModel.availableSessions.observe(this, Observer {
             it.let {
                 for (i in it) {
                     Toast.makeText(this.context,"${i.endpointId}: ${i.info.endpointName}",Toast.LENGTH_SHORT).show()
@@ -92,7 +88,11 @@ class ConnectionFragment : Fragment() {
             subscriber = ServiceSubscriber(activity!!.applicationContext, activity)
             subscriber.connServiceConnected.observe(this, Observer {
                 if (it) mCService = subscriber.connectionService
-
+                val viewModelFactory = ConnectionViewModelFactory(mCService?.endpointCallback,mCService?.payloadCallback)
+                viewModel = ViewModelProviders.of(this,viewModelFactory)
+                    .get(ConnectionViewModel::class.java)
+                binding.viewmodel = viewModel
+                subscribeToViewModel()
                 startDiscovery()
             })
             subscriber.metronomeConnected.observe(this, Observer {
@@ -100,7 +100,7 @@ class ConnectionFragment : Fragment() {
             })
             subscriber.subscribe()
         } catch (e: NullPointerException) {}
-        subscribeToViewModel()
+
     }
 
     private fun doUnbindService() {

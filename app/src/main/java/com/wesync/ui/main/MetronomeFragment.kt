@@ -54,6 +54,9 @@ class MetronomeFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         doUnbindService()
+        if (!viewModel.isPlaying.value!!) {
+            Log.d("shouldbestopped","should be stopped")
+        }
     }
 
     private fun doBindService() {
