@@ -17,8 +17,6 @@ class ConnectionViewModel(
     private val _availableSessions = endpointCallback?.endpoints
         val availableSessions = _availableSessions
 
-
-
     fun getAllSessions(): LiveData<List<String>> {
         val ld =  MutableLiveData<List<String>>()
         ld.postValue(listOf("Ayam","Bebek","Kucing","Ikan","Tikus"))

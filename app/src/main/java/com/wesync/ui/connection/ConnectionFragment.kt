@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.navArgs
@@ -76,6 +77,9 @@ class ConnectionFragment : Fragment() {
     private fun subscribeToViewModel() {
         viewModel.availableSessions?.observe(this, Observer {
             it.let {
+                for (i in it) {
+                    Toast.makeText(this.context,"${i.endpointId}: ${i.info.endpointName}",Toast.LENGTH_SHORT).show()
+                }
                 sessionAdapter.submitList(it)
                 Log.d("submitList","list submitted!")
             }
