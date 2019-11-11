@@ -18,9 +18,9 @@ class MyEndpointCallback : EndpointDiscoveryCallback() {
 
     override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
         val cl = _endpoints.value!!
-        Log.d("onEndpointFound","Endpoint found: $endpointId (${info.endpointName})")
-        if (!cl.any{ it.endpointId == endpointId && it.info == info }) {
+        if (!cl.any{it.endpointId == endpointId} ) {
             cl.add(Endpoint(endpointId,info))
+            Log.d("onEndpointFound","Endpoint added: $endpointId (${info.endpointName})")
         }
         _endpoints.value = cl
     }

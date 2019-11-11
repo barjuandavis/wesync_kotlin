@@ -55,10 +55,11 @@ class ConnectionManagerService : LifecycleService() {
     }
 
 
-    fun startAdvertising() {
+    fun startAdvertising(sessionName: String?) {
         val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
         Nearby.getConnectionsClient(applicationContext)
-            .startAdvertising("MusicDirector",SERVICE_ID, con, advertisingOptions)
+            .startAdvertising(sessionName!!
+                ,SERVICE_ID, con, advertisingOptions)
             .addOnSuccessListener { Toast.makeText(this,"Accepting User...",Toast.LENGTH_SHORT).show()}
             .addOnFailureListener { throw it }
     }

@@ -114,7 +114,7 @@ class MetronomeFragment : Fragment() {
                 if (it) {
                     binding.joinSession.setText(R.string.advertising)
                     binding.joinSession.setBackgroundColor(ContextCompat.getColor(context!!,R.color.colorStop))
-                    mCService?.startAdvertising()
+                    mCService?.startAdvertising(sharedViewModel.getSessionName())
                 }
                 else {
                     binding.joinSession.setText(R.string.not_advertising)
