@@ -85,7 +85,7 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     override fun onBind(intent: Intent): IBinder {
-        con = MyConnectionLifecycleCallback(applicationContext,payloadCallback)
+        con = MyConnectionLifecycleCallback(this.baseContext,payloadCallback)
         observePayloadAndEndpoints()
         super.onBind(intent)
         return _binder
@@ -127,7 +127,7 @@ class ConnectionManagerService : LifecycleService() {
         //_endpoints.value = mockListFORTESTINGPURPOSES()
     }
 
-    fun mockListFORTESTINGPURPOSES(): MutableList<Endpoint> {
+    private fun mockListFORTESTINGPURPOSES(): MutableList<Endpoint> {
         val mock = mutableListOf<Endpoint>()
         mock.add(Endpoint("test1",DiscoveredEndpointInfo("test1","test1")))
         mock.add(Endpoint("test2",DiscoveredEndpointInfo("test2","test2")))
