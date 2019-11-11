@@ -8,32 +8,33 @@
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:fitsSystemWindows="true"
+        android:layout_height="match_parent"
         android:background="@color/colorBackgroundDark"
-        >
+        android:fitsSystemWindows="false">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorBackground">
+            android:layout_height="match_parent"
+            android:background="@color/colorBackgroundDark">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorBackground" />
-        </com.google.android.material.appbar.AppBarLayout>
+                android:background="@color/colorBackground"
+                android:minHeight="56sp" />
 
-        <fragment
-            android:id="@+id/fragmentNavHost"
-            android:name="androidx.navigation.fragment.NavHostFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorBackgroundDark"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/nav_graph" />
+            <fragment
+                android:id="@+id/fragmentNavHost"
+                android:name="androidx.navigation.fragment.NavHostFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorBackgroundDark"
+                app:defaultNavHost="true"
+                app:navGraph="@navigation/nav_graph" />
+
+        </com.google.android.material.appbar.AppBarLayout>
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

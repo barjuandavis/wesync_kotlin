@@ -42,9 +42,13 @@ class ConnectionFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        doBindService()
+        val viewModelFactory = ConnectionViewModelFactory(mCService?.endpointCallback,mCService?.payloadCallback)
+        viewModel = ViewModelProviders.of(this,viewModelFactory)
+            .get(ConnectionViewModel::class.java)
         binding = DataBindingUtil.inflate(inflater,R.layout.connection_fragment,container,false)
+        binding.viewmodel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
-
         return binding.root
     }
 
@@ -56,7 +60,7 @@ class ConnectionFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        doBindService()
+
         sessionAdapter = SessionAdapter(SessionClickListener {mCService?.connect(it)})
         binding.recyclerView.adapter = sessionAdapter
         binding.recyclerView.apply {
@@ -71,13 +75,15 @@ class ConnectionFragment : Fragment() {
     }
 
     private fun subscribeToViewModel() {
-        viewModel.availableSessions.observe(this, Observer {
+       mCService?.endpoints?.observe(this, Observer {
             it.let {
                 for (i in it) {
                     Toast.makeText(this.context,"${i.endpointId}: ${i.info.endpointName}",Toast.LENGTH_SHORT).show()
                 }
-                sessionAdapter.submitList(it)
-                Log.d("submitList","list submitted!")
+                if (it.isNotEmpty()) {
+                    sessionAdapter.submitList(it)
+                    Log.d("submitList","list submitted!")
+                }
             }
         })
 
@@ -88,10 +94,6 @@ class ConnectionFragment : Fragment() {
             subscriber = ServiceSubscriber(activity!!.applicationContext, activity)
             subscriber.connServiceConnected.observe(this, Observer {
                 if (it) mCService = subscriber.connectionService
-                val viewModelFactory = ConnectionViewModelFactory(mCService?.endpointCallback,mCService?.payloadCallback)
-                viewModel = ViewModelProviders.of(this,viewModelFactory)
-                    .get(ConnectionViewModel::class.java)
-                binding.viewmodel = viewModel
                 subscribeToViewModel()
                 startDiscovery()
             })
@@ -100,12 +102,12 @@ class ConnectionFragment : Fragment() {
             })
             subscriber.subscribe()
         } catch (e: NullPointerException) {}
-
     }
 
     private fun doUnbindService() {
        subscriber.unsubscribe()
        mCService?.stopDiscovering()
+
        mService = null
        mCService = null
     }

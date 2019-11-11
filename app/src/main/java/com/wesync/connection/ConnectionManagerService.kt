@@ -11,6 +11,7 @@ import android.os.IBinder
 import com.google.android.gms.nearby.Nearby
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -62,11 +63,12 @@ class ConnectionManagerService : LifecycleService() {
             0, notificationIntent, 0
         )
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Wesync Metronome")
+            .setContentTitle("Wesync Metronome Connection")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentIntent(pendingIntent)
+            .setContentIntent(pendingIntent).setPriority(PRIORITY_MIN)
             .build()
         startForeground(2, notification)
+        LAUNCHER.onServiceCreated(this)
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -125,7 +127,7 @@ class ConnectionManagerService : LifecycleService() {
         //_endpoints.value = mockListFORTESTINGPURPOSES()
     }
 
-    private fun mockListFORTESTINGPURPOSES(): MutableList<Endpoint> {
+    fun mockListFORTESTINGPURPOSES(): MutableList<Endpoint> {
         val mock = mutableListOf<Endpoint>()
         mock.add(Endpoint("test1",DiscoveredEndpointInfo("test1","test1")))
         mock.add(Endpoint("test2",DiscoveredEndpointInfo("test2","test2")))

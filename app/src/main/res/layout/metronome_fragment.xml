@@ -41,23 +41,7 @@
             app:layout_constraintHorizontal_bias="0.494"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.419" />
-
-        <TextView
-            android:id="@+id/bpm_textView"
-            android:layout_width="197dp"
-            android:layout_height="137dp"
-            android:layout_marginStart="56dp"
-            android:ems="10"
-            android:fontFamily="sans-serif-black"
-            android:text="@{String.valueOf(viewmodel.bpm)}"
-            android:textAlignment="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="@android:color/primary_text_dark"
-            android:textSize="100sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/plus_layout" />
+            app:layout_constraintVertical_bias="0.045" />
 
         <Button
             android:id="@+id/new_session"
@@ -71,7 +55,7 @@
             android:textColor="#ffffff"
             app:layout_constraintBottom_toTopOf="@+id/plus_layout"
             app:layout_constraintEnd_toStartOf="@+id/join_session"
-            app:layout_constraintHorizontal_bias="0.076"
+            app:layout_constraintHorizontal_bias="0.067"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0" />
@@ -80,7 +64,7 @@
             android:id="@+id/join_session"
             android:layout_width="130sp"
             android:layout_height="56dp"
-            android:layout_marginEnd="48sp"
+            android:layout_marginEnd="44dp"
             android:layout_marginBottom="40sp"
             android:layout_weight="1"
             android:background="@color/colorPrimaryDark"
@@ -113,8 +97,8 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(-50)}"
                 android:text="@string/minus_50"
                 android:textColor="#ffffff"
-                tools:layout_editor_absoluteX="40dp"
-                tools:layout_editor_absoluteY="425dp" />
+                tools:layout_editor_absoluteX="37dp"
+                tools:layout_editor_absoluteY="351dp" />
 
             <Button
                 android:id="@+id/minus_10"
@@ -126,8 +110,8 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(-10)}"
                 android:text="@string/minus_10"
                 android:textColor="#ffffff"
-                tools:layout_editor_absoluteX="155dp"
-                tools:layout_editor_absoluteY="425dp" />
+                tools:layout_editor_absoluteX="153dp"
+                tools:layout_editor_absoluteY="351dp" />
 
             <Button
                 android:id="@+id/minus_1"
@@ -140,15 +124,15 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(-1)}"
                 android:text="@string/minus_1"
                 android:textColor="#ffffff"
-                tools:layout_editor_absoluteX="272dp"
-                tools:layout_editor_absoluteY="425dp" />
+                tools:layout_editor_absoluteX="269dp"
+                tools:layout_editor_absoluteY="351dp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/plus_layout"
             android:layout_width="348sp"
             android:layout_height="69dp"
-            android:layout_marginTop="212dp"
+            android:layout_marginTop="140dp"
             android:layout_marginEnd="2sp"
             android:gravity="center|fill"
             android:orientation="horizontal"
@@ -168,8 +152,8 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(50)}"
                 android:text="@string/plus_50"
                 android:textColor="#ffffff"
-                tools:layout_editor_absoluteX="39dp"
-                tools:layout_editor_absoluteY="215dp" />
+                tools:layout_editor_absoluteX="36dp"
+                tools:layout_editor_absoluteY="141dp" />
 
             <Button
                 android:id="@+id/plus_10"
@@ -181,8 +165,8 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(10)}"
                 android:text="@string/plus_10"
                 android:textColor="#ffffff"
-                tools:layout_editor_absoluteX="155dp"
-                tools:layout_editor_absoluteY="215dp" />
+                tools:layout_editor_absoluteX="152dp"
+                tools:layout_editor_absoluteY="141dp" />
 
             <Button
                 android:id="@+id/plus_1"
@@ -194,8 +178,8 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(1)}"
                 android:text="@string/plus_1"
                 android:textColor="#ffffff"
-                tools:layout_editor_absoluteX="271dp"
-                tools:layout_editor_absoluteY="215dp" />
+                tools:layout_editor_absoluteX="268dp"
+                tools:layout_editor_absoluteY="141dp" />
         </LinearLayout>
 
         <Button
@@ -210,7 +194,7 @@
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/minus_layout"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.026" />
 
         <TextView
             android:id="@+id/bpm_textView2"
@@ -226,10 +210,26 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/bpm_textView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.137"
+            app:layout_constraintHorizontal_bias="0.193"
             app:layout_constraintStart_toEndOf="@+id/bpm_textView"
             app:layout_constraintTop_toTopOf="@+id/bpm_textView"
             app:layout_constraintVertical_bias="1.0" />
+
+        <TextView
+            android:id="@+id/bpm_textView"
+            android:layout_width="197dp"
+            android:layout_height="137dp"
+            android:layout_marginStart="52dp"
+            android:ems="10"
+            android:fontFamily="sans-serif-black"
+            android:text="@{String.valueOf(viewmodel.bpm)}"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@android:color/primary_text_dark"
+            android:textSize="100sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/plus_layout" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

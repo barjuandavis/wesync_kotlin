@@ -19,8 +19,17 @@ class SessionAdapter(private val clickListener: SessionClickListener):
     ListAdapter<Endpoint, SessionAdapter.CardViewHolder>(SessionDiffCallback()) {
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        Log.d("bindViewHolder","bounding session$position to view")
+        Log.d("bindViewHolder","bounding session $position to view")
         holder.bind(getItem(position)!!,clickListener)
+    }
+
+    override fun onCurrentListChanged(
+        previousList: MutableList<Endpoint>,
+        currentList: MutableList<Endpoint>
+    ) {
+       for (i in currentList) {
+           Log.d("currentListChanged","${i.endpointId}: ${i.info.endpointName}")
+       }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -46,11 +55,6 @@ class SessionAdapter(private val clickListener: SessionClickListener):
             }
         }
     }
-
-    private var layoutId = 0
-    var sessions = mutableListOf<Endpoint>()
-
-
 
 }
 

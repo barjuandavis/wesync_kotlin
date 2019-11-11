@@ -10,11 +10,11 @@ import com.wesync.connection.callbacks.MyEndpointCallback
 import com.wesync.connection.callbacks.MyPayloadCallback
 
 class ConnectionViewModel(
-    private val endpointCallback: MyEndpointCallback,
-    private val payloadCallback: MyPayloadCallback
+    private val endpointCallback: MyEndpointCallback?,
+    private val payloadCallback: MyPayloadCallback?
 ) : ViewModel() {
 
-    private val _availableSessions = endpointCallback.endpoints
+    private val _availableSessions = endpointCallback?.endpoints
         val availableSessions = _availableSessions
 
     fun getAllSessions(): LiveData<List<String>> {

@@ -12,10 +12,7 @@ class ConnectionViewModelFactory(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ConnectionViewModel::class.java)) {
-                return ConnectionViewModel(
-                    endpointCallback!!, payloadCallback!!) as T
-        }
+        if (modelClass.isAssignableFrom(ConnectionViewModel::class.java)) return ConnectionViewModel(endpointCallback,payloadCallback) as T
         throw IllegalArgumentException("Unknown ViewModel Class")
     }
 

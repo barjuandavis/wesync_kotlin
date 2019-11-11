@@ -44,11 +44,12 @@ class MetronomeService: Service() {
             0, notificationIntent, 0
         )
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Wesync Metronome")
+            .setContentTitle("Wesync Metronome Notification")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .build()
         startForeground(1, notification)
+        LAUNCHER.onServiceCreated(this)
         return START_STICKY
     }
 
