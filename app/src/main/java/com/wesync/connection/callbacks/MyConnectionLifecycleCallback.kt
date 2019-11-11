@@ -37,6 +37,7 @@ class MyConnectionLifecycleCallback(
 
          */
         Toast.makeText(context, "Initiating connection to ${endpointId}...",Toast.LENGTH_SHORT).show()
+        Nearby.getConnectionsClient(context).acceptConnection(endpointId, pay)
     }
     override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
         when (result.status.statusCode) {
