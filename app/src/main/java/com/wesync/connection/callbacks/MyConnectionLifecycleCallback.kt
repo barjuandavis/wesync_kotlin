@@ -20,7 +20,7 @@ class MyConnectionLifecycleCallback(
         val connectedEndpointId = _connectedEndpointId
 
     override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
-        AlertDialog.Builder(context)
+        /*AlertDialog.Builder(context)
             .setTitle("Accept connection to " + info.endpointName)
             .setMessage("Confirm the code matches on both devices: " + info.authenticationToken)
 
@@ -34,6 +34,9 @@ class MyConnectionLifecycleCallback(
             }
             .setIcon(android.R.drawable.ic_dialog_info)
             .show()
+
+         */
+        Toast.makeText(context, "Initiating connection to ${endpointId}...",Toast.LENGTH_SHORT).show()
     }
     override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
         when (result.status.statusCode) {

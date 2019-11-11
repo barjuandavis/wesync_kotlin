@@ -85,7 +85,7 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     override fun onBind(intent: Intent): IBinder {
-        con = MyConnectionLifecycleCallback(this.baseContext,payloadCallback)
+        con = MyConnectionLifecycleCallback(applicationContext,payloadCallback)
         observePayloadAndEndpoints()
         super.onBind(intent)
         return _binder
