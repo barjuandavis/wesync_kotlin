@@ -9,4 +9,7 @@
     <color name="colorSubtractTempo">#EF5350</color>
     <color name="colorPlay">#43A047</color>
     <color name="colorStop">#D81B60</color>
+    <color name="colorDisabledButton">#525252</color>
+    <color name="colorDisabledButtonText">#727272</color>
+    <color name="colorEnabledButtonText">#FFFFFF</color>
 </resources>

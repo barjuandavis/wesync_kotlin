@@ -86,7 +86,7 @@ class MetronomeFragment : Fragment() {
                 UserTypes.SESSION_HOST -> {
                     if (sharedViewModel.isAdvertising.value == false) sharedViewModel.toggleAdvertise()
                 }
-                UserTypes.SLAVE -> TODO("lupa mau ngapain")
+                UserTypes.SLAVE -> {}
             }
         })
         sharedViewModel.isAdvertising.observe(viewLifecycleOwner, Observer {
@@ -118,8 +118,8 @@ class MetronomeFragment : Fragment() {
     }
 
     private fun onNewSessionButtonClicked() {
+        val builder = AlertDialog.Builder(context)
         if (sharedViewModel.userType.value == UserTypes.SOLO) {
-            val builder = AlertDialog.Builder(context)
             builder.setTitle("What is your Name?")
             val input = EditText(context)
             input.inputType = InputType.TYPE_CLASS_TEXT
@@ -132,7 +132,6 @@ class MetronomeFragment : Fragment() {
             builder.show()
         }
         else if (sharedViewModel.userType.value == UserTypes.SESSION_HOST) {
-            val builder = AlertDialog.Builder(context)
             builder.setTitle("Are you sure want to end this Session?")
             builder.setPositiveButton("OK") { _, _ ->
                 sharedViewModel.endSession() //TODO: PERHATIKANNNNN INIII

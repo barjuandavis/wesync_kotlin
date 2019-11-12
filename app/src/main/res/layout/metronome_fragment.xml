@@ -35,7 +35,6 @@
             app:layout_constraintVertical_bias="0.248"
             app:userType="@{sharedvm.userType}"
             app:sessionName="@{sharedvm.sessionName}"/>
-
         <Button
             android:id="@+id/new_session"
             android:layout_width="130sp"
@@ -54,8 +53,6 @@
             app:layout_constraintVertical_bias="1.0"
             app:userType="@{sharedvm.userType}"
             app:isAdvertising="@{sharedvm.isAdvertising()}"/>
-
-
         <Button
             android:id="@+id/join_session"
             android:layout_width="130sp"
@@ -86,7 +83,6 @@
             app:layout_constraintHorizontal_bias="0.507"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/bpm_textView">
-
             <Button
                 android:id="@+id/minus_50"
                 android:layout_width="42sp"
@@ -98,7 +94,8 @@
                 android:text="@string/minus_50"
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="37dp"
-                tools:layout_editor_absoluteY="351dp" />
+                tools:layout_editor_absoluteY="351dp"
+                app:joinedSession="@{sharedvm.userType}"/>
 
             <Button
                 android:id="@+id/minus_10"
@@ -111,7 +108,8 @@
                 android:text="@string/minus_10"
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="153dp"
-                tools:layout_editor_absoluteY="351dp" />
+                tools:layout_editor_absoluteY="351dp"
+                app:joinedSession="@{sharedvm.userType}"/>
 
             <Button
                 android:id="@+id/minus_1"
@@ -124,7 +122,8 @@
                 android:text="@string/minus_1"
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="269dp"
-                tools:layout_editor_absoluteY="351dp" />
+                tools:layout_editor_absoluteY="351dp"
+                app:joinedSession="@{sharedvm.userType}"/>
         </LinearLayout>
 
         <LinearLayout
@@ -151,7 +150,8 @@
                 android:text="@string/plus_50"
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="36dp"
-                tools:layout_editor_absoluteY="141dp" />
+                tools:layout_editor_absoluteY="141dp"
+                app:joinedSession="@{sharedvm.userType}"/>
 
             <Button
                 android:id="@+id/plus_10"
@@ -164,7 +164,8 @@
                 android:text="@string/plus_10"
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="152dp"
-                tools:layout_editor_absoluteY="141dp" />
+                tools:layout_editor_absoluteY="141dp"
+                app:joinedSession="@{sharedvm.userType}"/>
 
             <Button
                 android:id="@+id/plus_1"
@@ -177,7 +178,8 @@
                 android:text="@string/plus_1"
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="268dp"
-                tools:layout_editor_absoluteY="141dp" />
+                tools:layout_editor_absoluteY="141dp"
+                app:joinedSession="@{sharedvm.userType}"/>
         </LinearLayout>
 
         <Button
@@ -193,7 +195,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/minus_layout"
             app:layout_constraintVertical_bias="0.06"
-            app:playState="@{viewmodel.isPlaying()}" />
+            app:playState="@{viewmodel.isPlaying()}"
+            app:userType="@{sharedvm.userType}"/>
 
         <TextView
             android:id="@+id/bpm_textView2"
@@ -229,8 +232,6 @@
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/plus_layout" />
-
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
