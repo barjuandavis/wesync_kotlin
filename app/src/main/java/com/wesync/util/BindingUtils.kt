@@ -113,30 +113,18 @@ fun TextView.setSessionState(userType: LiveData<UserTypes>, sessionName: String?
 
 @BindingAdapter("joinedSession")
 fun Button.setButtonEnabled(userType: LiveData<UserTypes>) {
-    isEnabled = userType.value!! != UserTypes.SLAVE
+    isEnabled = (userType.value!! != UserTypes.SLAVE)
     if (!isEnabled) {
         setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisabledButton))
         setTextColor(ContextCompat.getColor(context, R.color.colorDisabledButtonText))
     } else {
         when (id) {
-            R.id.plus_1 -> {ContextCompat.getColor(context,
-                R.color.colorAddTempo
-            )}
-            R.id.plus_10 -> {ContextCompat.getColor(context,
-                R.color.colorAddTempo
-            )}
-            R.id.plus_50 -> {ContextCompat.getColor(context,
-                R.color.colorAddTempo
-            )}
-            R.id.minus_1 -> {ContextCompat.getColor(context,
-                R.color.colorSubtractTempo
-            )}
-            R.id.minus_10 -> {ContextCompat.getColor(context,
-                R.color.colorSubtractTempo
-            )}
-            R.id.minus_50 -> {ContextCompat.getColor(context,
-                R.color.colorSubtractTempo
-            )}
+            R.id.plus_1 -> setBackgroundColor(ContextCompat.getColor(context, R.color.colorAddTempo))
+            R.id.plus_10 -> setBackgroundColor(ContextCompat.getColor(context, R.color.colorAddTempo))
+            R.id.plus_50 -> setBackgroundColor(ContextCompat.getColor(context, R.color.colorAddTempo))
+            R.id.minus_1 -> setBackgroundColor(ContextCompat.getColor(context, R.color.colorSubtractTempo))
+            R.id.minus_10 -> setBackgroundColor(ContextCompat.getColor(context, R.color.colorSubtractTempo))
+            R.id.minus_50 -> setBackgroundColor(ContextCompat.getColor(context, R.color.colorSubtractTempo))
         }
         setTextColor(ContextCompat.getColor(context, R.color.colorEnabledButtonText))
     }

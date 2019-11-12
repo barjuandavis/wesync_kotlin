@@ -39,7 +39,6 @@ class MetronomeFragment : Fragment() {
        binding.viewmodel = viewModel
        return binding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
             sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
@@ -57,7 +56,6 @@ class MetronomeFragment : Fragment() {
             Log.d("shouldbestopped","should be stopped")
         }
     }
-
     private fun doBindService() {
         try {
             subscriber = ServiceSubscriber(activity!!.applicationContext, activity)
@@ -131,8 +129,11 @@ class MetronomeFragment : Fragment() {
             builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
             builder.show()
         }
-        else if (sharedViewModel.userType.value == UserTypes.SESSION_HOST) {
-            builder.setTitle("Are you sure want to end this Session?")
+        else  {
+            var t = "Are you sure want to end this Session?"
+            if (sharedViewModel.userType.value == UserTypes.SLAVE)
+                t = "Are you sure want to quit this Session?"
+            builder.setTitle(t)
             builder.setPositiveButton("OK") { _, _ ->
                 sharedViewModel.endSession() //TODO: PERHATIKANNNNN INIII
                 if (viewModel.isPlaying.value!!) viewModel.onPlayClicked()

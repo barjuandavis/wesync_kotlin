@@ -15,7 +15,7 @@
     <string name="dismiss_session">End Session</string>
     <string name="quit_session">Quit Session</string>
     <string name="current_session">"This is %1$s's Session."</string>
-    <string name="current_joined_session">"You have joined %1$s's Session."</string>
+    <string name="current_joined_session">"You have joined %1$s's Session.\nYou have to follow your Session Leader's instruction."</string>
     <string name="advertising">STOP\naccepting user</string>
     <string name="not_advertising">START\naccepting user</string>
     <string name="not_connected">You are playing by yourself.\nCreate a new Session or join an existing Session around you.</string>
