@@ -11,14 +11,8 @@
             type="com.wesync.SharedViewModel"
             />
         <variable
-            name="Converters"
-            type="com.wesync.util.Converters" />
-        <variable
-            name="UserTypes"
-            type="com.wesync.util.UserTypes"/>
-        <variable
-            name="View"
-            type="android.view.View"/>
+            name="uistate"
+            type="com.wesync.ui.UIState" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -147,8 +141,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5sp"
                 android:layout_weight="1"
-                android:background="@color/colorSubtractTempo"
-                android:backgroundTint="@color/colorAddTempo"
+                android:background="@color/colorAddTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(50)}"
                 android:text="@string/plus_50"
                 android:textColor="#ffffff"

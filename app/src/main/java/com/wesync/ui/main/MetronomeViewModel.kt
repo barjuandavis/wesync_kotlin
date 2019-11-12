@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.arch.core.util.Function
 import androidx.databinding.Bindable
 import androidx.lifecycle.*
+import com.wesync.ui.UIState
 import com.wesync.util.Tempo
 import com.wesync.util.UserTypes
+import java.lang.NullPointerException
 
 class MetronomeViewModel : ViewModel() {
 
@@ -33,6 +35,14 @@ class MetronomeViewModel : ViewModel() {
         }
     }
 
+    fun getUIState() : UIState {
+        return try
+        {
+            UIState(_isPlaying.value!!, _bpm.value!!)
+        } catch (e: NullPointerException) {
+            UIState(false, Tempo.DEFAULT_BPM)
+        }
+    }
 }
 
 
