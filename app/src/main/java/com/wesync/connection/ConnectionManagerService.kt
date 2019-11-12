@@ -38,8 +38,8 @@ class ConnectionManagerService : LifecycleService() {
     val payloadCallback = MyPayloadCallback()
     private val CHANNEL_ID = "wesync_notification_bar"
     private lateinit var con: MyConnectionLifecycleCallback
-    private val _connected = MutableLiveData<String>()
-        val connected = _connected
+    private var _advertising: Boolean = false
+    private var _discovering: Boolean = false
 
     val endpointCallback = MyEndpointCallback()
 
@@ -122,9 +122,6 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     private fun observePayloadAndEndpoints() {
-        con.connectedEndpointId.observe(this, Observer {
-            this._connected.value = it
-        })
         payloadCallback.payload.observe(this , Observer {this@ConnectionManagerService._payload.value = it})
         endpointCallback.endpoints.observe(this, Observer {this@ConnectionManagerService._endpoints.value = it})
         //_endpoints.value = mockListFORTESTINGPURPOSES()

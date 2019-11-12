@@ -10,10 +10,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import androidx.core.content.ContextCompat
-import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
@@ -22,7 +20,6 @@ import com.wesync.R
 import com.wesync.SharedViewModel
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.MetronomeFragmentBinding
-import com.wesync.ui.UIState
 import com.wesync.util.ConnectionCodes
 import com.wesync.util.ServiceSubscriber
 import com.wesync.util.UserTypes
@@ -32,33 +29,15 @@ class MetronomeFragment : Fragment() {
     private lateinit var viewModel          : MetronomeViewModel
     private lateinit var sharedViewModel    : SharedViewModel
     private lateinit var binding            : MetronomeFragmentBinding
-    private lateinit var uiState            : UIState
     private lateinit var subscriber         : ServiceSubscriber
     private var mService                    : MetronomeService? = null
     private var mCService                   : ConnectionManagerService? = null
 
-    companion object {
-        @JvmStatic
-        @BindingAdapter("playState")
-        fun Button.setPlayState(item: UIState?) {
-            item.let {
-                if (it!!.isPlaying) {
-                    // setText(R.string.stop_button)
-                    setBackgroundColor(ContextCompat.getColor(context, R.color.colorPlay))
-                } else {
-                    // setText(R.string.play_button)
-                    setBackgroundColor(ContextCompat.getColor(context, R.color.colorPlay))
-                }
-            }
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
        binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
-        viewModel = ViewModelProviders.of(this).get(MetronomeViewModel::class.java)
-        binding.lifecycleOwner = this.viewLifecycleOwner
-        uiState = viewModel.getUIState()
-        binding.uistate = uiState
+        viewModel = ViewModelProviders.of(this)
+            .get(MetronomeViewModel::class.java)
+       binding.setLifecycleOwner { this.lifecycle }
        binding.viewmodel = viewModel
        return binding.root
     }
@@ -66,7 +45,6 @@ class MetronomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
             sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
-            binding.sharedvm = sharedViewModel
         }
     }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -99,7 +77,6 @@ class MetronomeFragment : Fragment() {
             try {
                 mService?.onBPMChanged(it)
                 sharedViewModel.config.value = it
-
             }
             catch (e: Exception) {}
         })
@@ -111,7 +88,6 @@ class MetronomeFragment : Fragment() {
                 binding.playButton.setText(R.string.play_button)
                 binding.playButton.setBackgroundColor(ContextCompat.getColor(context!!, R.color.colorPlay))
             }
-            uiState.isPlaying = it
             mService?.onPlay()
         } catch (e: Exception) {}})
         sharedViewModel.userTypes.observe(viewLifecycleOwner, Observer {

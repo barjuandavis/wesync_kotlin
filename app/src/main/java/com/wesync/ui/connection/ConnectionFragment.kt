@@ -86,12 +86,7 @@ class ConnectionFragment : Fragment() {
                 }
             }
         })
-        mCService?.connected?.observe(this, Observer {
-            if (it.isNotEmpty()) {
 
-
-            }
-        })
     }
 
     private fun doBindService() {
