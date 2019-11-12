@@ -32,4 +32,12 @@ class Tempo {
     }
 }
 
+class TestMode {
+    companion object {
+        const val NEARBY_OFF = false
+        const val NEARBY_ON = true
+        const val STATUS = NEARBY_ON
+    }
+}
+
 

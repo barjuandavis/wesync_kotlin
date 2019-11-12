@@ -61,7 +61,10 @@ class ConnectionFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        sessionAdapter = SessionAdapter(SessionClickListener {mCService?.connect(it)})
+        sessionAdapter = SessionAdapter(SessionClickListener {
+            mCService?.connect(it)
+
+        })
         binding.recyclerView.adapter = sessionAdapter
         binding.recyclerView.apply {
             addItemDecoration(DividerItemDecoration(context,
@@ -77,14 +80,14 @@ class ConnectionFragment : Fragment() {
     private fun subscribeToViewModel() {
        mCService?.endpoints?.observe(this, Observer {
             it.let {
-                for (i in it) {
-                    Toast.makeText(this.context,"${i.endpointId}: ${i.info.endpointName}",Toast.LENGTH_SHORT).show()
-                }
                 if (it.isNotEmpty()) {
                     sessionAdapter.submitList(it)
                     Log.d("submitList","list submitted!")
                 }
             }
+        })
+        mCService?.con?.connectedEndpointId?.observe(this, Observer {
+
         })
 
     }

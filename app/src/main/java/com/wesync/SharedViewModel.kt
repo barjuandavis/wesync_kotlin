@@ -14,7 +14,7 @@ class SharedViewModel: ViewModel() {
         val isAdvertising: LiveData<Boolean> = _isAdvertising
     private val _isDiscovering           = MutableLiveData<Boolean>(false)
         val isDiscovering: LiveData<Boolean> = _isAdvertising
-        val userTypes: LiveData<UserTypes>  = _userType
+        val userType: LiveData<UserTypes>  = _userType
 
 
     fun onJoinSession() {

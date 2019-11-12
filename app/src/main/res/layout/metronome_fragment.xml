@@ -10,9 +10,6 @@
             name="sharedvm"
             type="com.wesync.SharedViewModel"
             />
-        <variable
-            name="uistate"
-            type="com.wesync.ui.UIState" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -35,30 +32,35 @@
             app:layout_constraintHorizontal_bias="0.494"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.045" />
+            app:layout_constraintVertical_bias="0.248"
+            app:userType="@{sharedvm.userType}"
+            app:sessionName="@{sharedvm.sessionName}"/>
 
         <Button
             android:id="@+id/new_session"
             android:layout_width="130sp"
             android:layout_height="56dp"
-            android:layout_marginStart="48sp"
+            android:layout_marginStart="44sp"
             android:layout_marginBottom="40sp"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:text="@string/new_session"
             android:textColor="#ffffff"
             app:layout_constraintBottom_toTopOf="@+id/plus_layout"
-            app:layout_constraintEnd_toStartOf="@+id/join_session"
-            app:layout_constraintHorizontal_bias="0.067"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintVertical_bias="1.0"
+            app:userType="@{sharedvm.userType}"
+            app:isAdvertising="@{sharedvm.isAdvertising()}"/>
+
 
         <Button
             android:id="@+id/join_session"
             android:layout_width="130sp"
             android:layout_height="56dp"
-            android:layout_marginEnd="44dp"
+            android:layout_marginEnd="44sp"
             android:layout_marginBottom="40sp"
             android:layout_weight="1"
             android:background="@color/colorPrimaryDark"
@@ -66,8 +68,12 @@
             android:textColor="#ffffff"
             app:layout_constraintBottom_toTopOf="@+id/plus_layout"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintVertical_bias="1.0"
+            app:userType="@{sharedvm.userType}"
+            app:isAdvertising="@{sharedvm.isAdvertising()}"/>
 
         <LinearLayout
             android:id="@+id/minus_layout"
@@ -114,7 +120,6 @@
                 android:layout_margin="5sp"
                 android:layout_weight="1"
                 android:background="@color/colorSubtractTempo"
-                android:backgroundTint="@color/colorSubtractTempo"
                 android:onClick="@{() -> viewmodel.modifyBPM(-1)}"
                 android:text="@string/minus_1"
                 android:textColor="#ffffff"
@@ -126,7 +131,7 @@
             android:id="@+id/plus_layout"
             android:layout_width="348sp"
             android:layout_height="69dp"
-            android:layout_marginTop="140dp"
+            android:layout_marginTop="168dp"
             android:layout_marginEnd="2sp"
             android:gravity="center|fill"
             android:orientation="horizontal"
@@ -187,7 +192,8 @@
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/minus_layout"
-            app:layout_constraintVertical_bias="0.026" />
+            app:layout_constraintVertical_bias="0.06"
+            app:playState="@{viewmodel.isPlaying()}" />
 
         <TextView
             android:id="@+id/bpm_textView2"
@@ -223,6 +229,8 @@
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/plus_layout" />
+
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

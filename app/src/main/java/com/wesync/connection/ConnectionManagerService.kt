@@ -21,6 +21,7 @@ import com.wesync.R
 import com.wesync.connection.callbacks.*
 import com.wesync.util.ForegroundServiceLauncher
 import com.wesync.util.ServiceUtil.Companion.SERVICE_ID
+import com.wesync.util.TestMode
 
 
 class ConnectionManagerService : LifecycleService() {
@@ -37,7 +38,7 @@ class ConnectionManagerService : LifecycleService() {
     private val strategy: Strategy = Strategy.P2P_STAR
     val payloadCallback = MyPayloadCallback()
     private val CHANNEL_ID = "wesync_notification_bar"
-    private lateinit var con: MyConnectionLifecycleCallback
+    lateinit var con: MyConnectionLifecycleCallback
     private var _advertising: Boolean = false
     private var _discovering: Boolean = false
 
@@ -93,32 +94,50 @@ class ConnectionManagerService : LifecycleService() {
 
 
     fun startAdvertising(sessionName: String?) {
-        val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
-        Nearby.getConnectionsClient(applicationContext)
-            .startAdvertising(sessionName!!
-                ,SERVICE_ID, con, advertisingOptions)
-            .addOnSuccessListener { Toast.makeText(this,"Accepting User...",Toast.LENGTH_SHORT).show()}
-            .addOnFailureListener { throw it }
+        if (TestMode.STATUS == TestMode.NEARBY_ON) {
+            val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
+            Nearby.getConnectionsClient(applicationContext)
+                .startAdvertising(
+                    sessionName!!
+                    , SERVICE_ID, con, advertisingOptions
+                )
+                .addOnSuccessListener {
+                    Toast.makeText(
+                        this,
+                        "Accepting User...",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                .addOnFailureListener { throw it }
+        }
     }
 
     fun stopAdvertising() {
-        Nearby.getConnectionsClient(applicationContext).stopAdvertising()
+        if (TestMode.STATUS == TestMode.NEARBY_ON) Nearby.getConnectionsClient(applicationContext).stopAdvertising()
     }
 
     fun startDiscovery() {
-        val discoveryOptions = DiscoveryOptions.Builder().setStrategy(strategy).build()
-        Nearby.getConnectionsClient(applicationContext)
-            .startDiscovery(SERVICE_ID, endpointCallback, discoveryOptions)
-            .addOnSuccessListener {Toast.makeText(this,"Finding nearby session...",Toast.LENGTH_SHORT).show()}
-            .addOnFailureListener { throw it }
+        if (TestMode.STATUS == TestMode.NEARBY_ON) {
+            val discoveryOptions = DiscoveryOptions.Builder().setStrategy(strategy).build()
+            Nearby.getConnectionsClient(applicationContext)
+                .startDiscovery(SERVICE_ID, endpointCallback, discoveryOptions)
+                .addOnSuccessListener {
+                    Toast.makeText(
+                        this,
+                        "Finding nearby session...",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                .addOnFailureListener { throw it }
+        }
     }
 
     fun stopDiscovering() {
-        Nearby.getConnectionsClient(applicationContext).stopDiscovery()
+        if (TestMode.STATUS == TestMode.NEARBY_ON) Nearby.getConnectionsClient(applicationContext).stopDiscovery()
     }
 
     fun sendPayload(s: String, p: Payload) {
-        Nearby.getConnectionsClient(applicationContext).sendPayload(s,p)
+        if (TestMode.STATUS == TestMode.NEARBY_ON) Nearby.getConnectionsClient(applicationContext).sendPayload(s,p)
     }
 
     private fun observePayloadAndEndpoints() {
@@ -136,15 +155,23 @@ class ConnectionManagerService : LifecycleService() {
         return mock
     }
 
-    fun connect(endpoint: Endpoint) { //placeholder
-        Nearby.getConnectionsClient(application).requestConnection("Slave", endpoint.endpointId, con)
-            .addOnSuccessListener {
-                Toast.makeText(applicationContext,"Connecting to ${endpoint.endpointId}",
-                    Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(applicationContext,"Failed to request connection to ${endpoint.endpointId}",
-                    Toast.LENGTH_SHORT).show()
-            }
+    fun connect(endpoint: Endpoint) {
+        if (TestMode.STATUS == TestMode.NEARBY_ON) {
+            Nearby.getConnectionsClient(application)
+                .requestConnection("Slave", endpoint.endpointId, con)
+                .addOnSuccessListener {
+                    Toast.makeText(
+                        applicationContext, "Connecting to ${endpoint.endpointId}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(
+                        applicationContext,
+                        "Failed to request connection to ${endpoint.endpointId}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+        }
     }
 }
