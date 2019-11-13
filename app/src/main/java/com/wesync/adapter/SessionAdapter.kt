@@ -3,17 +3,11 @@ package com.wesync.adapter
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.wesync.R
 import com.wesync.connection.Endpoint
 import com.wesync.databinding.CardViewBinding
-import com.wesync.ui.connection.ConnectionViewModel
 
 class SessionAdapter(private val clickListener: SessionClickListener):
     ListAdapter<Endpoint, SessionAdapter.CardViewHolder>(SessionDiffCallback()) {

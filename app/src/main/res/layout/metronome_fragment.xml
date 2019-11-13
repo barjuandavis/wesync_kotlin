@@ -5,11 +5,7 @@
     <data>
         <variable
             name="viewmodel"
-            type="com.wesync.ui.main.MetronomeViewModel"/>
-        <variable
-            name="sharedvm"
-            type="com.wesync.SharedViewModel"
-            />
+            type="com.wesync.SharedViewModel"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -33,8 +29,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.248"
-            app:userType="@{sharedvm.userType}"
-            app:sessionName="@{sharedvm.sessionName}"/>
+            app:userType="@{viewmodel.userType}"
+            app:sessionName="@{viewmodel.sessionName}"/>
         <Button
             android:id="@+id/new_session"
             android:layout_width="130sp"
@@ -51,8 +47,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
-            app:userType="@{sharedvm.userType}"
-            app:isAdvertising="@{sharedvm.isAdvertising()}"/>
+            app:userType="@{viewmodel.userType}"
+            app:isAdvertising="@{viewmodel.isAdvertising()}"/>
         <Button
             android:id="@+id/join_session"
             android:layout_width="130sp"
@@ -69,8 +65,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
-            app:userType="@{sharedvm.userType}"
-            app:isAdvertising="@{sharedvm.isAdvertising()}"/>
+            app:userType="@{viewmodel.userType}"
+            app:isAdvertising="@{viewmodel.isAdvertising()}"/>
 
         <LinearLayout
             android:id="@+id/minus_layout"
@@ -95,7 +91,7 @@
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="37dp"
                 tools:layout_editor_absoluteY="351dp"
-                app:joinedSession="@{sharedvm.userType}"/>
+                app:joinedSession="@{viewmodel.userType}"/>
 
             <Button
                 android:id="@+id/minus_10"
@@ -109,7 +105,7 @@
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="153dp"
                 tools:layout_editor_absoluteY="351dp"
-                app:joinedSession="@{sharedvm.userType}"/>
+                app:joinedSession="@{viewmodel.userType}"/>
 
             <Button
                 android:id="@+id/minus_1"
@@ -123,7 +119,7 @@
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="269dp"
                 tools:layout_editor_absoluteY="351dp"
-                app:joinedSession="@{sharedvm.userType}"/>
+                app:joinedSession="@{viewmodel.userType}"/>
         </LinearLayout>
 
         <LinearLayout
@@ -151,7 +147,7 @@
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="36dp"
                 tools:layout_editor_absoluteY="141dp"
-                app:joinedSession="@{sharedvm.userType}"/>
+                app:joinedSession="@{viewmodel.userType}"/>
 
             <Button
                 android:id="@+id/plus_10"
@@ -165,7 +161,7 @@
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="152dp"
                 tools:layout_editor_absoluteY="141dp"
-                app:joinedSession="@{sharedvm.userType}"/>
+                app:joinedSession="@{viewmodel.userType}"/>
 
             <Button
                 android:id="@+id/plus_1"
@@ -179,7 +175,7 @@
                 android:textColor="#ffffff"
                 tools:layout_editor_absoluteX="268dp"
                 tools:layout_editor_absoluteY="141dp"
-                app:joinedSession="@{sharedvm.userType}"/>
+                app:joinedSession="@{viewmodel.userType}"/>
         </LinearLayout>
 
         <Button
@@ -196,7 +192,7 @@
             app:layout_constraintTop_toBottomOf="@+id/minus_layout"
             app:layout_constraintVertical_bias="0.06"
             app:playState="@{viewmodel.isPlaying()}"
-            app:userType="@{sharedvm.userType}"/>
+            app:userType="@{viewmodel.userType}"/>
 
         <TextView
             android:id="@+id/bpm_textView2"

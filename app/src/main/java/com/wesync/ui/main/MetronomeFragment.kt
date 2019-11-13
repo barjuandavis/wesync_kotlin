@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.navigation.findNavController
 import com.wesync.metronome.MetronomeService
 import com.wesync.R
@@ -25,7 +26,6 @@ import com.wesync.util.UserTypes
 
 class MetronomeFragment : Fragment() {
 
-    private lateinit var viewModel          : MetronomeViewModel
     private lateinit var sharedViewModel    : SharedViewModel
     private lateinit var binding            : MetronomeFragmentBinding
     private lateinit var subscriber         : ServiceSubscriber
@@ -34,15 +34,15 @@ class MetronomeFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
        binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
-        viewModel = ViewModelProviders.of(this).get(MetronomeViewModel::class.java)
         binding.lifecycleOwner = this.viewLifecycleOwner
-       binding.viewmodel = viewModel
        return binding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
-            sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
-            binding.sharedvm = sharedViewModel
+            sharedViewModel = ViewModelProviders.of(it,
+                SavedStateViewModelFactory(it.application,it)
+            ).get(SharedViewModel::class.java)
+            binding.viewmodel = sharedViewModel
         }
     }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -52,7 +52,7 @@ class MetronomeFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         doUnbindService()
-        if (!viewModel.isPlaying.value!!) {
+        if (!sharedViewModel.isPlaying.value!!) {
             Log.d("shouldbestopped","should be stopped")
         }
     }
@@ -70,11 +70,10 @@ class MetronomeFragment : Fragment() {
         subscribeToViewModel()
     }
     private fun subscribeToViewModel() {
-        viewModel.bpm.observe(viewLifecycleOwner, Observer {
+        sharedViewModel.bpm.observe(viewLifecycleOwner, Observer {
             mService?.onBPMChanged(it)
-            sharedViewModel.config.value = it
         })
-        viewModel.isPlaying.observe( viewLifecycleOwner, Observer { mService?.onPlay()})
+        sharedViewModel.isPlaying.observe( viewLifecycleOwner, Observer { mService?.onPlay()})
         sharedViewModel.userType.observe(viewLifecycleOwner, Observer {
             @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
             when (it) {
@@ -93,6 +92,7 @@ class MetronomeFragment : Fragment() {
                 else mCService?.stopAdvertising()
             }
         })
+        
         binding.newSession.setOnClickListener(OnConnectionFragmentClickListener())
         binding.joinSession.setOnClickListener(OnConnectionFragmentClickListener())
     }
@@ -124,7 +124,7 @@ class MetronomeFragment : Fragment() {
             builder.setView(input)
             builder.setPositiveButton("OK") { dialog, i ->
                 sharedViewModel.onNewSession(input.text?.toString()) //TODO: PERHATIKANNNNN INIII
-                if (viewModel.isPlaying.value!!) viewModel.onPlayClicked()
+                if (sharedViewModel.isPlaying.value!!) sharedViewModel.onPlayClicked()
             }
             builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
             builder.show()
@@ -136,7 +136,7 @@ class MetronomeFragment : Fragment() {
             builder.setTitle(t)
             builder.setPositiveButton("OK") { _, _ ->
                 sharedViewModel.endSession() //TODO: PERHATIKANNNNN INIII
-                if (viewModel.isPlaying.value!!) viewModel.onPlayClicked()
+                if (sharedViewModel.isPlaying.value!!) sharedViewModel.onPlayClicked()
                 if (sharedViewModel.isAdvertising.value!!) sharedViewModel.toggleAdvertise()
             }
             builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }

@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 
@@ -31,7 +32,6 @@ import java.lang.NullPointerException
 class ConnectionFragment : Fragment() {
 
     private lateinit var sharedViewModel    : SharedViewModel
-    private lateinit var viewModel          : ConnectionViewModel
     private lateinit var binding            : ConnectionFragmentBinding
     private val userType                    = UserTypes.SLAVE
     private var mCService                   : ConnectionManagerService? = null
@@ -43,25 +43,25 @@ class ConnectionFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         doBindService()
-        val viewModelFactory = ConnectionViewModelFactory(mCService?.endpointCallback,mCService?.payloadCallback)
-        viewModel = ViewModelProviders.of(this,viewModelFactory)
-            .get(ConnectionViewModel::class.java)
         binding = DataBindingUtil.inflate(inflater,R.layout.connection_fragment,container,false)
-        binding.viewmodel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
-            sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
+            sharedViewModel = ViewModelProviders.of(it,
+                SavedStateViewModelFactory(it.application,it)
+            ).get(SharedViewModel::class.java)
+            binding.viewmodel = sharedViewModel
         }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        sessionAdapter = SessionAdapter(SessionClickListener {
+        sessionAdapter = SessionAdapter(
+            SessionClickListener {
             mCService?.connect(it)
 
         })
@@ -88,8 +88,9 @@ class ConnectionFragment : Fragment() {
         })
         mCService?.con?.connectedEndpointId?.observe(this, Observer {
 
-        })
 
+
+        })
     }
 
     private fun doBindService() {

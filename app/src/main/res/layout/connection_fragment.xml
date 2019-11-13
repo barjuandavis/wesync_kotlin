@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
-            type="com.wesync.ui.connection.ConnectionViewModel"
+            type="com.wesync.SharedViewModel"
             name="viewmodel"/>
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
