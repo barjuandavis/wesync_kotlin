@@ -1,4 +1,4 @@
-package com.wesync.ui.main
+package com.wesync.ui
 
 
 import android.app.AlertDialog
@@ -13,15 +13,13 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.lifecycle.SavedStateViewModelFactory
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.wesync.metronome.MetronomeService
 import com.wesync.R
 import com.wesync.SharedViewModel
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.MetronomeFragmentBinding
-import com.wesync.util.Config
+import com.wesync.ui.MetronomeFragmentDirections
 import com.wesync.util.ConnectionCodes
 import com.wesync.util.ServiceSubscriber
 import com.wesync.util.UserTypes
@@ -108,7 +106,6 @@ class MetronomeFragment : Fragment() {
 
     inner class OnConnectionFragmentClickListener: View.OnClickListener {
         override fun onClick(v: View) {
-            val args: Int
             when (v.id) {
                 R.id.new_session -> {
                      onNewSessionButtonClicked()
@@ -132,7 +129,7 @@ class MetronomeFragment : Fragment() {
             val input = EditText(context)
             input.inputType = InputType.TYPE_CLASS_TEXT
             builder.setView(input)
-            builder.setPositiveButton("OK") { dialog, i ->
+            builder.setPositiveButton("OK") { _, _ ->
                 sharedViewModel.onNewSession(input.text?.toString()) //TODO: PERHATIKANNNNN INIII
                 if (sharedViewModel.isPlaying.value!!) sharedViewModel.onPlayClicked()
             }
@@ -156,8 +153,8 @@ class MetronomeFragment : Fragment() {
     private fun onJoinSessionButtonClicked(v: View?) {
         if (sharedViewModel.userType.value == UserTypes.SOLO) {
             val args: Int = ConnectionCodes.JOIN_SESSION.v
-            val action = MetronomeFragmentDirections.
-                actionMetronomeFragmentToConnectionFragment()
+            val action =
+                MetronomeFragmentDirections.actionMetronomeFragmentToConnectionFragment()
             action.connectionType = args
             v!!.findNavController().navigate(action)
         }

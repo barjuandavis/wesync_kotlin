@@ -117,14 +117,14 @@ class ConnectionManagerService : LifecycleService() {
         //_endpoints.value = mockListFORTESTINGPURPOSES()
     }
 
-    private fun mockListFORTESTINGPURPOSES(): MutableList<Endpoint> {
+    /*private fun mockListFORTESTINGPURPOSES(): MutableList<Endpoint> {
         val mock = mutableListOf<Endpoint>()
         mock.add(Endpoint("test1",DiscoveredEndpointInfo("test1","test1")))
         mock.add(Endpoint("test2",DiscoveredEndpointInfo("test2","test2")))
         mock.add(Endpoint("test3",DiscoveredEndpointInfo("test3","test3")))
         mock.add(Endpoint("test4",DiscoveredEndpointInfo("test4","test4")))
         return mock
-    }
+    }*/
 
     fun connect(endpoint: Endpoint) {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {

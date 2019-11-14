@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/metronomeFragment"
-        android:name="com.wesync.ui.main.MetronomeFragment"
+        android:name="com.wesync.ui.MetronomeFragment"
         android:label="MetronomeFragment"
         tools:layout="@layout/metronome_fragment">
         <action
@@ -24,7 +24,7 @@
     </fragment>
     <fragment
         android:id="@+id/connectionFragment"
-        android:name="com.wesync.ui.connection.ConnectionFragment"
+        android:name="com.wesync.ui.ConnectionFragment"
         android:label="ConnectionFragment"
         tools:layout="@layout/connection_fragment">
         <argument
