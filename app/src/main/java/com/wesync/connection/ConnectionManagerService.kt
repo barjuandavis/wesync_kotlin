@@ -1,13 +1,12 @@
 package com.wesync.connection
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.view.View
 import com.google.android.gms.nearby.Nearby
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -38,6 +37,7 @@ class ConnectionManagerService : LifecycleService() {
     private val strategy: Strategy = Strategy.P2P_STAR
     val payloadCallback = MyPayloadCallback()
     private val CHANNEL_ID = "wesync_notification_bar"
+    private lateinit var notification: Notification
     lateinit var con: MyConnectionLifecycleCallback
     private var _advertising: Boolean = false
     private var _discovering: Boolean = false
@@ -58,38 +58,23 @@ class ConnectionManagerService : LifecycleService() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         createNotificationChannel()
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0, notificationIntent, 0
-        )
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Wesync Metronome Connection")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentIntent(pendingIntent).setPriority(PRIORITY_MIN)
-            .build()
         startForeground(2, notification)
         LAUNCHER.onServiceCreated(this)
-        return super.onStartCommand(intent, flags, startId)
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceChannel = NotificationChannel(
-                CHANNEL_ID,
-                "Wesync Notification Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            val manager: NotificationManager? = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(serviceChannel)
-        }
+        super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     override fun onBind(intent: Intent): IBinder {
         con = MyConnectionLifecycleCallback(applicationContext,payloadCallback)
         observePayloadAndEndpoints()
         super.onBind(intent)
-        return _binder
+        return this._binder
+    }
+
+    override fun onDestroy() {
+        //TODO: if user is SOLO
+        stopSelf()
+        super.onDestroy()
     }
 
 
@@ -97,23 +82,15 @@ class ConnectionManagerService : LifecycleService() {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
             Nearby.getConnectionsClient(applicationContext)
-                .startAdvertising(
-                    sessionName!!
-                    , SERVICE_ID, con, advertisingOptions
-                )
-                .addOnSuccessListener {
-                    Toast.makeText(
-                        this,
-                        "Accepting User...",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                .startAdvertising(sessionName!!,SERVICE_ID, con, advertisingOptions)
+                .addOnSuccessListener { Toast.makeText(this, "Accepting User...",Toast.LENGTH_SHORT).show() }
                 .addOnFailureListener { throw it }
         }
     }
 
     fun stopAdvertising() {
-        if (TestMode.STATUS == TestMode.NEARBY_ON) Nearby.getConnectionsClient(applicationContext).stopAdvertising()
+        if (TestMode.STATUS == TestMode.NEARBY_ON)
+            Nearby.getConnectionsClient(applicationContext).stopAdvertising()
     }
 
     fun startDiscovery() {
@@ -121,13 +98,7 @@ class ConnectionManagerService : LifecycleService() {
             val discoveryOptions = DiscoveryOptions.Builder().setStrategy(strategy).build()
             Nearby.getConnectionsClient(applicationContext)
                 .startDiscovery(SERVICE_ID, endpointCallback, discoveryOptions)
-                .addOnSuccessListener {
-                    Toast.makeText(
-                        this,
-                        "Finding nearby session...",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                .addOnSuccessListener { Toast.makeText(this, "Finding nearby session...", Toast.LENGTH_SHORT).show()}
                 .addOnFailureListener { throw it }
         }
     }
@@ -159,19 +130,32 @@ class ConnectionManagerService : LifecycleService() {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             Nearby.getConnectionsClient(application)
                 .requestConnection("Slave", endpoint.endpointId, con)
-                .addOnSuccessListener {
-                    Toast.makeText(
-                        applicationContext, "Connecting to ${endpoint.endpointId}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                .addOnFailureListener {
-                    Toast.makeText(
-                        applicationContext,
-                        "Failed to request connection to ${endpoint.endpointId}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                .addOnSuccessListener { Toast.makeText(applicationContext,
+                    "Connecting to ${endpoint.endpointId}", Toast.LENGTH_SHORT).show() }
+                .addOnFailureListener { Toast.makeText(applicationContext,
+                        "Failed to request connection to ${endpoint.endpointId}",Toast.LENGTH_SHORT).show() }
         }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceChannel = NotificationChannel(
+                CHANNEL_ID,
+                "Wesync Notification Channel",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            val manager: NotificationManager? = getSystemService(NotificationManager::class.java)
+            manager?.createNotificationChannel(serviceChannel)
+        }
+        val notificationIntent = Intent(applicationContext, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            applicationContext,
+            0, notificationIntent, 0
+        )
+        notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Wesync Metronome Connection")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentIntent(pendingIntent).setPriority(PRIORITY_MIN)
+            .build()
     }
 }

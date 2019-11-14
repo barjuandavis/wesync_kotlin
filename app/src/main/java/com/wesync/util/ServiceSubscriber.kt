@@ -34,7 +34,7 @@ class ServiceSubscriber(private val context: Context?, private val activity: Fra
 
     private val _metronomeConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            //Log.d("konek","Binding mService connected!")
+            Log.d("konek","Binding mService connected!")
             val s = (binder as MetronomeService.LocalBinder).getService()
             metronomeService = s
             _metronomeConnected.value = true
@@ -47,7 +47,7 @@ class ServiceSubscriber(private val context: Context?, private val activity: Fra
     }
     private val _connServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            Log.d("konek","Binding mConnService connected!")
+            Log.d("konek","Binding mCService connected!")
             val s = (binder as ConnectionManagerService.LocalBinder).getService()
             connectionService = s
             _connServiceConnected.value = true
@@ -73,8 +73,9 @@ class ServiceSubscriber(private val context: Context?, private val activity: Fra
         }
     }
 
+
     fun unsubscribe() {
-        activity!!.unbindService(_connServiceConnection)
-        activity.unbindService(_metronomeConnection)
+        activity?.unbindService(_metronomeConnection)
+        activity?.unbindService(_connServiceConnection)
     }
 }

@@ -14,12 +14,14 @@ import android.widget.EditText
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.SavedStateViewModelFactory
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.wesync.metronome.MetronomeService
 import com.wesync.R
 import com.wesync.SharedViewModel
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.MetronomeFragmentBinding
+import com.wesync.util.Config
 import com.wesync.util.ConnectionCodes
 import com.wesync.util.ServiceSubscriber
 import com.wesync.util.UserTypes
@@ -38,23 +40,29 @@ class MetronomeFragment : Fragment() {
        return binding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        activity?.let {
-            sharedViewModel = ViewModelProviders.of(it,
-                SavedStateViewModelFactory(it.application,it)
-            ).get(SharedViewModel::class.java)
+
+        activity?.let{
+            sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
             binding.viewmodel = sharedViewModel
+            sharedViewModel.unpackBundle(savedInstanceState)
+            printLog()
         }
-    }
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
         doBindService()
     }
+
+    private fun printLog() {
+        Log.d("states","bpm::${sharedViewModel.bpm.value}")
+        Log.d("states","isPlaying:${sharedViewModel.isPlaying.value}")
+        Log.d("states","session: ${sharedViewModel.session.value}")
+        Log.d("states","userType: ${sharedViewModel.userType.value}")
+    }
+
+
+
+
     override fun onDestroy() {
-        super.onDestroy()
         doUnbindService()
-        if (!sharedViewModel.isPlaying.value!!) {
-            Log.d("shouldbestopped","should be stopped")
-        }
+        super.onDestroy()
     }
     private fun doBindService() {
         try {
@@ -97,6 +105,7 @@ class MetronomeFragment : Fragment() {
         binding.joinSession.setOnClickListener(OnConnectionFragmentClickListener())
     }
 
+
     inner class OnConnectionFragmentClickListener: View.OnClickListener {
         override fun onClick(v: View) {
             val args: Int
@@ -110,6 +119,7 @@ class MetronomeFragment : Fragment() {
             }
         }
     }
+
 
     private fun doUnbindService() {
        subscriber.unsubscribe()

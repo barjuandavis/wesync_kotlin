@@ -1,25 +1,32 @@
 package com.wesync
 
+import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.wesync.util.Config
 import com.wesync.util.Tempo
 import com.wesync.util.UserTypes
+import java.lang.NullPointerException
 
-class SharedViewModel(private val state: SavedStateHandle): ViewModel() {
 
+class SharedViewModel: ViewModel() {
     companion object {
-        private const val SESSION_KEY = "currentSession"
-        private const val USER_TYPE_KEY = "currentUserType"
-        private const val BPM_KEY = "currentBPM"
-        private const val IS_PLAYING_KEY = "currentIsPlaying"
+        const val SESSION_KEY = "currentSession"
+        const val USER_TYPE_KEY = "currentUserType"
+        const val BPM_KEY = "currentBPM"
+        const val IS_PLAYING_KEY = "currentIsPlaying"
     }
-
-        val bpm         :LiveData<Long>                           = getBPM()
-        val isPlaying   :LiveData<Boolean>                        = getIsPlaying()
-        val session     :LiveData<String>                         = getSession()
-        val userType    : LiveData<UserTypes>                     = getUserType()
+    private val _bpm                                   = MutableLiveData<Long>()
+        val bpm         :LiveData<Long>                    = _bpm
+    private val _isPlaying                             = MutableLiveData<Boolean>()
+        val isPlaying   :LiveData<Boolean>                 = _isPlaying
+    private val _session                               = MutableLiveData<String>()
+        val session     :LiveData<String>                  = _session
+    private val _userType                              = MutableLiveData<String>()
+    val userType    :LiveData<String>                      = _userType
 
     private val _isAdvertising           = MutableLiveData<Boolean>(false)
         val isAdvertising: LiveData<Boolean> = _isAdvertising
@@ -27,58 +34,95 @@ class SharedViewModel(private val state: SavedStateHandle): ViewModel() {
     private val _isDiscovering           = MutableLiveData<Boolean>(false)
         val isDiscovering: LiveData<Boolean> = _isAdvertising
 
+    private fun Long.setBPM() {
+        //state.set(BPM_KEY, this)
+        _bpm.value = this
+    }
+    private fun flipIsPlaying() {
+        //state.set(IS_PLAYING_KEY, !isPlaying.value!!)
+        _isPlaying.value = !_isPlaying.value!!
+    }
 
-    //state getters
-        private fun getBPM()        :LiveData<Long> = state.getLiveData(BPM_KEY,Tempo.DEFAULT_BPM)
-        private fun Long.setBPM() { state.set(BPM_KEY, this) }
+    private fun setIsPlaying(b: Boolean) {
+        _isPlaying.value = b
+    }
 
-        private fun getIsPlaying():LiveData<Boolean> = state.getLiveData(IS_PLAYING_KEY,false)
-        private fun flipIsPlaying() { state.set(IS_PLAYING_KEY, !getIsPlaying().value!!) }
-
-        private fun getSession(): MutableLiveData<String> = state.getLiveData(SESSION_KEY,"MusicDirector")
-        private fun setSession(sessionName: String?) {
+    private fun setSession(sessionName: String?) {
             if (sessionName != null && sessionName.isNotEmpty()) {
-                state.set(SESSION_KEY,sessionName)
+                //state.set(SESSION_KEY,sessionName)
+                _session.value = sessionName
             }
         }
+    private fun setUserType(userTypes: String?) {
+        //state.set(USER_TYPE_KEY,userTypes)
+        if (userTypes!= null) _userType.value = userTypes
+        else _userType.value = UserTypes.SOLO
+    }
 
-        private fun getUserType(): MutableLiveData<UserTypes> = state.getLiveData(USER_TYPE_KEY,UserTypes.SOLO)
-        private fun setUserType(userTypes: UserTypes) { state.set(USER_TYPE_KEY,userTypes) }
 
+    fun onJoinSession() {setUserType(UserTypes.SLAVE)}
+    fun endSession() {setUserType(UserTypes.SOLO) }
+    fun onNewSession(sessionName: String?) {
+        setSession(sessionName)
+        setUserType(UserTypes.SESSION_HOST)
+    }
 
-        fun onJoinSession() {
-            setUserType(UserTypes.SLAVE)
+    fun toggleAdvertise() {
+        val p = _isAdvertising.value
+        _isAdvertising.value = !p!!
+    }
+
+    fun onPlayClicked() {
+        flipIsPlaying()
+    }
+
+    fun modifyBPM(plus:Long) {
+        val r = bpm.value!!
+        when {
+            r+plus < Tempo.MINIMUM_BPM -> Tempo.MINIMUM_BPM.setBPM()
+            r+plus > Tempo.MAXIMUM_BPM -> Tempo.MAXIMUM_BPM.setBPM()
+            else -> (r + plus).setBPM()
         }
+    }
 
-        fun endSession() {
-            setUserType(UserTypes.SOLO)
-        }
+    fun getConfig(): Config {
+        return Config(
+            bpm.value!!,
+            isPlaying.value!!,
+            session.value!!,
+            userType.value!!
+        )
+    }
 
-        fun onNewSession(sessionName: String?) {
-            setSession(sessionName)
-            setUserType(UserTypes.SESSION_HOST)
+    fun unpackBundle(b: Bundle?) {
+        if (b != null) {
+            b.getLong(BPM_KEY).setBPM()
+            setIsPlaying(b.getBoolean(IS_PLAYING_KEY))
+            setSession(b.getString(SESSION_KEY))
+            setUserType(b.getString(USER_TYPE_KEY))
+        } else {
+            Log.d("states","Bundle was null. resetting.")
+            reset()
         }
+    }
 
-        fun toggleAdvertise() {
-            val p = _isAdvertising.value
-            _isAdvertising.value = !p!!
-        }
+    private fun reset(){
+        Tempo.DEFAULT_BPM.setBPM()
+        setIsPlaying(false)
+        setSession("MusicDirector")
+        setUserType(UserTypes.SOLO)
+    }
 
-        fun onPlayClicked() {
-            flipIsPlaying()
-        }
-
-        fun modifyBPM(plus:Long) {
-            val r = bpm.value!!
-            when {
-                r+plus < Tempo.MINIMUM_BPM -> Tempo.MINIMUM_BPM.setBPM()
-                r+plus > Tempo.MAXIMUM_BPM -> Tempo.MAXIMUM_BPM.setBPM()
-                else -> (r + plus).setBPM()
-            }
-        }
 
     fun getSessionName(): String? {
         return session.value
+    }
+
+    private fun printValues() {
+        Log.d("states","bpm::${bpm.value}")
+        Log.d("states","isPlaying:${isPlaying.value}")
+        Log.d("states","session: ${session.value}")
+        Log.d("states","userType: ${userType.value}")
     }
 
 }

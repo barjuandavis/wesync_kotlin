@@ -10,7 +10,7 @@ import com.wesync.R
 
 
 @BindingAdapter("userType","playState")
-fun Button.setPlayState(userType: LiveData<UserTypes>, isPlaying: LiveData<Boolean>) {
+fun Button.setPlayState(userType: LiveData<String>, isPlaying: LiveData<Boolean>) {
     when (userType.value!!){
         UserTypes.SLAVE -> {
             setBackgroundColor(ContextCompat.getColor(context,
@@ -36,7 +36,7 @@ fun Button.setPlayState(userType: LiveData<UserTypes>, isPlaying: LiveData<Boole
 }
 
 @BindingAdapter("userType","isAdvertising")
-fun Button.setSessionState(item: LiveData<UserTypes>,
+fun Button.setSessionState(item: LiveData<String>,
                            isAdvertising: LiveData<Boolean>) {
     when (item.value) {
         UserTypes.SOLO -> {
@@ -97,7 +97,7 @@ fun Button.setSessionState(item: LiveData<UserTypes>,
 }
 
 @BindingAdapter("userType","sessionName")
-fun TextView.setSessionState(userType: LiveData<UserTypes>, sessionName: String?) {
+fun TextView.setSessionState(userType: LiveData<String>, sessionName: String?) {
     when (userType.value) {
        UserTypes.SOLO -> {
            text = resources.getString(R.string.not_connected)
@@ -112,7 +112,7 @@ fun TextView.setSessionState(userType: LiveData<UserTypes>, sessionName: String?
 }
 
 @BindingAdapter("joinedSession")
-fun Button.setButtonEnabled(userType: LiveData<UserTypes>) {
+fun Button.setButtonEnabled(userType: LiveData<String>) {
     isEnabled = (userType.value!! != UserTypes.SLAVE)
     if (!isEnabled) {
         setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisabledButton))
