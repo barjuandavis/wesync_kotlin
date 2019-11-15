@@ -34,16 +34,11 @@ class ConnectionManagerService : LifecycleService() {
         fun stop(context: Context) = LAUNCHER.stopService(context)
     }
 
-    private val _binder = LocalBinder()
-    private val strategy: Strategy = Strategy.P2P_STAR
-    val payloadCallback = MyPayloadCallback()
-    private val CHANNEL_ID = "wesync_notification_bar"
-    private lateinit var notification: Notification
-    lateinit var con: MyConnectionLifecycleCallback
-    private var _advertising: Boolean = false
-    private var _discovering: Boolean = false
-
-    val endpointCallback = MyEndpointCallback()
+    private val _binder                         = LocalBinder()
+    private val strategy: Strategy              = Strategy.P2P_STAR
+    private val payloadCallback                 = MyPayloadCallback()
+    private val endpointCallback                = MyEndpointCallback()
+    lateinit var connectionCallback             : MyConnectionLifecycleCallback
 
     private val _endpoints = MutableLiveData<MutableList<Endpoint>>() //TODO: observed by ConnectionFragment
         val endpoints = _endpoints
@@ -67,7 +62,8 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     override fun onBind(intent: Intent): IBinder {
-        con = MyConnectionLifecycleCallback(applicationContext,payloadCallback)
+        connectionCallback = MyConnectionLifecycleCallback(
+            applicationContext,payloadCallback)
         observePayloadAndEndpoints()
         super.onBind(intent)
         return this._binder
@@ -84,7 +80,7 @@ class ConnectionManagerService : LifecycleService() {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
             Nearby.getConnectionsClient(applicationContext)
-                .startAdvertising(sessionName!!,SERVICE_ID, con, advertisingOptions)
+                .startAdvertising(sessionName!!,SERVICE_ID, connectionCallback, advertisingOptions)
                 .addOnSuccessListener { Toast.makeText(this, "Accepting User...",Toast.LENGTH_SHORT).show() }
                 .addOnFailureListener { throw it }
         }
@@ -128,10 +124,10 @@ class ConnectionManagerService : LifecycleService() {
         return mock
     }*/
 
-    fun connect(endpoint: Endpoint) {
+    fun connect(endpoint: Endpoint, name: String) {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             Nearby.getConnectionsClient(application)
-                .requestConnection("Slave", endpoint.endpointId, con)
+                .requestConnection(name, endpoint.endpointId, connectionCallback)
                 .addOnSuccessListener { Toast.makeText(applicationContext,
                     "Connecting to ${endpoint.endpointId}", Toast.LENGTH_SHORT).show() }
                 .addOnFailureListener { Toast.makeText(applicationContext,
@@ -139,7 +135,4 @@ class ConnectionManagerService : LifecycleService() {
         }
     }
 
-    private fun createNotificationChannel() {
-
-    }
 }

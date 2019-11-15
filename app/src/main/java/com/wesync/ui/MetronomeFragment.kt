@@ -115,7 +115,7 @@ class MetronomeFragment : Fragment(), LifecycleObserver{
         if (sharedViewModel.userType.value == UserTypes.SOLO) {
             builder.setTitle("What is your Name?")
             val input = EditText(context)
-            input.inputType = InputType.TYPE_CLASS_TEXT
+                input.inputType = InputType.TYPE_CLASS_TEXT
             builder.setView(input)
             builder.setPositiveButton("OK") { _, _ ->
                 sharedViewModel.onNewSession(input.text?.toString()) //TODO: PERHATIKANNNNN INIII
@@ -137,16 +137,17 @@ class MetronomeFragment : Fragment(), LifecycleObserver{
             builder.show()
         }
     }
+    ///////////////////////////////////////////////////////////
+
     private fun onJoinSessionButtonClicked(v: View?) {
         if (sharedViewModel.userType.value == UserTypes.SOLO) {
-            val args: Int = ConnectionCodes.JOIN_SESSION.v
-            val action =
-                MetronomeFragmentDirections.actionMetronomeFragmentToConnectionFragment()
-            action.connectionType = args
-            v!!.findNavController().navigate(action)
+            v!!.findNavController().navigate(
+                MetronomeFragmentDirections
+                    .actionMetronomeFragmentToConnectionFragment())
         }
         else if (sharedViewModel.userType.value == UserTypes.SESSION_HOST) {
             sharedViewModel.toggleAdvertise()
         }
     }
 }
+///////////////////////////////////////////////////////

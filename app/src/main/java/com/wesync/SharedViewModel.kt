@@ -4,13 +4,10 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.wesync.util.Config
 import com.wesync.util.Tempo
 import com.wesync.util.UserTypes
-import java.lang.NullPointerException
-
 
 class SharedViewModel: ViewModel() {
     companion object {
@@ -61,7 +58,9 @@ class SharedViewModel: ViewModel() {
     }
 
 
-    fun onJoinSession() {setUserType(UserTypes.SLAVE)}
+    fun onJoinSession(sessionName: String?) {
+        setUserType(UserTypes.SLAVE)
+    }
     fun endSession() {setUserType(UserTypes.SOLO) }
     fun onNewSession(sessionName: String?) {
         setSession(sessionName)
@@ -115,8 +114,8 @@ class SharedViewModel: ViewModel() {
     }
 
 
-    fun getSessionName(): String? {
-        return session.value
+    fun getSessionName(): String {
+        return session.value!!
     }
 
     fun printValues() {
