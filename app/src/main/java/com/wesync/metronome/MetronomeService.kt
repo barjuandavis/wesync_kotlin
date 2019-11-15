@@ -4,18 +4,20 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.*
-import com.wesync.util.ForegroundServiceLauncher
+import com.wesync.util.service.ForegroundServiceLauncher
 import com.wesync.util.MetronomeCodes
 import com.wesync.MainActivity
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import com.wesync.R
+import com.wesync.util.service.ForegroundNotification
 
 
 class MetronomeService: LifecycleService() {
 
     companion object {
-        private val LAUNCHER = ForegroundServiceLauncher(MetronomeService::class.java)
+        private val LAUNCHER =
+            ForegroundServiceLauncher(MetronomeService::class.java)
         @JvmStatic
         fun start(context: Context) = LAUNCHER.startService(context)
         @JvmStatic
@@ -26,7 +28,7 @@ class MetronomeService: LifecycleService() {
     private val CHANNEL_ID                              = "wesync_notification_bar"
     private lateinit var notification  : Notification
     private lateinit var handlerThread : TickHandlerThread
-    private var bpm                    :Long = 120
+    private var bpm                    :Long            = 120
     private var isPlaying                               = false
 
     inner class LocalBinder : Binder() {
@@ -36,8 +38,8 @@ class MetronomeService: LifecycleService() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        createNotificationChannel()
-        startForeground(1, notification)
+        startForeground(ForegroundNotification.NOTIFICATION_ID,
+            ForegroundNotification.getNotification(this))
         LAUNCHER.onServiceCreated(this)
         super.onStartCommand(intent, flags, startId)
         return START_STICKY
@@ -57,12 +59,8 @@ class MetronomeService: LifecycleService() {
 
     fun onPlay(){
         isPlaying = !isPlaying
-        if (isPlaying) {
-            handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME)
-        }
-        else {
-            handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME)
-        }
+        if (isPlaying) { handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME) }
+        else { handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME) }
      }
 
      fun onBPMChanged(bpm: Long) {
@@ -73,7 +71,6 @@ class MetronomeService: LifecycleService() {
             handlerThread.getHandler().sendMessage(m)
             this.bpm = bpm
         }
-
     }
 
     private fun cleanup() {
@@ -81,26 +78,5 @@ class MetronomeService: LifecycleService() {
         stopSelf()
     }
 
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceChannel = NotificationChannel(
-                CHANNEL_ID,
-                "Wesync Notification Channel",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val manager: NotificationManager? = getSystemService(NotificationManager::class.java)
-                manager?.createNotificationChannel(serviceChannel)
-        }
-        val notificationIntent = Intent(applicationContext, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            applicationContext,
-            0, notificationIntent, 0
-        )
-        notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Wesync Metronome Notification")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentIntent(pendingIntent)
-            .build()
-    }
 
 }

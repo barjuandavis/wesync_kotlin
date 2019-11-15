@@ -1,6 +1,5 @@
-package com.wesync.util
+package com.wesync.util.service
 
-import android.app.NotificationChannel
 import android.app.Service
 import android.content.Context
 import android.content.Intent

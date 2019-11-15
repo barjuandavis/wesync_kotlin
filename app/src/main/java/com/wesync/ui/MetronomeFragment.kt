@@ -13,18 +13,18 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.lifecycle.*
 import androidx.navigation.findNavController
 import com.wesync.metronome.MetronomeService
 import com.wesync.R
 import com.wesync.SharedViewModel
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.MetronomeFragmentBinding
-import com.wesync.ui.MetronomeFragmentDirections
 import com.wesync.util.ConnectionCodes
-import com.wesync.util.ServiceSubscriber
+import com.wesync.util.service.ServiceSubscriber
 import com.wesync.util.UserTypes
 
-class MetronomeFragment : Fragment() {
+class MetronomeFragment : Fragment(), LifecycleObserver{
 
     private lateinit var sharedViewModel    : SharedViewModel
     private lateinit var binding            : MetronomeFragmentBinding
@@ -34,47 +34,39 @@ class MetronomeFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
        binding = DataBindingUtil.inflate(inflater,R.layout.metronome_fragment,container,false)
-        binding.lifecycleOwner = this.viewLifecycleOwner
+
        return binding.root
     }
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let{
             sharedViewModel = ViewModelProviders.of(it).get(SharedViewModel::class.java)
             binding.viewmodel = sharedViewModel
+            binding.lifecycleOwner = it
             sharedViewModel.unpackBundle(savedInstanceState)
-            printLog()
+                it.lifecycle.addObserver(this)
+            subscribeToViewModel()
         }
-        doBindService()
     }
 
-    private fun printLog() {
-        Log.d("states","bpm::${sharedViewModel.bpm.value}")
-        Log.d("states","isPlaying:${sharedViewModel.isPlaying.value}")
-        Log.d("states","session: ${sharedViewModel.session.value}")
-        Log.d("states","userType: ${sharedViewModel.userType.value}")
-    }
-
-
-
-
-    override fun onDestroy() {
-        doUnbindService()
-        super.onDestroy()
-    }
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
     private fun doBindService() {
+        //Log.d("doBindService","Binding!")
         try {
             subscriber = ServiceSubscriber(activity!!.applicationContext, activity)
-            subscriber.connServiceConnected.observe(this, Observer {
-                if (it) mCService = subscriber.connectionService!!
-            })
-            subscriber.metronomeConnected.observe(this, Observer {
-                if (it) mService = subscriber.metronomeService!!
-            })
+            subscriber.connServiceConnected.observe(this, Observer { if (it) mCService = subscriber.connectionService!! })
+            subscriber.metronomeConnected.observe(this, Observer { if (it) mService = subscriber.metronomeService!! })
             subscriber.subscribe()
         } catch (e: Exception) {}
-        subscribeToViewModel()
     }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    private fun doUnbindService() {
+        //Log.d("doBindService","UnBinding!")
+        subscriber.unsubscribe()
+    }
+
     private fun subscribeToViewModel() {
         sharedViewModel.bpm.observe(viewLifecycleOwner, Observer {
             mService?.onBPMChanged(it)
@@ -118,10 +110,6 @@ class MetronomeFragment : Fragment() {
     }
 
 
-    private fun doUnbindService() {
-       subscriber.unsubscribe()
-    }
-
     private fun onNewSessionButtonClicked() {
         val builder = AlertDialog.Builder(context)
         if (sharedViewModel.userType.value == UserTypes.SOLO) {
@@ -143,7 +131,6 @@ class MetronomeFragment : Fragment() {
             builder.setTitle(t)
             builder.setPositiveButton("OK") { _, _ ->
                 sharedViewModel.endSession() //TODO: PERHATIKANNNNN INIII
-                if (sharedViewModel.isPlaying.value!!) sharedViewModel.onPlayClicked()
                 if (sharedViewModel.isAdvertising.value!!) sharedViewModel.toggleAdvertise()
             }
             builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }

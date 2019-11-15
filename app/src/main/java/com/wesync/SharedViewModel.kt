@@ -28,6 +28,7 @@ class SharedViewModel: ViewModel() {
     private val _userType                              = MutableLiveData<String>()
     val userType    :LiveData<String>                      = _userType
 
+
     private val _isAdvertising           = MutableLiveData<Boolean>(false)
         val isAdvertising: LiveData<Boolean> = _isAdvertising
 
@@ -118,7 +119,7 @@ class SharedViewModel: ViewModel() {
         return session.value
     }
 
-    private fun printValues() {
+    fun printValues() {
         Log.d("states","bpm::${bpm.value}")
         Log.d("states","isPlaying:${isPlaying.value}")
         Log.d("states","session: ${session.value}")

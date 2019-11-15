@@ -23,8 +23,7 @@ import com.wesync.adapter.SessionClickListener
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.ConnectionFragmentBinding
 import com.wesync.metronome.MetronomeService
-import com.wesync.ui.ConnectionFragmentArgs
-import com.wesync.util.ServiceSubscriber
+import com.wesync.util.service.ServiceSubscriber
 import com.wesync.util.UserTypes
 import java.lang.NullPointerException
 
@@ -95,7 +94,8 @@ class ConnectionFragment : Fragment() {
 
     private fun doBindService() {
         try {
-            subscriber = ServiceSubscriber(activity!!.applicationContext, activity)
+            subscriber =
+                ServiceSubscriber(activity!!.applicationContext, activity)
             subscriber.connServiceConnected.observe(this, Observer {
                 if (it) mCService = subscriber.connectionService
                 subscribeToViewModel()

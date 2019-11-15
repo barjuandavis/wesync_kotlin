@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import android.view.View
 import com.google.android.gms.nearby.Nearby
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -18,15 +17,17 @@ import com.google.android.gms.nearby.connection.*
 import com.wesync.MainActivity
 import com.wesync.R
 import com.wesync.connection.callbacks.*
-import com.wesync.util.ForegroundServiceLauncher
+import com.wesync.util.service.ForegroundServiceLauncher
 import com.wesync.util.ServiceUtil.Companion.SERVICE_ID
 import com.wesync.util.TestMode
+import com.wesync.util.service.ForegroundNotification
 
 
 class ConnectionManagerService : LifecycleService() {
 
     companion object {
-        private val LAUNCHER = ForegroundServiceLauncher(ConnectionManagerService::class.java)
+        private val LAUNCHER =
+            ForegroundServiceLauncher(ConnectionManagerService::class.java)
         @JvmStatic
         fun start(context: Context) = LAUNCHER.startService(context)
         @JvmStatic
@@ -57,8 +58,9 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        createNotificationChannel()
-        startForeground(2, notification)
+        startForeground(
+            ForegroundNotification.NOTIFICATION_ID,
+            ForegroundNotification.getNotification(this))
         LAUNCHER.onServiceCreated(this)
         super.onStartCommand(intent, flags, startId)
         return START_STICKY
@@ -138,24 +140,6 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceChannel = NotificationChannel(
-                CHANNEL_ID,
-                "Wesync Notification Channel",
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val manager: NotificationManager? = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(serviceChannel)
-        }
-        val notificationIntent = Intent(applicationContext, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            applicationContext,
-            0, notificationIntent, 0
-        )
-        notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Wesync Metronome Connection")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentIntent(pendingIntent).setPriority(PRIORITY_MIN)
-            .build()
+
     }
 }

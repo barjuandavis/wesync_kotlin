@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">WeSync</string>
+    <string name="app_name" translatable="false">Wesync</string>
     <string name="stop_button" translatable="false">Stop</string>
     <string name="plus_50" translatable="false">+50</string>
     <string name="plus_10" translatable="false">+10</string>
@@ -18,5 +18,7 @@
     <string name="current_joined_session">"You have joined %1$s's Session.\nYou have to follow your Session Leader's instruction."</string>
     <string name="advertising">STOP\naccepting user</string>
     <string name="not_advertising">START\naccepting user</string>
+    <string name="notification_manager">Wesync Notification Manager</string>
+    <string name="notification_main">Wesync: Synchronized Metronome</string>
     <string name="not_connected">You are playing by yourself.\nCreate a new Session or join an existing Session around you.</string>
 </resources>
