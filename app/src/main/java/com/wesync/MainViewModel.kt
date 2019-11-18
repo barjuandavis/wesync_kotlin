@@ -1,54 +1,72 @@
 package com.wesync
 
+import android.app.Application
 import android.os.Bundle
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import com.google.android.gms.nearby.connection.Payload
 import com.wesync.util.Config
+import com.wesync.util.ConnectionStatus
 import com.wesync.util.Tempo
 import com.wesync.util.UserTypes
+import com.wesync.util.service.ServiceSubscriber
 
-class SharedViewModel: ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     companion object {
         const val SESSION_KEY = "currentSession"
         const val USER_TYPE_KEY = "currentUserType"
         const val BPM_KEY = "currentBPM"
         const val IS_PLAYING_KEY = "currentIsPlaying"
     }
-    private val _bpm                                   = MutableLiveData<Long>()
+
+    private val subscriber = ServiceSubscriber(this.getApplication(),null)
+
+    // Viewmodel lifecycle management
+    init {
+        subscriber.subscribe()
+    }
+
+    override fun onCleared() {
+        subscriber.unsubscribe()
+        super.onCleared()
+    }
+
+
+    private val _bpm                                   = MutableLiveData<Long>(Tempo.DEFAULT_BPM)
         val bpm         :LiveData<Long>                    = _bpm
-    private val _isPlaying                             = MutableLiveData<Boolean>()
+    private val _isPlaying                             = MutableLiveData<Boolean>(false)
         val isPlaying   :LiveData<Boolean>                 = _isPlaying
-    private val _session                               = MutableLiveData<String>()
+    private val _session                               = MutableLiveData<String>("MusicDirector")
         val session     :LiveData<String>                  = _session
-    private val _userType                              = MutableLiveData<String>()
-    val userType    :LiveData<String>                      = _userType
-
-
-    private val _isAdvertising           = MutableLiveData<Boolean>(false)
+    private val _userType                              = MutableLiveData<String>(UserTypes.SOLO)
+        val userType    :LiveData<String>                  = _userType
+        val connectionStatus                               = MutableLiveData<Int>() //TODO: OBSERVE FROM INTERNAL SERVICE
+        val payload                                        = MutableLiveData<Payload>()
+        val connectedEndpointId                            = MutableLiveData<String>(null)
+    private val _isAdvertising                         = MutableLiveData<Boolean>(false)
         val isAdvertising: LiveData<Boolean> = _isAdvertising
-
     private val _isDiscovering           = MutableLiveData<Boolean>(false)
         val isDiscovering: LiveData<Boolean> = _isAdvertising
+
 
     private fun Long.setBPM() {
         //state.set(BPM_KEY, this)
         _bpm.value = this
+        subscriber.metronomeService?.setBPM(this)
     }
-    private fun flipIsPlaying() {
-        //state.set(IS_PLAYING_KEY, !isPlaying.value!!)
-        _isPlaying.value = !_isPlaying.value!!
-    }
-
     private fun setIsPlaying(b: Boolean) {
         _isPlaying.value = b
+        if (b) subscriber.metronomeService?.play()
+        else subscriber.metronomeService?.stop()
     }
-
     private fun setSession(sessionName: String?) {
             if (sessionName != null && sessionName.isNotEmpty()) {
                 //state.set(SESSION_KEY,sessionName)
                 _session.value = sessionName
+            } else {
+                _session.value = "MusicDirector"
             }
         }
     private fun setUserType(userTypes: String?) {
@@ -56,26 +74,30 @@ class SharedViewModel: ViewModel() {
         if (userTypes!= null) _userType.value = userTypes
         else _userType.value = UserTypes.SOLO
     }
-
-
-    fun onJoinSession(sessionName: String?) {
-        setUserType(UserTypes.SLAVE)
+    private fun setIsAdvertising(a: Boolean) {
+        _isAdvertising.value = a
+        if (a) subscriber.connectionService?.startAdvertising(_session.value)
+        else subscriber.connectionService?.stopAdvertising()
     }
-    fun endSession() {setUserType(UserTypes.SOLO) }
+
     fun onNewSession(sessionName: String?) {
         setSession(sessionName)
         setUserType(UserTypes.SESSION_HOST)
     }
+    fun onJoinSession(sessionName: String?) {
+        setSession(sessionName)
+        setUserType(UserTypes.SLAVE)
+    }
+    fun endSession() {setUserType(UserTypes.SOLO) }
 
     fun toggleAdvertise() {
         val p = _isAdvertising.value
-        _isAdvertising.value = !p!!
+        setIsAdvertising(!p!!)
     }
-
-    fun onPlayClicked() {
-        flipIsPlaying()
+    fun flipIsPlaying() {
+        //state.set(IS_PLAYING_KEY, !isPlaying.value!!)
+        setIsPlaying(!_isPlaying.value!!)
     }
-
     fun modifyBPM(plus:Long) {
         val r = bpm.value!!
         when {
@@ -84,7 +106,6 @@ class SharedViewModel: ViewModel() {
             else -> (r + plus).setBPM()
         }
     }
-
     fun getConfig(): Config {
         return Config(
             bpm.value!!,
@@ -111,11 +132,12 @@ class SharedViewModel: ViewModel() {
         setIsPlaying(false)
         setSession("MusicDirector")
         setUserType(UserTypes.SOLO)
+        connectionStatus.value = ConnectionStatus.DISCONNECTED
+        connectedEndpointId.value = null
     }
 
-
     fun getSessionName(): String {
-        return session.value!!
+        return _session.value!!
     }
 
     fun printValues() {

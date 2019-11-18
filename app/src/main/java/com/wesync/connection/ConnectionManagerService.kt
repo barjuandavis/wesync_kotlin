@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.google.android.gms.nearby.connection.*
@@ -38,13 +39,17 @@ class ConnectionManagerService : LifecycleService() {
     private val strategy: Strategy              = Strategy.P2P_STAR
     private val payloadCallback                 = MyPayloadCallback()
     private val endpointCallback                = MyEndpointCallback()
-    lateinit var connectionCallback             : MyConnectionLifecycleCallback
-
-    private val _endpoints = MutableLiveData<MutableList<Endpoint>>() //TODO: observed by ConnectionFragment
-        val endpoints = _endpoints
-    private val _payload = MutableLiveData<Payload>() //TODO: observed by MetronomeFragment
-        val payload = _payload
-
+    private lateinit var connectionCallback      : MyConnectionLifecycleCallback
+    // callback listeners, distributed to fragments
+    private val _connectionStatus                      = MutableLiveData<Int>()
+        val connectionStatus:LiveData<Int>             = _connectionStatus
+    private val _endpoints                             = MutableLiveData<MutableList<Endpoint>>()
+        val endpoints: LiveData<MutableList<Endpoint>> = _endpoints
+    private val _payload                               = MutableLiveData<Payload>()
+        val payload: LiveData<Payload>                 = _payload
+    private val _connectedEndpointId                   = MutableLiveData<String>(null)
+        val connectedEndpointId:LiveData<String>           = _connectedEndpointId
+    // END OF LISTENERS
 
     inner class LocalBinder : Binder() {
         fun getService() : ConnectionManagerService {
@@ -69,8 +74,19 @@ class ConnectionManagerService : LifecycleService() {
         return this._binder
     }
 
+    private fun observePayloadAndEndpoints() {
+        payloadCallback.payload.observe(this , Observer {
+            this@ConnectionManagerService._payload.value = it})
+        endpointCallback.endpoints.observe(this, Observer {
+            this@ConnectionManagerService._endpoints.value = it})
+        connectionCallback.connectedEndpointId.observe(this, Observer {
+            this@ConnectionManagerService._connectedEndpointId.value = it})
+        connectionCallback.connectionStatus.observe(this, Observer {
+            this@ConnectionManagerService._connectionStatus.value = it})
+        //_endpoints.value = mockListFORTESTINGPURPOSES()
+    }
+
     override fun onDestroy() {
-        //TODO: if user is SOLO
         stopSelf()
         super.onDestroy()
     }
@@ -102,27 +118,13 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     fun stopDiscovering() {
-        if (TestMode.STATUS == TestMode.NEARBY_ON) Nearby.getConnectionsClient(applicationContext).stopDiscovery()
+        if (TestMode.STATUS == TestMode.NEARBY_ON)
+            Nearby.getConnectionsClient(applicationContext).stopDiscovery()
     }
 
     fun sendPayload(s: String, p: Payload) {
         if (TestMode.STATUS == TestMode.NEARBY_ON) Nearby.getConnectionsClient(applicationContext).sendPayload(s,p)
     }
-
-    private fun observePayloadAndEndpoints() {
-        payloadCallback.payload.observe(this , Observer {this@ConnectionManagerService._payload.value = it})
-        endpointCallback.endpoints.observe(this, Observer {this@ConnectionManagerService._endpoints.value = it})
-        //_endpoints.value = mockListFORTESTINGPURPOSES()
-    }
-
-    /*private fun mockListFORTESTINGPURPOSES(): MutableList<Endpoint> {
-        val mock = mutableListOf<Endpoint>()
-        mock.add(Endpoint("test1",DiscoveredEndpointInfo("test1","test1")))
-        mock.add(Endpoint("test2",DiscoveredEndpointInfo("test2","test2")))
-        mock.add(Endpoint("test3",DiscoveredEndpointInfo("test3","test3")))
-        mock.add(Endpoint("test4",DiscoveredEndpointInfo("test4","test4")))
-        return mock
-    }*/
 
     fun connect(endpoint: Endpoint, name: String) {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
@@ -133,6 +135,10 @@ class ConnectionManagerService : LifecycleService() {
                 .addOnFailureListener { Toast.makeText(applicationContext,
                         "Failed to request connection to ${endpoint.endpointId}",Toast.LENGTH_SHORT).show() }
         }
+    }
+
+    fun disconnect() {
+        Nearby.getConnectionsClient(application).stopAllEndpoints()
     }
 
 }

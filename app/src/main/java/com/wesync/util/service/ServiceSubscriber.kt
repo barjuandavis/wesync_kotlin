@@ -22,7 +22,7 @@ import com.wesync.metronome.MetronomeService
  *
 */
 
-class ServiceSubscriber(private val context: Context?, private val activity: FragmentActivity?) {
+class ServiceSubscriber(private val context: Context, private val activity: FragmentActivity?) {
     private val _metronomeConnected = MutableLiveData<Boolean>()
         val metronomeConnected : LiveData<Boolean> = _metronomeConnected
 
@@ -31,6 +31,9 @@ class ServiceSubscriber(private val context: Context?, private val activity: Fra
 
     var metronomeService : MetronomeService? = null
     var connectionService: ConnectionManagerService? = null
+
+    private var metronomeBoundByActivity = false
+    private var connBoundByActivity = false
 
     private val _metronomeConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -66,16 +69,33 @@ class ServiceSubscriber(private val context: Context?, private val activity: Fra
 
     fun subscribe() {
         Intent(context, MetronomeService::class.java).also { i ->
-            activity!!.bindService(i, _metronomeConnection, Context.BIND_AUTO_CREATE)
+            if (activity != null)
+            {
+                activity.bindService(i, _metronomeConnection, Context.BIND_AUTO_CREATE)
+                metronomeBoundByActivity = true
+            }
+            else
+                context.bindService(i,_metronomeConnection,Context.BIND_AUTO_CREATE)
         }
         Intent(context, ConnectionManagerService::class.java).also { i ->
-            activity!!.bindService(i, _connServiceConnection, Context.BIND_AUTO_CREATE)
-        }
+            if (activity != null){
+                activity.bindService(i, _connServiceConnection, Context.BIND_AUTO_CREATE)
+                connBoundByActivity = true
+            }
+            else
+                context.bindService(i,_connServiceConnection,Context.BIND_AUTO_CREATE)
+         }
     }
 
 
     fun unsubscribe() {
-        activity?.unbindService(_metronomeConnection)
-        activity?.unbindService(_connServiceConnection)
+        if (metronomeBoundByActivity)
+            activity?.unbindService(_metronomeConnection)
+        else
+            context.unbindService(_metronomeConnection)
+        if (connBoundByActivity)
+            activity?.unbindService(_connServiceConnection)
+        else
+            context.unbindService(_connServiceConnection)
     }
 }

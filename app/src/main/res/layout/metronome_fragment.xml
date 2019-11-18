@@ -5,7 +5,7 @@
     <data>
         <variable
             name="viewmodel"
-            type="com.wesync.SharedViewModel"/>
+            type="com.wesync.MainViewModel"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -183,7 +183,7 @@
             android:layout_width="150sp"
             android:layout_height="75sp"
             android:layout_marginTop="20sp"
-            android:onClick="@{() -> viewmodel.onPlayClicked()}"
+            android:onClick="@{() -> viewmodel.flipIsPlaying()}"
             android:text="@string/play_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

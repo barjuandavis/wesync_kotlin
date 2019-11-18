@@ -57,13 +57,17 @@ class MetronomeService: LifecycleService() {
         super.onDestroy()
     }
 
-    fun onPlay(){
-        isPlaying = !isPlaying
-        if (isPlaying) { handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME) }
-        else { handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME) }
+    fun play(){
+        isPlaying = true
+        handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME)
      }
 
-     fun onBPMChanged(bpm: Long) {
+    fun stop() {
+        isPlaying = false
+        handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME)
+    }
+
+     fun setBPM(bpm: Long) {
         if (handlerThread.isAlive) {
             val m = Message()
             m.what = MetronomeCodes.ON_BPM_CHANGED

@@ -11,13 +11,17 @@ import com.google.android.gms.nearby.connection.ConnectionInfo
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback
 import com.google.android.gms.nearby.connection.ConnectionResolution
 import com.google.android.gms.nearby.connection.ConnectionsStatusCodes
+import com.wesync.util.ConnectionStatus
 
 class MyConnectionLifecycleCallback(
     private val context: Context,
     private val pay: MyPayloadCallback) : ConnectionLifecycleCallback() {
 
-    private val _connectedEndpointId = MutableLiveData<String?>(null)
-        val connectedEndpointId = _connectedEndpointId
+    private val _connectedEndpointId = MutableLiveData<String>(null)
+        val connectedEndpointId:LiveData<String> = _connectedEndpointId
+
+    private val _connectionStatus = MutableLiveData(ConnectionStatus.DISCONNECTED)
+        val connectionStatus: LiveData<Int> = _connectionStatus
 
     override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
         /*AlertDialog.Builder(context)
@@ -44,6 +48,7 @@ class MyConnectionLifecycleCallback(
             ConnectionsStatusCodes.STATUS_OK -> {
                 Toast.makeText(context, "You are connected to ${endpointId}!",Toast.LENGTH_SHORT).show()
                 _connectedEndpointId.value = endpointId
+                _connectionStatus.value = ConnectionStatus.CONNECTED
             } // We're connected! Can now start sending and receiving data.
             ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
                 Toast.makeText(context, "You or $endpointId rejected the connection :(",Toast.LENGTH_SHORT).show()}  // The connection was rejected by one or both sides.
@@ -53,6 +58,7 @@ class MyConnectionLifecycleCallback(
     override fun onDisconnected(endpointId: String) {
         Toast.makeText(context, "You are disconnected from ${endpointId}!",Toast.LENGTH_SHORT).show()
         _connectedEndpointId.value = null
+        _connectionStatus.value = ConnectionStatus.DISCONNECTED
     }
 
 

@@ -13,7 +13,7 @@ import com.wesync.util.Tempo
 import java.lang.IllegalStateException
 import java.lang.NullPointerException
 
-class TickHandlerThread(private val context:Context ): HandlerThread("TickHandlerThread",
+class TickHandlerThread(private val context:Context): HandlerThread("TickHandlerThread",
     Process.THREAD_PRIORITY_URGENT_AUDIO) {
 
     /*

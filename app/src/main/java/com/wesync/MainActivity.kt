@@ -5,9 +5,9 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.metronome.MetronomeService
@@ -15,7 +15,7 @@ import com.wesync.util.service.ServiceSubscriber
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var sharedViewModel: SharedViewModel
+    private lateinit var mainViewModel: MainViewModel
     private val serviceSubscriber = ServiceSubscriber(this, this)
 
     companion object {
@@ -29,19 +29,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         checkForPermission()
-        sharedViewModel = ViewModelProviders.of(this)
-            .get(SharedViewModel::class.java)
-    }
-
-    override fun onRestart() {
-        sharedViewModel.printValues()
-        super.onRestart()
-
+        startServices()
+        mainViewModel = ViewModelProvider.AndroidViewModelFactory.
+            getInstance(this.application).create(MainViewModel::class.java)
+        mainViewModel.unpackBundle(savedInstanceState)
     }
 
     override fun onStart() {
-        if (!metronomeIsAlive) MetronomeService.start(applicationContext)
-        if (!connectionIsAlive) ConnectionManagerService.start(applicationContext)
+        startServices()
         serviceSubscriber.subscribe()
         super.onStart()
     }
@@ -67,11 +62,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         //Log.d("savedinstance","onSaveInstance Called!")
-        val currState = sharedViewModel.getConfig()
-            savedInstanceState.putLong(SharedViewModel.BPM_KEY,currState.bpm)
-            savedInstanceState.putBoolean(SharedViewModel.USER_TYPE_KEY,currState.isPlaying)
-            savedInstanceState.putString(SharedViewModel.SESSION_KEY,currState.session)
-            savedInstanceState.putString(SharedViewModel.USER_TYPE_KEY,currState.userTypeString)
+        val currState = mainViewModel.getConfig()
+            savedInstanceState.putLong(MainViewModel.BPM_KEY,currState.bpm)
+            savedInstanceState.putBoolean(MainViewModel.USER_TYPE_KEY,currState.isPlaying)
+            savedInstanceState.putString(MainViewModel.SESSION_KEY,currState.session)
+            savedInstanceState.putString(MainViewModel.USER_TYPE_KEY,currState.userTypeString)
             savedInstanceState.putBoolean(CNS_CON,serviceSubscriber.connServiceConnected.value?: false)
             savedInstanceState.putBoolean(MTS_CON,serviceSubscriber.metronomeConnected.value?: false)
         super.onSaveInstanceState(savedInstanceState)
@@ -80,13 +75,18 @@ class MainActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         //Log.d("savedinstance","onRestoreInstance Called!")
-        sharedViewModel.unpackBundle(savedInstanceState)
+        mainViewModel.unpackBundle(savedInstanceState)
         metronomeIsAlive = savedInstanceState.getBoolean(MTS_CON)
         connectionIsAlive = savedInstanceState.getBoolean(CNS_CON)
     }
 
+    private fun startServices() {
+        if (!metronomeIsAlive) MetronomeService.start(applicationContext)
+        if (!connectionIsAlive) ConnectionManagerService.start(applicationContext)
+    }
+
     override fun onBackPressed() {
-      //  if (sharedViewModel.isPlaying.value!!)
+      //  if (mainViewModel.isPlaying.value!!)
         //    moveTaskToBack(true)
        // else
             super.onBackPressed()

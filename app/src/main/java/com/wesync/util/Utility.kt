@@ -1,9 +1,8 @@
 package com.wesync.util
 
 import android.os.Bundle
-import android.os.Parcel
 import android.os.Parcelable
-import com.wesync.SharedViewModel
+import com.wesync.MainViewModel
 import kotlinx.android.parcel.Parcelize
 
 
@@ -31,7 +30,13 @@ class UserTypes {
         const val SLAVE = "USER_TYPE_SLAVE"
         const val SOLO = "USER_TYPE_SOLO"
     }
+}
 
+class ConnectionStatus {
+    companion object  {
+        const val DISCONNECTED = 0
+        const val CONNECTED = 4
+    }
 }
 
 class Tempo {
@@ -51,10 +56,10 @@ data class Config(
     val userTypeString: String): Parcelable {
     fun getBundle(): Bundle {
         val b = Bundle()
-        b.putLong(SharedViewModel.BPM_KEY,bpm)
-        b.putBoolean(SharedViewModel.USER_TYPE_KEY,isPlaying)
-        b.putString(SharedViewModel.SESSION_KEY,session)
-        b.putString(SharedViewModel.USER_TYPE_KEY,userTypeString)
+        b.putLong(MainViewModel.BPM_KEY,bpm)
+        b.putBoolean(MainViewModel.USER_TYPE_KEY,isPlaying)
+        b.putString(MainViewModel.SESSION_KEY,session)
+        b.putString(MainViewModel.USER_TYPE_KEY,userTypeString)
         return b
     }
 }
@@ -63,7 +68,7 @@ class TestMode {
     companion object {
         const val NEARBY_OFF = false
         const val NEARBY_ON = true
-        const val STATUS = NEARBY_ON
+        const val STATUS = NEARBY_OFF
     }
 }
 
