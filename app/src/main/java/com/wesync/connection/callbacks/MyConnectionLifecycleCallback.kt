@@ -1,8 +1,6 @@
 package com.wesync.connection.callbacks
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -17,37 +15,22 @@ class MyConnectionLifecycleCallback(
     private val context: Context,
     private val pay: MyPayloadCallback) : ConnectionLifecycleCallback() {
 
-    private val _connectedEndpointId = MutableLiveData<String>(null)
-        val connectedEndpointId:LiveData<String> = _connectedEndpointId
+    private val _connectedSessionId = MutableLiveData<String>(null)
+        val connectedSessionId:LiveData<String> = _connectedSessionId
 
     private val _connectionStatus = MutableLiveData(ConnectionStatus.DISCONNECTED)
         val connectionStatus: LiveData<Int> = _connectionStatus
 
     override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
-        /*AlertDialog.Builder(context)
-            .setTitle("Accept connection to " + info.endpointName)
-            .setMessage("Confirm the code matches on both devices: " + info.authenticationToken)
-
-            .setPositiveButton("Accept") { _: DialogInterface, _: Int ->
-                // The user confirmed, so we can accept the connection.
-                Nearby.getConnectionsClient(context).acceptConnection(endpointId, pay)
-            }
-            .setNegativeButton(android.R.string.cancel) { _: DialogInterface, _: Int ->
-                // The user canceled, so we should reject the connection.
-                Nearby.getConnectionsClient(context).rejectConnection(endpointId)
-            }
-            .setIcon(android.R.drawable.ic_dialog_info)
-            .show()
-
-         */
         Toast.makeText(context, "Initiating connection to ${endpointId}...",Toast.LENGTH_SHORT).show()
+        _connectionStatus.value = ConnectionStatus.CONNECTING
         Nearby.getConnectionsClient(context).acceptConnection(endpointId, pay)
     }
     override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
         when (result.status.statusCode) {
             ConnectionsStatusCodes.STATUS_OK -> {
                 Toast.makeText(context, "You are connected to ${endpointId}!",Toast.LENGTH_SHORT).show()
-                _connectedEndpointId.value = endpointId
+                _connectedSessionId.value = endpointId
                 _connectionStatus.value = ConnectionStatus.CONNECTED
             } // We're connected! Can now start sending and receiving data.
             ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
@@ -57,7 +40,7 @@ class MyConnectionLifecycleCallback(
     }
     override fun onDisconnected(endpointId: String) {
         Toast.makeText(context, "You are disconnected from ${endpointId}!",Toast.LENGTH_SHORT).show()
-        _connectedEndpointId.value = null
+        _connectedSessionId.value = null
         _connectionStatus.value = ConnectionStatus.DISCONNECTED
     }
 

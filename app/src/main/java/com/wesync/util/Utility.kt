@@ -35,6 +35,7 @@ class UserTypes {
 class ConnectionStatus {
     companion object  {
         const val DISCONNECTED = 0
+        const val CONNECTING = 2
         const val CONNECTED = 4
     }
 }

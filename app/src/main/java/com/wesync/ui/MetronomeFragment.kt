@@ -36,7 +36,8 @@ class MetronomeFragment : Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let{
-            mainViewModel = ViewModelProviders.of(it).get(MainViewModel::class.java)
+            mainViewModel = ViewModelProvider.AndroidViewModelFactory.
+                getInstance(it.application).create(MainViewModel::class.java)
             binding.viewmodel = mainViewModel
             binding.lifecycleOwner = it
             subscribeToViewModel()
@@ -85,7 +86,7 @@ class MetronomeFragment : Fragment(){
             builder.show()
         }
     }
-    ///////////////////////////////////////////////////////////
+
 
     private fun onJoinSessionButtonClicked() {
         if (mainViewModel.userType.value == UserTypes.SOLO) {
@@ -98,4 +99,3 @@ class MetronomeFragment : Fragment(){
         }
     }
 }
-///////////////////////////////////////////////////////

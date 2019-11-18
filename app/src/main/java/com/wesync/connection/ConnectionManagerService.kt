@@ -1,27 +1,28 @@
 package com.wesync.connection
 
-import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
-import android.os.Build
 import android.os.IBinder
-import com.google.android.gms.nearby.Nearby
 import android.widget.Toast
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.google.android.gms.nearby.connection.*
-import com.wesync.MainActivity
-import com.wesync.R
-import com.wesync.connection.callbacks.*
-import com.wesync.util.service.ForegroundServiceLauncher
+import com.google.android.gms.nearby.Nearby
+import com.google.android.gms.nearby.connection.AdvertisingOptions
+import com.google.android.gms.nearby.connection.DiscoveryOptions
+import com.google.android.gms.nearby.connection.Payload
+import com.google.android.gms.nearby.connection.Strategy
+import com.wesync.connection.callbacks.MyConnectionLifecycleCallback
+import com.wesync.connection.callbacks.MyEndpointCallback
+import com.wesync.connection.callbacks.MyPayloadCallback
+import com.wesync.util.ConnectionStatus
 import com.wesync.util.ServiceUtil.Companion.SERVICE_ID
 import com.wesync.util.TestMode
+import com.wesync.util.UserTypes
 import com.wesync.util.service.ForegroundNotification
+import com.wesync.util.service.ForegroundServiceLauncher
 
 
 class ConnectionManagerService : LifecycleService() {
@@ -39,17 +40,22 @@ class ConnectionManagerService : LifecycleService() {
     private val strategy: Strategy              = Strategy.P2P_STAR
     private val payloadCallback                 = MyPayloadCallback()
     private val endpointCallback                = MyEndpointCallback()
+        var userType                        = UserTypes.SOLO
+        var userName                               = ""
     private lateinit var connectionCallback      : MyConnectionLifecycleCallback
-    // callback listeners, distributed to fragments
-    private val _connectionStatus                      = MutableLiveData<Int>()
-        val connectionStatus:LiveData<Int>             = _connectionStatus
-    private val _endpoints                             = MutableLiveData<MutableList<Endpoint>>()
-        val endpoints: LiveData<MutableList<Endpoint>> = _endpoints
+
+
     private val _payload                               = MutableLiveData<Payload>()
-        val payload: LiveData<Payload>                 = _payload
+        val payload: LiveData<Payload>                     = _payload
+    private val _foundSessions                         = MutableLiveData<MutableList<Endpoint>>()
+        val foundSessions: LiveData<MutableList<Endpoint>> = _foundSessions
     private val _connectedEndpointId                   = MutableLiveData<String>(null)
         val connectedEndpointId:LiveData<String>           = _connectedEndpointId
-    // END OF LISTENERS
+    private val _connectionStatus                      = MutableLiveData<Int>()
+        val connectionStatus:LiveData<Int>                 = _connectionStatus
+
+
+    private fun setConnectionStatus(i:Int) {_connectionStatus.value = i}
 
     inner class LocalBinder : Binder() {
         fun getService() : ConnectionManagerService {
@@ -77,13 +83,13 @@ class ConnectionManagerService : LifecycleService() {
     private fun observePayloadAndEndpoints() {
         payloadCallback.payload.observe(this , Observer {
             this@ConnectionManagerService._payload.value = it})
-        endpointCallback.endpoints.observe(this, Observer {
-            this@ConnectionManagerService._endpoints.value = it})
-        connectionCallback.connectedEndpointId.observe(this, Observer {
+        endpointCallback.sessions.observe(this, Observer {
+            this@ConnectionManagerService._foundSessions.value = it})
+        connectionCallback.connectedSessionId.observe(this, Observer {
             this@ConnectionManagerService._connectedEndpointId.value = it})
         connectionCallback.connectionStatus.observe(this, Observer {
-            this@ConnectionManagerService._connectionStatus.value = it})
-        //_endpoints.value = mockListFORTESTINGPURPOSES()
+            this@ConnectionManagerService._connectionStatus.value = it })
+        //_foundSessions.value = mockListFORTESTINGPURPOSES()
     }
 
     override fun onDestroy() {
@@ -92,11 +98,11 @@ class ConnectionManagerService : LifecycleService() {
     }
 
 
-    fun startAdvertising(sessionName: String?) {
-        if (TestMode.STATUS == TestMode.NEARBY_ON) {
+    fun startAdvertising() {
+        if (TestMode.STATUS == TestMode.NEARBY_ON && userType == UserTypes.SESSION_HOST) {
             val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
             Nearby.getConnectionsClient(applicationContext)
-                .startAdvertising(sessionName!!,SERVICE_ID, connectionCallback, advertisingOptions)
+                .startAdvertising(userName,SERVICE_ID, connectionCallback, advertisingOptions)
                 .addOnSuccessListener { Toast.makeText(this, "Accepting User...",Toast.LENGTH_SHORT).show() }
                 .addOnFailureListener { throw it }
         }
@@ -108,7 +114,7 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     fun startDiscovery() {
-        if (TestMode.STATUS == TestMode.NEARBY_ON) {
+        if (TestMode.STATUS == TestMode.NEARBY_ON && userType == UserTypes.SLAVE) {
             val discoveryOptions = DiscoveryOptions.Builder().setStrategy(strategy).build()
             Nearby.getConnectionsClient(applicationContext)
                 .startDiscovery(SERVICE_ID, endpointCallback, discoveryOptions)
@@ -122,8 +128,14 @@ class ConnectionManagerService : LifecycleService() {
             Nearby.getConnectionsClient(applicationContext).stopDiscovery()
     }
 
-    fun sendPayload(s: String, p: Payload) {
-        if (TestMode.STATUS == TestMode.NEARBY_ON) Nearby.getConnectionsClient(applicationContext).sendPayload(s,p)
+    fun sendConfig(bpm: Long, isPlaying: Boolean) {
+        val byteArray = ByteArray(5)
+    }
+
+    fun sendPayload(toEndpointId: String, payload: Payload) {
+        if (TestMode.STATUS == TestMode.NEARBY_ON)
+            Nearby.getConnectionsClient(applicationContext)
+                .sendPayload(toEndpointId,payload)
     }
 
     fun connect(endpoint: Endpoint, name: String) {
@@ -131,14 +143,17 @@ class ConnectionManagerService : LifecycleService() {
             Nearby.getConnectionsClient(application)
                 .requestConnection(name, endpoint.endpointId, connectionCallback)
                 .addOnSuccessListener { Toast.makeText(applicationContext,
-                    "Connecting to ${endpoint.endpointId}", Toast.LENGTH_SHORT).show() }
+                    "Connecting to ${endpoint.endpointId}", Toast.LENGTH_SHORT).show()
+                setConnectionStatus(ConnectionStatus.CONNECTING)
+                }
                 .addOnFailureListener { Toast.makeText(applicationContext,
-                        "Failed to request connection to ${endpoint.endpointId}",Toast.LENGTH_SHORT).show() }
+                        "Failed to request connection to ${endpoint.endpointId}", Toast.LENGTH_SHORT).show() }
         }
     }
 
     fun disconnect() {
         Nearby.getConnectionsClient(application).stopAllEndpoints()
+        userType = UserTypes.SOLO
     }
 
 }

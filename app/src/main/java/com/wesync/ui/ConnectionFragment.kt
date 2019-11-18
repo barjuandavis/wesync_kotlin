@@ -3,7 +3,6 @@ package com.wesync.ui
 
 
 import android.app.AlertDialog
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.Observer
 import android.os.Bundle
 import android.text.InputType
@@ -14,7 +13,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.SavedStateViewModelFactory
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 
@@ -22,23 +21,17 @@ import com.wesync.R
 import com.wesync.MainViewModel
 import com.wesync.adapter.SessionAdapter
 import com.wesync.adapter.SessionClickListener
-import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.ConnectionFragmentBinding
-import com.wesync.util.service.ServiceSubscriber
-import java.lang.NullPointerException
 
 
 class ConnectionFragment : Fragment() {
 
-    private lateinit var mainViewModel    : MainViewModel
+    private lateinit var mainViewModel      : MainViewModel
     private lateinit var binding            : ConnectionFragmentBinding
-    private var mCService                   : ConnectionManagerService? = null
-    private lateinit var subscriber         : ServiceSubscriber
     private lateinit var sessionAdapter     : SessionAdapter
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        doBindService()
         binding = DataBindingUtil.inflate(inflater,R.layout.connection_fragment,container,false)
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
@@ -46,11 +39,12 @@ class ConnectionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
-            mainViewModel = ViewModelProviders.of(it,
-                SavedStateViewModelFactory(it.application,it)
-            ).get(MainViewModel::class.java)
+            mainViewModel = ViewModelProvider.AndroidViewModelFactory.
+                getInstance(it.application).create(MainViewModel::class.java)
             binding.viewmodel = mainViewModel
+            subscribeToViewModel()
         }
+        mainViewModel.startDiscovery()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -63,8 +57,7 @@ class ConnectionFragment : Fragment() {
                 input.inputType = InputType.TYPE_CLASS_TEXT
                 builder.setView(input)
                 builder.setPositiveButton("OK") { _, _ ->
-                    mainViewModel.onJoinSession(input.text?.toString())
-                    mCService?.connect(it,mainViewModel.getSessionName())
+                    mainViewModel.onJoinSession(input.text?.toString(),it)
                     findNavController().navigate(
                         ConnectionFragmentDirections
                             .actionConnectionFragmentToMetronomeFragment())
@@ -80,37 +73,16 @@ class ConnectionFragment : Fragment() {
     }
 
     override fun onDestroy() {
+        mainViewModel.stopDiscovery()
         super.onDestroy()
-        doUnbindService()
     }
 
-    private fun subscribeToService() {
-       mCService?.endpoints?.observe(this, Observer {
-            it.let { if (it.isNotEmpty()) { sessionAdapter.submitList(it) } } })
+    private fun subscribeToViewModel() {
+       mainViewModel.foundSessions.observe(this, Observer {
+            it.let { if (it.isNotEmpty()) { sessionAdapter.submitList(it)
+            } } })
     }
 
-    private fun doBindService() {
-        try {
-            subscriber =
-                ServiceSubscriber(activity!!.applicationContext, activity)
-            subscriber.connServiceConnected.observe(this, Observer {
-                if (it) mCService = subscriber.connectionService
-                subscribeToService()
-                startDiscovery()
-            })
-            subscriber.subscribe()
-        } catch (e: NullPointerException) {}
-    }
-
-    private fun doUnbindService() {
-       subscriber.unsubscribe()
-       mCService?.stopDiscovering()
-       mCService = null
-    }
-
-    private fun startDiscovery() {
-        mCService?.startDiscovery()
-    }
 
 
 }
