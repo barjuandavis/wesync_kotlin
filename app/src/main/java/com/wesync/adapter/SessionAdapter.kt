@@ -6,11 +6,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.wesync.connection.Endpoint
+import com.wesync.connection.DiscoveredEndpoint
 import com.wesync.databinding.CardViewBinding
 
 class SessionAdapter(private val clickListener: SessionClickListener):
-    ListAdapter<Endpoint, SessionAdapter.CardViewHolder>(SessionDiffCallback()) {
+    ListAdapter<DiscoveredEndpoint, SessionAdapter.CardViewHolder>(SessionDiffCallback()) {
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
         Log.d("bindViewHolder","bounding session $position to view")
@@ -18,8 +18,8 @@ class SessionAdapter(private val clickListener: SessionClickListener):
     }
 
     override fun onCurrentListChanged(
-        previousList: MutableList<Endpoint>,
-        currentList: MutableList<Endpoint>
+        previousList: MutableList<DiscoveredEndpoint>,
+        currentList: MutableList<DiscoveredEndpoint>
     ) {
        for (i in currentList) {
            Log.d("currentListChanged","${i.endpointId}: ${i.info.endpointName}")
@@ -34,8 +34,8 @@ class SessionAdapter(private val clickListener: SessionClickListener):
         private val binding: CardViewBinding)
         : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(endpoint: Endpoint, clickListener: SessionClickListener) {
-            binding.endpoint = endpoint
+        fun bind(discoveredEndpoint: DiscoveredEndpoint, clickListener: SessionClickListener) {
+            binding.discoveredEndpoint = discoveredEndpoint
             binding.clickListener = clickListener
             binding.executePendingBindings()
         }
@@ -52,17 +52,17 @@ class SessionAdapter(private val clickListener: SessionClickListener):
 
 }
 
-class SessionDiffCallback : DiffUtil.ItemCallback<Endpoint> () {
-    override fun areItemsTheSame(oldItem: Endpoint, newItem: Endpoint): Boolean {
+class SessionDiffCallback : DiffUtil.ItemCallback<DiscoveredEndpoint> () {
+    override fun areItemsTheSame(oldItem: DiscoveredEndpoint, newItem: DiscoveredEndpoint): Boolean {
         return oldItem.endpointId == newItem.endpointId
     }
-    override fun areContentsTheSame(oldItem: Endpoint, newItem: Endpoint): Boolean {
+    override fun areContentsTheSame(oldItem: DiscoveredEndpoint, newItem: DiscoveredEndpoint): Boolean {
         return oldItem == newItem
     }
 }
 
-class SessionClickListener(val clickListener: (endpoint: Endpoint) -> Unit) {
-    fun onClick(endpoint: Endpoint) = clickListener(endpoint)
+class SessionClickListener(val clickListener: (discoveredEndpoint: DiscoveredEndpoint) -> Unit) {
+    fun onClick(discoveredEndpoint: DiscoveredEndpoint) = clickListener(discoveredEndpoint)
 }
 
 

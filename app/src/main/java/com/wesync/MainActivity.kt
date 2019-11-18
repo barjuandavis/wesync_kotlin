@@ -8,7 +8,6 @@ import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.metronome.MetronomeService
 import com.wesync.util.service.ServiceSubscriber
@@ -41,6 +40,10 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
     }
 
+    override fun onPause() {
+        super.onPause()
+    }
+
     override fun onStop() {
         serviceSubscriber.unsubscribe()
         super.onStop()
@@ -60,21 +63,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun getCurrentState(): Bundle {
+        val b = Bundle()
+        val currState = mainViewModel.getConfig()
+            b.putLong(MainViewModel.BPM_KEY,currState.bpm)
+            b.putBoolean(MainViewModel.USER_TYPE_KEY,currState.isPlaying)
+            b.putString(MainViewModel.SESSION_KEY,currState.session)
+            b.putString(MainViewModel.USER_TYPE_KEY,currState.userTypeString)
+            b.putBoolean(CNS_CON,serviceSubscriber.connServiceConnected.value?: false)
+            b.putBoolean(MTS_CON,serviceSubscriber.metronomeConnected.value?: false)
+        return b
+    }
+
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         //Log.d("savedinstance","onSaveInstance Called!")
-        val currState = mainViewModel.getConfig()
-            savedInstanceState.putLong(MainViewModel.BPM_KEY,currState.bpm)
-            savedInstanceState.putBoolean(MainViewModel.USER_TYPE_KEY,currState.isPlaying)
-            savedInstanceState.putString(MainViewModel.SESSION_KEY,currState.session)
-            savedInstanceState.putString(MainViewModel.USER_TYPE_KEY,currState.userTypeString)
-            savedInstanceState.putBoolean(CNS_CON,serviceSubscriber.connServiceConnected.value?: false)
-            savedInstanceState.putBoolean(MTS_CON,serviceSubscriber.metronomeConnected.value?: false)
-        super.onSaveInstanceState(savedInstanceState)
+        super.onSaveInstanceState(getCurrentState())
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        //Log.d("savedinstance","onRestoreInstance Called!")
         mainViewModel.unpackBundle(savedInstanceState)
         metronomeIsAlive = savedInstanceState.getBoolean(MTS_CON)
         connectionIsAlive = savedInstanceState.getBoolean(CNS_CON)
@@ -86,9 +93,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-      //  if (mainViewModel.isPlaying.value!!)
-        //    moveTaskToBack(true)
-       // else
-            super.onBackPressed()
+        super.onBackPressed()
     }
 }

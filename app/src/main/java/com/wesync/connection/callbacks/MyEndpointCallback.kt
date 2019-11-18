@@ -5,12 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
 import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback
-import com.wesync.connection.Endpoint
+import com.wesync.connection.DiscoveredEndpoint
 
 class MyEndpointCallback : EndpointDiscoveryCallback() {
 
-    private val _sessions = MutableLiveData<MutableList<Endpoint>>()
-        val sessions: LiveData<MutableList<Endpoint>> = _sessions
+    private val _sessions = MutableLiveData<MutableList<DiscoveredEndpoint>>()
+        val sessions: LiveData<MutableList<DiscoveredEndpoint>> = _sessions
 
     init {
         _sessions.value = mutableListOf()
@@ -19,8 +19,8 @@ class MyEndpointCallback : EndpointDiscoveryCallback() {
     override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
         val cl = _sessions.value!!
         if (!cl.any{it.endpointId == endpointId} ) {
-            cl.add(Endpoint(endpointId,info))
-            Log.d("onEndpointFound","Endpoint added: $endpointId (${info.endpointName})")
+            cl.add(DiscoveredEndpoint(endpointId,info))
+            Log.d("onEndpointFound","DiscoveredEndpoint added: $endpointId (${info.endpointName})")
         }
         _sessions.value = cl
     }

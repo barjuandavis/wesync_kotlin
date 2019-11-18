@@ -71,12 +71,10 @@ class ConnectionFragment : Fragment() {
                 DividerItemDecoration.VERTICAL))
         }
     }
-
     override fun onDestroy() {
         mainViewModel.stopDiscovery()
         super.onDestroy()
     }
-
     private fun subscribeToViewModel() {
        mainViewModel.foundSessions.observe(this, Observer {
             it.let { if (it.isNotEmpty()) { sessionAdapter.submitList(it)

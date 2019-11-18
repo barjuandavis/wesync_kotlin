@@ -11,7 +11,7 @@ import com.google.android.gms.nearby.connection.ConnectionResolution
 import com.google.android.gms.nearby.connection.ConnectionsStatusCodes
 import com.wesync.util.ConnectionStatus
 
-class MyConnectionLifecycleCallback(
+open class MyConnectionLifecycleCallback(
     private val context: Context,
     private val pay: MyPayloadCallback) : ConnectionLifecycleCallback() {
 

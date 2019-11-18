@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
-            name="endpoint"
-            type="com.wesync.connection.Endpoint"
+            name="discoveredEndpoint"
+            type="com.wesync.connection.DiscoveredEndpoint"
             />
         <variable
             name="clickListener"
@@ -16,7 +16,7 @@
         android:id="@+id/card_view_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> clickListener.onClick(endpoint)}"
+        android:onClick="@{() -> clickListener.onClick(discoveredEndpoint)}"
         >
 
         <RelativeLayout
@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:text="@{endpoint.component1() +` (`+ endpoint.component2().endpointName + `)`}"
+                android:text="@{discoveredEndpoint.component1() +` (`+ discoveredEndpoint.component2().endpointName + `)`}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <TextView

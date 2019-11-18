@@ -7,7 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.nearby.connection.Payload
-import com.wesync.connection.Endpoint
+import com.wesync.connection.DiscoveredEndpoint
 import com.wesync.util.Config
 import com.wesync.util.ConnectionStatus
 import com.wesync.util.Tempo
@@ -43,15 +43,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val userName     :LiveData<String>                  = _userName
     private val _userType                              = MutableLiveData<String>(UserTypes.SOLO)
         val userType    :LiveData<String>                  = _userType
-        val connectionStatus                               = MutableLiveData<Int>() //TODO: OBSERVE FROM INTERNAL SERVICE
+        val connectionStatus                               = MutableLiveData<Int>()
         val payload                                        = MutableLiveData<Payload>()
         val connectedEndpointId                            = MutableLiveData<String>(null)
     private val _isAdvertising                         = MutableLiveData<Boolean>(false)
         val isAdvertising: LiveData<Boolean> = _isAdvertising
     private val _isDiscovering           = MutableLiveData<Boolean>(false)
         val isDiscovering: LiveData<Boolean> = _isAdvertising
-    private val _foundSessions = MutableLiveData<MutableList<Endpoint>>()
-        val foundSessions: LiveData<MutableList<Endpoint>> = _foundSessions
+    private val _foundSessions = MutableLiveData<MutableList<DiscoveredEndpoint>>()
+        val foundSessions: LiveData<MutableList<DiscoveredEndpoint>> = _foundSessions
 
     private fun observeService() {
         subscriber.connectionService?.foundSessions?.observeForever {_foundSessions.value = it}
@@ -60,10 +60,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // a callback which always be called when BPM or isPlaying is changing.
     // it is used to inform mCService to send payload for everytime changes at mService happens.
     private fun onConfigChanged() {
-
-
+        subscriber.connectionService?.setConfig(_bpm.value!!,_isPlaying.value!!)
     }
-    private fun connect(e: Endpoint) { subscriber.connectionService?.connect(e,_userName.value!!)}
+    private fun connect(e: DiscoveredEndpoint) { subscriber.connectionService?.connect(e,_userName.value!!)}
     private fun disconnect() {subscriber.connectionService?.disconnect()}
     private fun Long.setBPM() {
         //state.set(BPM_KEY, this)
@@ -117,14 +116,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         setUserType(UserTypes.SESSION_HOST)
         if (!_isAdvertising.value!!) setIsAdvertising(true)
     }
-    fun onJoinSession(yourName: String?, it: Endpoint) {
+    fun onJoinSession(yourName: String?, it: DiscoveredEndpoint) {
         setUserName(yourName)
         setUserType(UserTypes.SLAVE)
         connect(it)
     }
     fun endSession() {
         setUserType(UserTypes.SOLO)
-
+        disconnect()
     }
     fun toggleAdvertise() {
         val p = _isAdvertising.value

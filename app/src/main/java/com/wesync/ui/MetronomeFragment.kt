@@ -66,11 +66,16 @@ class MetronomeFragment : Fragment(){
             val input = EditText(context)
                 input.inputType = InputType.TYPE_CLASS_TEXT
             builder.setView(input)
+
             builder.setPositiveButton("OK") { _, _ ->
-                mainViewModel.onNewSession(input.text?.toString()) //TODO: PERHATIKANNNNN INIII
+                mainViewModel.onNewSession(input.text?.toString())
                 if (mainViewModel.isPlaying.value!!) mainViewModel.flipIsPlaying()
             }
-            builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+
+            builder.setNegativeButton("Cancel") {
+                    dialog, _ -> dialog.cancel()
+            }
+
             builder.show()
         }
         else  {
@@ -78,10 +83,12 @@ class MetronomeFragment : Fragment(){
             if (mainViewModel.userType.value == UserTypes.SLAVE)
                 t = "Are you sure want to quit this Session?"
             builder.setTitle(t)
+
             builder.setPositiveButton("OK") { _, _ ->
-                mainViewModel.endSession() //TODO: PERHATIKANNNNN INIII
+                mainViewModel.endSession()
                 if (mainViewModel.isAdvertising.value!!) mainViewModel.toggleAdvertise()
             }
+
             builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
             builder.show()
         }

@@ -12,13 +12,15 @@ import com.wesync.util.MetronomeCodes
 import com.wesync.util.Tempo
 import java.lang.IllegalStateException
 import java.lang.NullPointerException
+import kotlin.math.roundToLong
 
 class TickHandlerThread(private val context:Context): HandlerThread("TickHandlerThread",
     Process.THREAD_PRIORITY_URGENT_AUDIO) {
 
     /*
            TODO: try to reduce audio latency by using Oboe's AudioStream instead of SoundPool
-           TODO: DO IT IN EXPERIMENTAL BRANCH. By now, SoundPool is PERCEIVING-LY good enough. Using Oboe can improve this A LOT.
+             DO IT IN EXPERIMENTAL BRANCH. By now, SoundPool is PERCEIVING-LY good enough.
+                Using Oboe can improve this A LOT.
      */
 
     private lateinit var handler: Handler
@@ -41,7 +43,7 @@ class TickHandlerThread(private val context:Context): HandlerThread("TickHandler
             MetronomeCodes.START_METRONOME -> {
                 _isPlaying = true
                 sp.play(tickSound,1.0f,1.0f, Thread.NORM_PRIORITY,0,1.0f)
-                SystemClock.sleep((60000 / this.bpm) - Tempo.OFFSET_IN_MILLIS)
+                SystemClock.sleep((60000 / this.bpm).toDouble().roundToLong())
                 if (_isPlaying == true) handler.sendEmptyMessage(MetronomeCodes.START_METRONOME)
             }
             MetronomeCodes.STOP_METRONOME -> {

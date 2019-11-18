@@ -97,7 +97,7 @@ fun Button.setSessionState(item: LiveData<String>,
     }
 }
 
-@BindingAdapter("userType","sessionName","")
+@BindingAdapter("userType","sessionName")
 fun TextView.setSessionState(userType: LiveData<String>, sessionName: String?) {
     when (userType.value) {
        UserTypes.SOLO -> {

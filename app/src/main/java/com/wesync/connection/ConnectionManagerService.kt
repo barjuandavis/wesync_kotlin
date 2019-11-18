@@ -43,12 +43,13 @@ class ConnectionManagerService : LifecycleService() {
         var userType                        = UserTypes.SOLO
         var userName                               = ""
     private lateinit var connectionCallback      : MyConnectionLifecycleCallback
+    private var currentByteArray  = ByteArray(5) {0}
 
 
     private val _payload                               = MutableLiveData<Payload>()
-        val payload: LiveData<Payload>                     = _payload
-    private val _foundSessions                         = MutableLiveData<MutableList<Endpoint>>()
-        val foundSessions: LiveData<MutableList<Endpoint>> = _foundSessions
+        val payload: LiveData<Payload>                     = _payload //INI YANG DITERIMA, BUKAN YANG DIKIRIM
+    private val _foundSessions                         = MutableLiveData<MutableList<DiscoveredEndpoint>>()
+        val foundSessions: LiveData<MutableList<DiscoveredEndpoint>> = _foundSessions
     private val _connectedEndpointId                   = MutableLiveData<String>(null)
         val connectedEndpointId:LiveData<String>           = _connectedEndpointId
     private val _connectionStatus                      = MutableLiveData<Int>()
@@ -89,7 +90,6 @@ class ConnectionManagerService : LifecycleService() {
             this@ConnectionManagerService._connectedEndpointId.value = it})
         connectionCallback.connectionStatus.observe(this, Observer {
             this@ConnectionManagerService._connectionStatus.value = it })
-        //_foundSessions.value = mockListFORTESTINGPURPOSES()
     }
 
     override fun onDestroy() {
@@ -128,26 +128,41 @@ class ConnectionManagerService : LifecycleService() {
             Nearby.getConnectionsClient(applicationContext).stopDiscovery()
     }
 
-    fun sendConfig(bpm: Long, isPlaying: Boolean) {
-        val byteArray = ByteArray(5)
+    fun setConfig(bpm: Long, isPlaying: Boolean) {
+        val bins:Int = (bpm/100).toInt() - 1
+        for (i in 0..2){
+            if (i <= bins) {
+                currentByteArray[i] = 100
+            }
+        }
+        currentByteArray[3] = (bpm % 100).toByte()
+        if (isPlaying) currentByteArray[4] = 1
+            else currentByteArray[4] = 0
     }
 
-    fun sendPayload(toEndpointId: String, payload: Payload) {
+
+    /*
+    * TODO: untuk 19/11/2019
+    *   Bikin MutableLiveData<MutableMap<ReceivedEndpoint>> jadi Service tau mau sendPayload kemana.
+    *   connectedSessionId untuk slave hanya digunakan unutk
+    * */
+
+    fun sendPayload(toEndpointId: String) {
         if (TestMode.STATUS == TestMode.NEARBY_ON)
             Nearby.getConnectionsClient(applicationContext)
-                .sendPayload(toEndpointId,payload)
+                .sendPayload(toEndpointId,Payload.fromBytes(currentByteArray))
     }
 
-    fun connect(endpoint: Endpoint, name: String) {
+    fun connect(discoveredEndpoint: DiscoveredEndpoint, name: String) {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             Nearby.getConnectionsClient(application)
-                .requestConnection(name, endpoint.endpointId, connectionCallback)
+                .requestConnection(name, discoveredEndpoint.endpointId, connectionCallback)
                 .addOnSuccessListener { Toast.makeText(applicationContext,
-                    "Connecting to ${endpoint.endpointId}", Toast.LENGTH_SHORT).show()
+                    "Connecting to ${discoveredEndpoint.endpointId}", Toast.LENGTH_SHORT).show()
                 setConnectionStatus(ConnectionStatus.CONNECTING)
                 }
                 .addOnFailureListener { Toast.makeText(applicationContext,
-                        "Failed to request connection to ${endpoint.endpointId}", Toast.LENGTH_SHORT).show() }
+                        "Failed to request connection to ${discoveredEndpoint.endpointId}", Toast.LENGTH_SHORT).show() }
         }
     }
 
