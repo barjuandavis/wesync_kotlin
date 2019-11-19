@@ -17,7 +17,7 @@ import com.google.android.gms.nearby.connection.Strategy
 import com.wesync.connection.callbacks.MyConnectionLifecycleCallback
 import com.wesync.connection.callbacks.MyEndpointCallback
 import com.wesync.connection.callbacks.MyPayloadCallback
-import com.wesync.util.ConnectionStatus
+import com.wesync.connection.callbacks.SessionConnectionLifecycleCallback
 import com.wesync.util.ServiceUtil.Companion.SERVICE_ID
 import com.wesync.util.TestMode
 import com.wesync.util.UserTypes
@@ -43,6 +43,7 @@ class ConnectionManagerService : LifecycleService() {
         var userType                        = UserTypes.SOLO
         var userName                               = ""
     private lateinit var connectionCallback      : MyConnectionLifecycleCallback
+    private lateinit var advertiserConnectionCallback : SessionConnectionLifecycleCallback
     private var currentByteArray  = ByteArray(5) {0}
 
 
@@ -54,9 +55,9 @@ class ConnectionManagerService : LifecycleService() {
         val connectedEndpointId:LiveData<String>           = _connectedEndpointId
     private val _connectionStatus                      = MutableLiveData<Int>()
         val connectionStatus:LiveData<Int>                 = _connectionStatus
+    private val _connectedSlaves = MutableLiveData<MutableMap<String,ReceivedEndpoint>>()
+        val connectedSlaves:LiveData<MutableMap<String,ReceivedEndpoint>> = _connectedSlaves
 
-
-    private fun setConnectionStatus(i:Int) {_connectionStatus.value = i}
 
     inner class LocalBinder : Binder() {
         fun getService() : ConnectionManagerService {
@@ -76,12 +77,14 @@ class ConnectionManagerService : LifecycleService() {
     override fun onBind(intent: Intent): IBinder {
         connectionCallback = MyConnectionLifecycleCallback(
             applicationContext,payloadCallback)
-        observePayloadAndEndpoints()
+        advertiserConnectionCallback = SessionConnectionLifecycleCallback(
+            applicationContext,payloadCallback)
+        observePayloadEndpointsAndCallbacks()
         super.onBind(intent)
         return this._binder
     }
 
-    private fun observePayloadAndEndpoints() {
+    private fun observePayloadEndpointsAndCallbacks() {
         payloadCallback.payload.observe(this , Observer {
             this@ConnectionManagerService._payload.value = it})
         endpointCallback.sessions.observe(this, Observer {
@@ -90,6 +93,8 @@ class ConnectionManagerService : LifecycleService() {
             this@ConnectionManagerService._connectedEndpointId.value = it})
         connectionCallback.connectionStatus.observe(this, Observer {
             this@ConnectionManagerService._connectionStatus.value = it })
+        advertiserConnectionCallback.connectedSlaves.observe(this, Observer {
+            this@ConnectionManagerService._connectedSlaves.value = it })
     }
 
     override fun onDestroy() {
@@ -102,7 +107,7 @@ class ConnectionManagerService : LifecycleService() {
         if (TestMode.STATUS == TestMode.NEARBY_ON && userType == UserTypes.SESSION_HOST) {
             val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
             Nearby.getConnectionsClient(applicationContext)
-                .startAdvertising(userName,SERVICE_ID, connectionCallback, advertisingOptions)
+                .startAdvertising(userName,SERVICE_ID, advertiserConnectionCallback, advertisingOptions)
                 .addOnSuccessListener { Toast.makeText(this, "Accepting User...",Toast.LENGTH_SHORT).show() }
                 .addOnFailureListener { throw it }
         }
@@ -144,7 +149,7 @@ class ConnectionManagerService : LifecycleService() {
     /*
     * TODO: untuk 19/11/2019
     *   Bikin MutableLiveData<MutableMap<ReceivedEndpoint>> jadi Service tau mau sendPayload kemana.
-    *   connectedSessionId untuk slave hanya digunakan unutk
+    *
     * */
 
     fun sendPayload(toEndpointId: String) {
@@ -158,11 +163,10 @@ class ConnectionManagerService : LifecycleService() {
             Nearby.getConnectionsClient(application)
                 .requestConnection(name, discoveredEndpoint.endpointId, connectionCallback)
                 .addOnSuccessListener { Toast.makeText(applicationContext,
-                    "Connecting to ${discoveredEndpoint.endpointId}", Toast.LENGTH_SHORT).show()
-                setConnectionStatus(ConnectionStatus.CONNECTING)
-                }
+                    "Connecting to ${discoveredEndpoint.endpointId}", Toast.LENGTH_SHORT).show() }
                 .addOnFailureListener { Toast.makeText(applicationContext,
-                        "Failed to request connection to ${discoveredEndpoint.endpointId}", Toast.LENGTH_SHORT).show() }
+                        "Failed to request connection to ${discoveredEndpoint.info.endpointName} " +
+                                "(${discoveredEndpoint.endpointId})", Toast.LENGTH_SHORT).show() }
         }
     }
 

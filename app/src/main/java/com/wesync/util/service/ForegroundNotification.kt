@@ -14,7 +14,6 @@ import com.wesync.MainActivity
 import com.wesync.R
 
 object ForegroundNotification {
-
     private const val CHANNEL_ID = "com.wesync"
         const val NOTIFICATION_ID = 357951
 

@@ -22,7 +22,7 @@ class SessionAdapter(private val clickListener: SessionClickListener):
         currentList: MutableList<DiscoveredEndpoint>
     ) {
        for (i in currentList) {
-           Log.d("currentListChanged","${i.endpointId}: ${i.info.endpointName}")
+           Log.d("currentListChanged","${i.info.endpointName}: ${i.endpointId}")
        }
     }
 

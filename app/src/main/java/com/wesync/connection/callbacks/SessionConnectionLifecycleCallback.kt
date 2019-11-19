@@ -16,35 +16,40 @@ class SessionConnectionLifecycleCallback(
     private val context: Context,
     private val pay: MyPayloadCallback): ConnectionLifecycleCallback() {
 
-    private val list = mutableListOf<ReceivedEndpoint>()
-    private val _connectedSlaves = MutableLiveData<MutableList<ReceivedEndpoint>>(list)
-        val connectedSlaves: LiveData<MutableList<ReceivedEndpoint>> =  _connectedSlaves
+
+    private val map = mutableMapOf<String,ReceivedEndpoint>()
+    private val statusMap = mutableMapOf<String,Int>()
+    private val _connectedSlaves = MutableLiveData<MutableMap<String,ReceivedEndpoint>>(map)
+        val connectedSlaves: LiveData<MutableMap<String,ReceivedEndpoint>> =  _connectedSlaves
 
     private fun updateList() {
-        _connectedSlaves.value = list
+        _connectedSlaves.value = map
     }
-
 
     override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
         Nearby.getConnectionsClient(context).acceptConnection(endpointId, pay)
-            list.add(ReceivedEndpoint(endpointId,info))
+        map[endpointId] = ReceivedEndpoint(endpointId,info)
+        statusMap[endpointId] = ConnectionStatus.CONNECTING
     }
 
     override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
-        when (result.status.statusCode) {
-            ConnectionsStatusCodes.STATUS_OK -> {
-                Toast.makeText(context, "${endpointId} has joined your session!",Toast.LENGTH_SHORT).show()
+        if (result.status.statusCode ==
+            ConnectionsStatusCodes.STATUS_OK)  {
+                Toast.makeText(context,
+                    "${map[endpointId]?.info?.endpointName} ($endpointId) has joined your session!",Toast.LENGTH_SHORT).show()
+                statusMap[endpointId] = ConnectionStatus.CONNECTED
                 updateList()
-            } // We're connected! Can now start sending and receiving data.
-            ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
-                Toast.makeText(context, "You or $endpointId rejected the connection :(",Toast.LENGTH_SHORT).show()
-
             }
-            ConnectionsStatusCodes.STATUS_ERROR -> { Toast.makeText(context, "${endpointId} has failed to join.",Toast.LENGTH_SHORT).show()} // The connection broke before it was able to be accepted.
-        }
+            else {
+                statusMap[endpointId] = ConnectionStatus.DISCONNECTED
+                map.remove(endpointId)
+                updateList()
+            }
     }
 
-    override fun onDisconnected(p0: String) {
-
+    override fun onDisconnected(endpointId: String) {
+        statusMap[endpointId] = ConnectionStatus.DISCONNECTED
+        map.remove(endpointId)
+        updateList()
     }
 }
