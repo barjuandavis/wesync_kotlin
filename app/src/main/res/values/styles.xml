@@ -6,6 +6,12 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:titleTextStyle">@style/AppTheme.ToolbarTitleTextStyle</item>
     </style>
+
+    <style name="AppTheme.ToolbarTitleTextStyle">
+        <item name="android:titleTextStyle">@color/colorEnabledButtonText</item>
+    </style>
+
 
 </resources>

@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.nearby.connection.Payload
+import com.wesync.connection.ConnectionManagerService
 import com.wesync.connection.DiscoveredEndpoint
 import com.wesync.util.Config
 import com.wesync.util.ConnectionStatus
@@ -27,12 +28,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         super.onCleared()
     }
 
-    private val subscriber = ServiceSubscriber(this.getApplication(),null)
+    val subscriber = ServiceSubscriber(this.getApplication(),null)
+    private var mCService: ConnectionManagerService? = null
+
     // Viewmodel lifecycle management
     init {
         subscriber.subscribe()
         observeService()
-
     }
 
     private val _bpm                                   = MutableLiveData<Long>(Tempo.DEFAULT_BPM)
@@ -54,16 +56,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val foundSessions: LiveData<MutableList<DiscoveredEndpoint>> = _foundSessions
 
     private fun observeService() {
+        subscriber.connServiceConnected.observeForever {
+            if (it) mCService = subscriber.connectionService
+        }
         subscriber.connectionService?.foundSessions?.observeForever {_foundSessions.value = it}
         subscriber.connectionService?.payload?.observeForever{payload.value = it}
+
     }
     // a callback which always be called when BPM or isPlaying is changing.
     // it is used to inform mCService to send payload for everytime changes at mService happens.
     private fun onConfigChanged() {
-        subscriber.connectionService?.setConfig(_bpm.value!!,_isPlaying.value!!)
+        mCService?.setConfig(_bpm.value!!,_isPlaying.value!!)
     }
-    private fun connect(e: DiscoveredEndpoint) { subscriber.connectionService?.connect(e,_userName.value!!)}
-    private fun disconnect() {subscriber.connectionService?.disconnect()}
+    private fun connect(e: DiscoveredEndpoint) { mCService?.connect(e,_userName.value!!)}
+    private fun disconnect() {mCService?.disconnect()}
     private fun Long.setBPM() {
         //state.set(BPM_KEY, this)
         _bpm.value = this
@@ -82,25 +88,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _userName.value = sessionName
         } else
         { _userName.value = "MusicDirector" }
-        subscriber.connectionService?.userName = _userName.value!!
+        mCService?.userName = _userName.value!!
 
     }
     private fun setUserType(userTypes: String?) {
         //state.set(USER_TYPE_KEY,userTypes)
         if (userTypes!= null) _userType.value = userTypes
         else _userType.value = UserTypes.SOLO
-        subscriber.connectionService?.userType = _userType.value!!
+        mCService?.userType = _userType.value!!
     }
-    private fun setIsAdvertising(a: Boolean) {
+    fun setIsAdvertising(a: Boolean) {
         _isAdvertising.value = a
-        if (a) subscriber.connectionService?.startAdvertising()
-        else subscriber.connectionService?.stopAdvertising()
+        if (a) mCService?.startAdvertising()
+        else mCService?.stopAdvertising()
+        Log.d("connectionService:Ad","${mCService}")
     }
     private fun setIsDiscovering(a: Boolean){
         _isDiscovering.value = a
-        if (a) subscriber.connectionService?.startDiscovery()
-        else subscriber.connectionService?.stopDiscovering()
-
+            if (a) {
+                subscriber.connectionService?.startDiscovery()
+            }
+                else {
+                subscriber.connectionService?.stopDiscovery()
+            }
+        Log.d("connectionService:Dc","${subscriber.connectionService}")
     }
     private fun reset(){
         Tempo.DEFAULT_BPM.setBPM()

@@ -4,16 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.google.android.gms.nearby.Nearby
-import com.google.android.gms.nearby.connection.AdvertisingOptions
-import com.google.android.gms.nearby.connection.DiscoveryOptions
-import com.google.android.gms.nearby.connection.Payload
-import com.google.android.gms.nearby.connection.Strategy
+import com.google.android.gms.nearby.connection.*
 import com.wesync.connection.callbacks.MyConnectionLifecycleCallback
 import com.wesync.connection.callbacks.MyEndpointCallback
 import com.wesync.connection.callbacks.MyPayloadCallback
@@ -65,6 +63,21 @@ class ConnectionManagerService : LifecycleService() {
         }
     }
 
+    fun mockList(): MutableList<DiscoveredEndpoint> {
+        val l = mutableListOf<DiscoveredEndpoint>()
+        l.add(DiscoveredEndpoint("test1", DiscoveredEndpointInfo("test1","test1")))
+        l.add(DiscoveredEndpoint("test2", DiscoveredEndpointInfo("test1","test1")))
+        l.add(DiscoveredEndpoint("test3", DiscoveredEndpointInfo("test1","test1")))
+        l.add(DiscoveredEndpoint("test4", DiscoveredEndpointInfo("test1","test1")))
+        l.add(DiscoveredEndpoint("test5", DiscoveredEndpointInfo("test1","test1")))
+        l.add(DiscoveredEndpoint("test6", DiscoveredEndpointInfo("test1","test1")))
+        l.add(DiscoveredEndpoint("test7", DiscoveredEndpointInfo("test1","test1")))
+        l.add(DiscoveredEndpoint("test8", DiscoveredEndpointInfo("test1","test1")))
+        l.add(DiscoveredEndpoint("test9", DiscoveredEndpointInfo("test1","test1")))
+        l.add(DiscoveredEndpoint("test10", DiscoveredEndpointInfo("test1","test1")))
+        return l
+    }
+
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         startForeground(
             ForegroundNotification.NOTIFICATION_ID,
@@ -89,6 +102,7 @@ class ConnectionManagerService : LifecycleService() {
             this@ConnectionManagerService._payload.value = it})
         endpointCallback.sessions.observe(this, Observer {
             this@ConnectionManagerService._foundSessions.value = it})
+
         connectionCallback.connectedSessionId.observe(this, Observer {
             this@ConnectionManagerService._connectedEndpointId.value = it})
         connectionCallback.connectionStatus.observe(this, Observer {
@@ -104,7 +118,7 @@ class ConnectionManagerService : LifecycleService() {
 
 
     fun startAdvertising() {
-        if (TestMode.STATUS == TestMode.NEARBY_ON && userType == UserTypes.SESSION_HOST) {
+        if (TestMode.STATUS == TestMode.NEARBY_ON) {
             val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
             Nearby.getConnectionsClient(applicationContext)
                 .startAdvertising(userName,SERVICE_ID, advertiserConnectionCallback, advertisingOptions)
@@ -119,7 +133,8 @@ class ConnectionManagerService : LifecycleService() {
     }
 
     fun startDiscovery() {
-        if (TestMode.STATUS == TestMode.NEARBY_ON && userType == UserTypes.SLAVE) {
+        Log.d("startDiscovery","DISCOVERUING")
+        if (TestMode.STATUS == TestMode.NEARBY_ON) {
             val discoveryOptions = DiscoveryOptions.Builder().setStrategy(strategy).build()
             Nearby.getConnectionsClient(applicationContext)
                 .startDiscovery(SERVICE_ID, endpointCallback, discoveryOptions)
@@ -128,7 +143,7 @@ class ConnectionManagerService : LifecycleService() {
         }
     }
 
-    fun stopDiscovering() {
+    fun stopDiscovery() {
         if (TestMode.STATUS == TestMode.NEARBY_ON)
             Nearby.getConnectionsClient(applicationContext).stopDiscovery()
     }

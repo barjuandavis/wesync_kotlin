@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.wesync.R
 import com.wesync.util.UserTypes
 
@@ -130,3 +131,5 @@ fun Button.setButtonEnabled(userType: LiveData<String>) {
         setTextColor(ContextCompat.getColor(context, R.color.colorEnabledButtonText))
     }
 }
+
+

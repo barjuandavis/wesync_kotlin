@@ -1,6 +1,7 @@
 package com.wesync.connection.callbacks
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,6 +25,7 @@ class SessionConnectionLifecycleCallback(
 
     private fun updateList() {
         _connectedSlaves.value = map
+        Log.d("connectedSlaves","Connected Slaves: ${_connectedSlaves.value?.size}")
     }
 
     override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {

@@ -6,11 +6,15 @@ import android.app.AlertDialog
 import androidx.lifecycle.Observer
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -29,6 +33,8 @@ class ConnectionFragment : Fragment() {
     private lateinit var mainViewModel      : MainViewModel
     private lateinit var binding            : ConnectionFragmentBinding
     private lateinit var sessionAdapter     : SessionAdapter
+    private lateinit var toolbar            : ActionBar
+    private var discovering = false
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -42,14 +48,15 @@ class ConnectionFragment : Fragment() {
             mainViewModel = ViewModelProvider.AndroidViewModelFactory.
                 getInstance(it.application).create(MainViewModel::class.java)
             binding.viewmodel = mainViewModel
-            subscribeToViewModel()
+            binding.lifecycleOwner = it
+            toolbar = (it as AppCompatActivity).supportActionBar!!
         }
-        mainViewModel.startDiscovery()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val builder = AlertDialog.Builder(context)
+
         sessionAdapter = SessionAdapter(
             SessionClickListener {
                 builder.setTitle("What is your Name?")
@@ -70,15 +77,34 @@ class ConnectionFragment : Fragment() {
             addItemDecoration(DividerItemDecoration(context,
                 DividerItemDecoration.VERTICAL))
         }
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            mainViewModel.startDiscovery()
+        }
+        binding.swipeRefreshLayout.isEnabled = true
+        mainViewModel.subscriber.connServiceConnected.observe(this, Observer {
+            if (!discovering && it) {
+                mainViewModel.startDiscovery()
+                binding.swipeRefreshLayout.isRefreshing = true
+                discovering = true
+            }
+        })
+        subscribeToViewModel()
     }
+
+
+
     override fun onDestroy() {
         mainViewModel.stopDiscovery()
         super.onDestroy()
     }
     private fun subscribeToViewModel() {
        mainViewModel.foundSessions.observe(this, Observer {
-            it.let { if (it.isNotEmpty()) { sessionAdapter.submitList(it)
-            } } })
+            it.let {
+                if (it.isNotEmpty()) {
+                    sessionAdapter.submitList(it)
+                    binding.swipeRefreshLayout.isRefreshing = false
+                }
+            } })
     }
 
 

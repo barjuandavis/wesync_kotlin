@@ -14,7 +14,7 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view_layout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="@{() -> clickListener.onClick(discoveredEndpoint)}"
         >
@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:text="@{discoveredEndpoint.component1() +` (`+ discoveredEndpoint.component2().endpointName + `)`}"
+                android:text="@{discoveredEndpoint.component2().endpointName +` (`+ discoveredEndpoint.component1() + `)`}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <TextView

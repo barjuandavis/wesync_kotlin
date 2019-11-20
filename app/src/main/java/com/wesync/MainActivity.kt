@@ -5,6 +5,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.ActionBar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mainViewModel: MainViewModel
     private val serviceSubscriber = ServiceSubscriber(this, this)
+    private lateinit var toolbar: ActionBar
 
     companion object {
         const val MTS_CON = "metronomeConnected"
@@ -26,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity)
+        initSupportActionBar()
         checkForPermission()
         startServices()
         mainViewModel = ViewModelProvider.AndroidViewModelFactory.
@@ -53,6 +55,12 @@ class MainActivity : AppCompatActivity() {
         MetronomeService.stop(applicationContext)
         ConnectionManagerService.stop(applicationContext)
         super.onDestroy()
+    }
+
+    private fun initSupportActionBar() {
+        setContentView(R.layout.main_activity)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        toolbar = supportActionBar!!
     }
 
     private fun checkForPermission() {
