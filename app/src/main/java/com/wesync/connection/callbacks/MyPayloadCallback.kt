@@ -1,6 +1,7 @@
 package com.wesync.connection.callbacks
 
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.nearby.connection.Payload
 import com.google.android.gms.nearby.connection.PayloadCallback
@@ -16,7 +17,5 @@ class MyPayloadCallback: PayloadCallback() {
         _observablePayload.value = p1
     }
 
-    override fun onPayloadTransferUpdate(p0: String, p1: PayloadTransferUpdate) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun onPayloadTransferUpdate(p0: String, p1: PayloadTransferUpdate) {}
 }

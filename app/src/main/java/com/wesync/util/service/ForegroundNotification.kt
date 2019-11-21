@@ -19,17 +19,20 @@ object ForegroundNotification {
 
     fun getNotification(context: Context): Notification? {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
             val serviceChannel = NotificationChannel(CHANNEL_ID,
                 "Wesync Notification Channel", NotificationManager.IMPORTANCE_LOW)
+
             val manager :NotificationManager =
                 getSystemService(context,NotificationManager::class.java) as NotificationManager
+
             manager.createNotificationChannel(serviceChannel)
+
         }
+
         val notificationIntent = Intent(context, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0, notificationIntent, 0
-        )
+        val pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0)
+
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("Wesync: Synchronized Metronome")
             .setSmallIcon(R.drawable.ic_launcher_foreground)

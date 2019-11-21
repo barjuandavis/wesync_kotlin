@@ -42,7 +42,7 @@ class ConnectionManagerService : LifecycleService() {
         var userName                               = ""
     private lateinit var connectionCallback      : MyConnectionLifecycleCallback
     private lateinit var advertiserConnectionCallback : SessionConnectionLifecycleCallback
-    private var currentByteArray  = ByteArray(5) {0}
+
 
 
     private val _payload                               = MutableLiveData<Payload>()
@@ -97,11 +97,20 @@ class ConnectionManagerService : LifecycleService() {
         return this._binder
     }
 
+    override fun onUnbind(intent: Intent?): Boolean {
+        Log.d("_con","connectionmanagerservice DISCONNECTED")
+        if (userType == UserTypes.SOLO) {
+            stopSelf()
+        }
+        return super.onUnbind(intent)
+    }
+
     private fun observePayloadEndpointsAndCallbacks() {
         payloadCallback.payload.observe(this , Observer {
             this@ConnectionManagerService._payload.value = it})
         endpointCallback.sessions.observe(this, Observer {
-            this@ConnectionManagerService._foundSessions.value = it})
+            this@ConnectionManagerService._foundSessions.value = it
+            Log.d("onEndpointFound","DiscoveredEndpoint added. List in ConnectionManagerService updated")})
 
         connectionCallback.connectedSessionId.observe(this, Observer {
             this@ConnectionManagerService._connectedEndpointId.value = it})
@@ -115,8 +124,6 @@ class ConnectionManagerService : LifecycleService() {
         stopSelf()
         super.onDestroy()
     }
-
-
     fun startAdvertising() {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
@@ -126,12 +133,10 @@ class ConnectionManagerService : LifecycleService() {
                 .addOnFailureListener { throw it }
         }
     }
-
     fun stopAdvertising() {
         if (TestMode.STATUS == TestMode.NEARBY_ON)
             Nearby.getConnectionsClient(applicationContext).stopAdvertising()
     }
-
     fun startDiscovery() {
         Log.d("startDiscovery","DISCOVERUING")
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
@@ -142,35 +147,22 @@ class ConnectionManagerService : LifecycleService() {
                 .addOnFailureListener { throw it }
         }
     }
-
     fun stopDiscovery() {
         if (TestMode.STATUS == TestMode.NEARBY_ON)
             Nearby.getConnectionsClient(applicationContext).stopDiscovery()
     }
 
-    fun setConfig(bpm: Long, isPlaying: Boolean) {
-        val bins:Int = (bpm/100).toInt() - 1
-        for (i in 0..2){
-            if (i <= bins) {
-                currentByteArray[i] = 100
-            }
+    fun sendByteArray(b: ByteArray) {
+        for (endpoint in connectedSlaves.value!!) {
+            sendPayload(endpoint.key,b)
         }
-        currentByteArray[3] = (bpm % 100).toByte()
-        if (isPlaying) currentByteArray[4] = 1
-            else currentByteArray[4] = 0
     }
 
-
-    /*
-    * TODO: untuk 19/11/2019
-    *   Bikin MutableLiveData<MutableMap<ReceivedEndpoint>> jadi Service tau mau sendPayload kemana.
-    *
-    * */
-
-    fun sendPayload(toEndpointId: String) {
-        if (TestMode.STATUS == TestMode.NEARBY_ON)
+    fun sendPayload(toEndpointId: String, b: ByteArray) {
+        if (TestMode.STATUS == TestMode.NEARBY_ON) {
             Nearby.getConnectionsClient(applicationContext)
-                .sendPayload(toEndpointId,Payload.fromBytes(currentByteArray))
+                .sendPayload(toEndpointId, Payload.fromBytes(b))
+        }
     }
 
     fun connect(discoveredEndpoint: DiscoveredEndpoint, name: String) {

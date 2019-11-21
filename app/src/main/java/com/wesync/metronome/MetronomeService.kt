@@ -4,6 +4,7 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.*
+import android.util.Log
 import com.wesync.util.service.ForegroundServiceLauncher
 import com.wesync.util.MetronomeCodes
 import com.wesync.MainActivity
@@ -16,8 +17,7 @@ import com.wesync.util.service.ForegroundNotification
 class MetronomeService: LifecycleService() {
 
     companion object {
-        private val LAUNCHER =
-            ForegroundServiceLauncher(MetronomeService::class.java)
+        private val LAUNCHER = ForegroundServiceLauncher(MetronomeService::class.java)
         @JvmStatic
         fun start(context: Context) = LAUNCHER.startService(context)
         @JvmStatic
@@ -36,7 +36,6 @@ class MetronomeService: LifecycleService() {
             return this@MetronomeService
         }
     }
-
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         startForeground(ForegroundNotification.NOTIFICATION_ID,
             ForegroundNotification.getNotification(this))
@@ -44,14 +43,19 @@ class MetronomeService: LifecycleService() {
         super.onStartCommand(intent, flags, startId)
         return START_STICKY
     }
-
     override fun onBind(intent: Intent): IBinder? {
         handlerThread = TickHandlerThread(applicationContext)
         handlerThread.start()
         super.onBind(intent)
         return this._binder
     }
-
+    override fun onUnbind(intent: Intent?): Boolean {
+        Log.d("_con","MetronomeService DISCONNECTED")
+        if (!isPlaying) {
+            cleanup()
+        }
+        return super.onUnbind(intent)
+    }
     override fun onDestroy() {
         cleanup()
         super.onDestroy()
@@ -61,13 +65,11 @@ class MetronomeService: LifecycleService() {
         isPlaying = true
         handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME)
      }
-
     fun stop() {
         isPlaying = false
         handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME)
     }
-
-     fun setBPM(bpm: Long) {
+    fun setBPM(bpm: Long) {
         if (handlerThread.isAlive) {
             val m = Message()
             m.what = MetronomeCodes.ON_BPM_CHANGED

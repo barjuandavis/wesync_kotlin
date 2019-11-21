@@ -11,6 +11,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.metronome.MetronomeService
+import java.lang.IllegalArgumentException
 
 
 /**
@@ -39,26 +40,33 @@ class ServiceSubscriber(private val context: Context, private val activity: Frag
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             //Log.d("konek","Binding mService connected!")
             val s = (binder as MetronomeService.LocalBinder).getService()
+            Log.d("_con","MetronomeService connected to ${name?.shortClassName}")
             metronomeService = s
             _metronomeConnected.value = true
         }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
+        override fun onServiceDisconnected(name: ComponentName?) {}
+        override fun onNullBinding(name: ComponentName?) {
+            Log.d("_con","MetronomeService DISCONNECTED to ${name?.shortClassName}")
             metronomeService = null
             _metronomeConnected.value = false
+            super.onNullBinding(name)
         }
+
     }
     private val _connServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             //Log.d("konek","Binding mCService connected!")
             val s = (binder as ConnectionManagerService.LocalBinder).getService()
+            Log.d("_con","ConnectionManagerService connected to ${name?.shortClassName}")
             connectionService = s
             _connServiceConnected.value = true
         }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
+        override fun onServiceDisconnected(name: ComponentName?) {}
+        override fun onNullBinding(name: ComponentName?) {
+            Log.d("_con","ConnectionManagerService DISCONNECTED from ${name?.shortClassName}")
             connectionService= null
             _connServiceConnected.value = false
+            super.onNullBinding(name)
         }
     }
 
@@ -89,13 +97,11 @@ class ServiceSubscriber(private val context: Context, private val activity: Frag
 
 
     fun unsubscribe() {
-        if (metronomeBoundByActivity)
-            activity?.unbindService(_metronomeConnection)
-        else
-            context.unbindService(_metronomeConnection)
-        if (connBoundByActivity)
-            activity?.unbindService(_connServiceConnection)
-        else
-            context.unbindService(_connServiceConnection)
+        if (_connServiceConnected.value!! && _metronomeConnected.value!!) {
+            if (metronomeBoundByActivity) activity?.unbindService(_metronomeConnection)
+            else context.unbindService(_metronomeConnection)
+            if (connBoundByActivity) activity?.unbindService(_connServiceConnection)
+            else context.unbindService(_connServiceConnection)
+        }
     }
 }

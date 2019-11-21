@@ -18,6 +18,7 @@ import androidx.appcompat.widget.Toolbar
 
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 
@@ -26,6 +27,7 @@ import com.wesync.MainViewModel
 import com.wesync.adapter.SessionAdapter
 import com.wesync.adapter.SessionClickListener
 import com.wesync.databinding.ConnectionFragmentBinding
+import kotlinx.android.synthetic.main.metronome_fragment.*
 
 
 class ConnectionFragment : Fragment() {
@@ -45,12 +47,20 @@ class ConnectionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
-            mainViewModel = ViewModelProvider.AndroidViewModelFactory.
-                getInstance(it.application).create(MainViewModel::class.java)
+            mainViewModel = ViewModelProviders.of(it).get(MainViewModel::class.java)
             binding.viewmodel = mainViewModel
-            binding.lifecycleOwner = it
+            binding.lifecycleOwner = this
+            mainViewModel.subscriber.subscribe()
+            it.lifecycle.addObserver(mainViewModel)
+            mainViewModel.currentFragment.value = 2
             toolbar = (it as AppCompatActivity).supportActionBar!!
+            subscribeToViewModel()
         }
+    }
+
+    override fun onResume() {
+        mainViewModel.currentFragment.value = 2
+        super.onResume()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -88,10 +98,7 @@ class ConnectionFragment : Fragment() {
                 discovering = true
             }
         })
-        subscribeToViewModel()
     }
-
-
 
     override fun onDestroy() {
         mainViewModel.stopDiscovery()
@@ -99,12 +106,12 @@ class ConnectionFragment : Fragment() {
     }
     private fun subscribeToViewModel() {
        mainViewModel.foundSessions.observe(this, Observer {
-            it.let {
-                if (it.isNotEmpty()) {
-                    sessionAdapter.submitList(it)
-                    binding.swipeRefreshLayout.isRefreshing = false
-                }
-            } })
+           if (it.isNotEmpty()) {
+               sessionAdapter.submitList(it)
+               Log.d("onEndpointFound", "DiscoveredEndpoint added. List in SessionAdapted updated")
+               binding.swipeRefreshLayout.isRefreshing = false
+           }
+       })
     }
 
 

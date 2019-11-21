@@ -2,27 +2,24 @@ package com.wesync.ui
 
 
 import android.app.AlertDialog
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
-
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
-import com.wesync.metronome.MetronomeService
+import com.wesync.MainActivity
 import com.wesync.R
 import com.wesync.MainViewModel
-import com.wesync.connection.ConnectionManagerService
 import com.wesync.databinding.MetronomeFragmentBinding
 import com.wesync.util.service.ServiceSubscriber
 import com.wesync.util.UserTypes
+import java.lang.Exception
 
 class MetronomeFragment : Fragment(){
 
@@ -34,15 +31,21 @@ class MetronomeFragment : Fragment(){
        return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        activity?.let{
-            mainViewModel = ViewModelProvider.AndroidViewModelFactory.
-                getInstance(it.application).create(MainViewModel::class.java)
+        (activity as MainActivity).let{
+            mainViewModel =
+                ViewModelProviders.of(it).get(MainViewModel::class.java)
             binding.viewmodel = mainViewModel
-            binding.lifecycleOwner = it
+            binding.lifecycleOwner = this
+            it.lifecycle.addObserver(mainViewModel)
+            mainViewModel.currentFragment.value = 1
             subscribeToViewModel()
         }
+    }
+
+    override fun onResume() {
+        mainViewModel.currentFragment.value = 1
+        super.onResume()
     }
 
     private fun subscribeToViewModel() {

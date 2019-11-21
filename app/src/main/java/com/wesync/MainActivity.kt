@@ -5,12 +5,17 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.metronome.MetronomeService
+import com.wesync.util.UserTypes
 import com.wesync.util.service.ServiceSubscriber
 
 class MainActivity : AppCompatActivity() {
@@ -31,29 +36,26 @@ class MainActivity : AppCompatActivity() {
         initSupportActionBar()
         checkForPermission()
         startServices()
-        mainViewModel = ViewModelProvider.AndroidViewModelFactory.
-            getInstance(this.application).create(MainViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        this.lifecycle.addObserver(mainViewModel)
         mainViewModel.unpackBundle(savedInstanceState)
     }
 
     override fun onStart() {
         startServices()
-        serviceSubscriber.subscribe()
         super.onStart()
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
     override fun onStop() {
-        serviceSubscriber.unsubscribe()
+        if (!mainViewModel.isPlaying.value!!) {
+            Log.d("onStop","stopping")
+            stopServices()
+        }
         super.onStop()
     }
 
     override fun onDestroy() {
-        MetronomeService.stop(applicationContext)
-        ConnectionManagerService.stop(applicationContext)
+        stopServices()
         super.onDestroy()
     }
 
@@ -78,13 +80,12 @@ class MainActivity : AppCompatActivity() {
             b.putBoolean(MainViewModel.USER_TYPE_KEY,currState.isPlaying)
             b.putString(MainViewModel.SESSION_KEY,currState.session)
             b.putString(MainViewModel.USER_TYPE_KEY,currState.userTypeString)
-            b.putBoolean(CNS_CON,serviceSubscriber.connServiceConnected.value?: false)
-            b.putBoolean(MTS_CON,serviceSubscriber.metronomeConnected.value?: false)
+            b.putBoolean(CNS_CON,mainViewModel.subscriber.connServiceConnected.value?: false)
+            b.putBoolean(MTS_CON,mainViewModel.subscriber.metronomeConnected.value?: false)
         return b
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        //Log.d("savedinstance","onSaveInstance Called!")
         super.onSaveInstanceState(getCurrentState())
     }
 
@@ -100,7 +101,25 @@ class MainActivity : AppCompatActivity() {
         if (!connectionIsAlive) ConnectionManagerService.start(applicationContext)
     }
 
+    private fun stopServices() {
+        if (metronomeIsAlive) MetronomeService.stop(applicationContext)
+        if (connectionIsAlive)ConnectionManagerService.stop(applicationContext)
+    }
+
     override fun onBackPressed() {
-        super.onBackPressed()
+        val id = findNavController(R.id.fragmentNavHost).currentDestination?.id
+        if (id == R.id.connectionFragment) {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Are you sure you want to stop finding session?")
+            builder.setPositiveButton("OK") { _, _ ->
+                super.onBackPressed()
+            }
+            builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+            if (id == R.id.connectionFragment) builder.show()
+        } else {
+
+            super.onBackPressed()
+        }
+
     }
 }
