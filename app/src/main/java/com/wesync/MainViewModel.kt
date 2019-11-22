@@ -2,6 +2,7 @@ package com.wesync
 
 import android.app.Application
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.*
 import com.google.android.gms.nearby.connection.Payload
@@ -49,21 +50,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         val bpm         :LiveData<Long>                    = _bpm
     private val _isPlaying                             = MutableLiveData<Boolean>(false)
         val isPlaying   :LiveData<Boolean>                 = _isPlaying
+
     private val _userName                               = MutableLiveData<String>("MusicDirector")
-        val userName     :LiveData<String>                  = _userName
+        val userName     :LiveData<String>                 = _userName
     private val _userType                              = MutableLiveData<String>(UserTypes.SOLO)
         val userType    :LiveData<String>                  = _userType
-        val connectionStatus                               = MutableLiveData<Int>()
-    private val payload                                        = MutableLiveData<Payload>()
-        val connectedEndpointId                            = MutableLiveData<String>(null)
+    private val _connectionStatus                      = MutableLiveData<Int>()
+    private val payload                                = MutableLiveData<Payload>()
+    private val connectedEndpointId                    = MutableLiveData<String>(null)
+
     private val _isAdvertising                         = MutableLiveData<Boolean>(false)
         val isAdvertising: LiveData<Boolean> = _isAdvertising
     private val _isDiscovering           = MutableLiveData<Boolean>(false)
         val isDiscovering: LiveData<Boolean> = _isAdvertising
+
     private val _foundSessions = MutableLiveData<MutableList<DiscoveredEndpoint>>()
         val foundSessions: LiveData<MutableList<DiscoveredEndpoint>> = _foundSessions
     var currentFragment = MutableLiveData(0)
-    private var currentByteArray  = ByteArray(5) {0}
+    private var currentByteArray  = ByteArray(7) {0}
     private fun observeService() {
         subscriber.connectionService?.foundSessions?.observeForever { _foundSessions.value = it}
         subscriber.connectionService?.payload?.observeForever{
@@ -71,7 +75,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
             unpackPayload(it)
         }
         subscriber.connectionService?.connectionStatus?.observeForever {
-           connectionStatus.value = it
+           _connectionStatus.value = it
            if (it == ConnectionStatus.DISCONNECTED) {
                endSession()
            }
@@ -83,6 +87,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         packByteArray()
         if (userType.value == UserTypes.SESSION_HOST)
             mCService?.sendByteArray(currentByteArray)
+    }
+    private fun pingToAllUsers() {
 
     }
     private fun connect(e: DiscoveredEndpoint) { mCService?.connect(e,_userName.value!!)}
@@ -102,16 +108,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         currentByteArray[3] = (bpm % 100).toByte()
         if (isPlaying) currentByteArray[4] = 1
         else currentByteArray[4] = 0
+        //ping
+        updateSystemTime()
     }
+
     private fun Long.setBPM() {
         //state.set(BPM_KEY, this)
         _bpm.value = this
         subscriber.metronomeService?.setBPM(this)
         onConfigChanged()
     }
+    private fun updateSystemTime() {
+        System.currentTimeMillis()
+
+
+    }
     private fun setIsPlaying(b: Boolean) {
         _isPlaying.value = b
-        if (b) subscriber.metronomeService?.play()
+        if (b)  {
+            subscriber.metronomeService?.play()
+            if (userType.value!! == UserTypes.SESSION_HOST && isAdvertising.value!!) {
+                setIsAdvertising(false)
+            }
+        }
         else subscriber.metronomeService?.stop()
         onConfigChanged()
     }
@@ -130,12 +149,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         else _userType.value = UserTypes.SOLO
         mCService?.userType = _userType.value!!
     }
-    fun setIsAdvertising(a: Boolean) {
-        _isAdvertising.value = a
-        if (a) mCService?.startAdvertising()
-        else mCService?.stopAdvertising()
-        Log.d("connectionService:Ad","${mCService}")
-    }
     private fun setIsDiscovering(a: Boolean){
         _isDiscovering.value = a
             if (a) {
@@ -151,7 +164,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         setIsPlaying(false)
         setUserName("MusicDirector")
         setUserType(UserTypes.SOLO)
-        connectionStatus.value = ConnectionStatus.DISCONNECTED
+        _connectionStatus.value = ConnectionStatus.DISCONNECTED
         connectedEndpointId.value = null
     }
     private fun unpackPayload(p: Payload) {
@@ -169,8 +182,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         setUserType(UserTypes.SESSION_HOST)
         if (!_isAdvertising.value!!) setIsAdvertising(true)
     }
+    fun setIsAdvertising(a: Boolean) {
+        _isAdvertising.value = a
+        if (a) mCService?.startAdvertising()
+        else mCService?.stopAdvertising()
+        Log.d("connectionService:Ad","${mCService}")
+    }
     fun onJoinSession(yourName: String?, it: DiscoveredEndpoint) {
         setUserName(yourName)
+        _connectionStatus.value = ConnectionStatus.CONNECTING
         setUserType(UserTypes.SLAVE)
         connect(it)
     }
@@ -188,7 +208,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     fun stopDiscovery() {
         setIsDiscovering(false)
     }
-
     fun flipIsPlaying() {
         setIsPlaying(!_isPlaying.value!!)
     }
@@ -200,7 +219,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
             else -> (r + plus).setBPM()
         }
     }
-
     fun getConfig(): Config {
         return Config(
             bpm.value!!,
@@ -209,7 +227,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
             userType.value!!
         )
     }
-
     fun unpackBundle(b: Bundle?) {
         if (b != null) {
             b.getLong(BPM_KEY).setBPM()
@@ -223,6 +240,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     }
     fun getSessionName(): String {
         return _userName.value!!
+    }
+    fun getConnectionStatus(): Int {
+        return _connectionStatus.value!!
     }
 
     fun printValues() {

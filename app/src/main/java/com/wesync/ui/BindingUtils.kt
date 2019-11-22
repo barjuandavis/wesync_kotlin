@@ -8,11 +8,15 @@ import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.wesync.R
+import com.wesync.util.ConnectionStatus
 import com.wesync.util.UserTypes
 
 
 @BindingAdapter("userType","playState")
 fun Button.setPlayState(userType: LiveData<String>, isPlaying: LiveData<Boolean>) {
+    if (this.id == R.id.play_button) {
+        isEnabled = userType.value!! != UserTypes.SLAVE
+    }
     when (userType.value!!){
         UserTypes.SLAVE -> {
             setBackgroundColor(ContextCompat.getColor(context,
@@ -37,9 +41,11 @@ fun Button.setPlayState(userType: LiveData<String>, isPlaying: LiveData<Boolean>
 
 }
 
-@BindingAdapter("userType","isAdvertising")
+@BindingAdapter("userType","isAdvertising","playState","connectionStatus")
 fun Button.setSessionState(item: LiveData<String>,
-                           isAdvertising: LiveData<Boolean>) {
+                           isAdvertising: LiveData<Boolean>,
+                           isPlaying: LiveData<Boolean>,
+                           connectionStatus: Int) {
     when (item.value) {
         UserTypes.SOLO -> {
             when (id) {
@@ -68,16 +74,24 @@ fun Button.setSessionState(item: LiveData<String>,
                 }
                 R.id.join_session -> {
                     visibility = View.VISIBLE
+                    isEnabled = !isPlaying.value!!
+                    if (!isEnabled) {
+                        text = resources.getString(R.string.not_advertising)
+                        setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisabledButton))
+                        setTextColor(ContextCompat.getColor(context,R.color.colorDisabledButtonText))
+                    }
                     if (isAdvertising.value!!) {
                         text = resources.getString(R.string.advertising)
                         setBackgroundColor(ContextCompat.getColor(context,
                             R.color.colorStop
                         ))
+                        setTextColor(ContextCompat.getColor(context,R.color.colorEnabledButtonText))
                     } else {
                         text = resources.getString(R.string.not_advertising)
                         setBackgroundColor(ContextCompat.getColor(context,
                             R.color.colorPlay
                         ))
+                        setTextColor(ContextCompat.getColor(context,R.color.colorEnabledButtonText))
                     }
                 }
             }
@@ -85,6 +99,14 @@ fun Button.setSessionState(item: LiveData<String>,
         UserTypes.SLAVE -> {
             when (id) {
                 R.id.new_session -> {
+                    if (connectionStatus == ConnectionStatus.CONNECTING) {
+                        isEnabled = false
+                        setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisabledButton))
+                        setTextColor(ContextCompat.getColor(context,R.color.colorDisabledButtonText))
+                    } else  {
+                        isEnabled = true
+                        setTextColor(ContextCompat.getColor(context,R.color.colorEnabledButtonText))
+                    }
                     text = resources.getString(R.string.quit_session)
                     setBackgroundColor(ContextCompat.getColor(context,
                         R.color.colorSubtractTempo
@@ -98,8 +120,8 @@ fun Button.setSessionState(item: LiveData<String>,
     }
 }
 
-@BindingAdapter("userType","sessionName")
-fun TextView.setSessionState(userType: LiveData<String>, sessionName: String?) {
+@BindingAdapter("userType","sessionName","connecting")
+fun TextView.setSessionState(userType: LiveData<String>, sessionName: String?, connectionStatus: Int?) {
     when (userType.value) {
        UserTypes.SOLO -> {
            text = resources.getString(R.string.not_connected)
@@ -108,7 +130,11 @@ fun TextView.setSessionState(userType: LiveData<String>, sessionName: String?) {
             text = resources.getString(R.string.current_session, sessionName)
         }
         UserTypes.SLAVE -> {
-            text = resources.getString(R.string.current_joined_session, sessionName)
+            text = if (connectionStatus == ConnectionStatus.CONNECTING) {
+                resources.getString(R.string.connecting, sessionName)
+            } else {
+                resources.getString(R.string.current_joined_session, sessionName)
+            }
         }
     }
 }
@@ -131,5 +157,7 @@ fun Button.setButtonEnabled(userType: LiveData<String>) {
         setTextColor(ContextCompat.getColor(context, R.color.colorEnabledButtonText))
     }
 }
+
+
 
 

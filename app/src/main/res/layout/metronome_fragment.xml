@@ -30,7 +30,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.248"
             app:userType="@{viewmodel.userType}"
-            app:sessionName="@{viewmodel.sessionName}"/>
+            app:sessionName="@{viewmodel.sessionName}"
+            app:connecting="@{viewmodel.connectionStatus}"/>
         <Button
             android:id="@+id/new_session"
             android:layout_width="130sp"
@@ -48,7 +49,10 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
             app:userType="@{viewmodel.userType}"
-            app:isAdvertising="@{viewmodel.isAdvertising()}"/>
+            app:isAdvertising="@{viewmodel.isAdvertising}"
+            app:playState="@{viewmodel.isPlaying}"
+            app:connectionStatus="@{viewmodel.connectionStatus}"
+            />
         <Button
             android:id="@+id/join_session"
             android:layout_width="130sp"
@@ -66,7 +70,9 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
             app:userType="@{viewmodel.userType}"
-            app:isAdvertising="@{viewmodel.isAdvertising()}"/>
+            app:isAdvertising="@{viewmodel.isAdvertising}"
+            app:connectionStatus="@{viewmodel.connectionStatus}"
+            app:playState="@{viewmodel.isPlaying()}"/>
 
         <LinearLayout
             android:id="@+id/minus_layout"

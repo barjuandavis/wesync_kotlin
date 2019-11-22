@@ -16,9 +16,11 @@
     <string name="quit_session">Quit Session</string>
     <string name="current_session">"This is %1$s's Session."</string>
     <string name="current_joined_session">"You have joined %1$s's Session.\nYou have to follow your Session Leader's instruction."</string>
+    <string name="connecting">"Connecting to %1$s's Session…"</string>
     <string name="advertising">STOP\naccepting user</string>
     <string name="not_advertising">START\naccepting user</string>
     <string name="notification_manager">Wesync Notification Manager</string>
     <string name="notification_main">Wesync: Synchronized Metronome</string>
     <string name="not_connected">You are playing by yourself.\nCreate a new Session or join an existing Session around you.</string>
+    <string name="need_auto_time">To ensure accuracy of this application, We recommend you to turn on automatic date and time on your Settings.</string>
 </resources>
