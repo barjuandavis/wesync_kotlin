@@ -2,16 +2,12 @@ package com.wesync.metronome
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
 import android.media.AudioManager
-import android.media.MediaPlayer
 import android.media.SoundPool
 import android.os.*
-import android.util.Log
 import com.wesync.R
 import com.wesync.util.MetronomeCodes
-import com.wesync.util.Tempo
-import java.lang.IllegalStateException
-import java.lang.NullPointerException
 import kotlin.math.roundToLong
 
 class TickHandlerThread(private val context:Context): HandlerThread("TickHandlerThread",
@@ -42,7 +38,7 @@ class TickHandlerThread(private val context:Context): HandlerThread("TickHandler
             when (it.what) {
             MetronomeCodes.START_METRONOME -> {
                 _isPlaying = true
-                sp.play(tickSound,1.0f,1.0f, Thread.NORM_PRIORITY,0,1.0f)
+                sp.play(tickSound,1.0f,1.0f, Thread.MAX_PRIORITY,0,1.0f)
                 SystemClock.sleep((60000 / this.bpm).toDouble().roundToLong())
                 if (_isPlaying == true) handler.sendEmptyMessage(MetronomeCodes.START_METRONOME)
             }

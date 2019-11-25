@@ -51,9 +51,6 @@ class MetronomeService: LifecycleService() {
     }
     override fun onUnbind(intent: Intent?): Boolean {
         Log.d("_con","MetronomeService DISCONNECTED")
-        if (!isPlaying) {
-            cleanup()
-        }
         return super.onUnbind(intent)
     }
     override fun onDestroy() {

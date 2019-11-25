@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.HandlerThread
 import android.text.InputType
 import android.util.Log
 import android.widget.EditText
@@ -18,8 +19,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.work.*
+import com.google.common.util.concurrent.ListenableFuture
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.metronome.MetronomeService
+import com.wesync.ntp.NTPClientWorker
 import com.wesync.ui.ConnectionFragmentDirections
 import com.wesync.util.UserTypes
 import com.wesync.util.service.ServiceSubscriber
@@ -49,11 +53,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun syncSystemClock() {
-        val a = android.
-            provider.
-            Settings.Global.
-            getInt(contentResolver, android.provider.Settings.Global.AUTO_TIME, 0)
-        if (a != 1) {
+        if (android.
+                provider.
+                Settings.Global.
+                getInt(contentResolver, android.provider.Settings.Global.AUTO_TIME, 0) != 1) {
             val builder = AlertDialog.Builder(this)
             val tv = TextView(this)
             tv.text = getString(R.string.need_auto_time)
@@ -65,7 +68,17 @@ class MainActivity : AppCompatActivity() {
             }
             builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
             builder.show()
-        }
+        } //persuade user to turn on NITZ
+        //here is an attempt to connect to an NTP Service. Embrace yourselves!
+        val constrains = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val otr = OneTimeWorkRequest.Builder(NTPClientWorker::class.java)
+        .setConstraints(constrains).build()
+        WorkManager.getInstance(this)
+            .beginWith(otr)
+            .enqueue()
+
     }
 
     override fun onStart() {
