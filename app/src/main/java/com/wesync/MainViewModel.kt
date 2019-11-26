@@ -2,7 +2,6 @@ package com.wesync
 
 import android.app.Application
 import android.os.Bundle
-import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.*
 import com.google.android.gms.nearby.connection.Payload
@@ -21,6 +20,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         const val BPM_KEY = "currentBPM"
         const val IS_PLAYING_KEY = "currentIsPlaying"
     }
+
 
     val subscriber = ServiceSubscriber(this.getApplication(),null)
     private var mCService: ConnectionManagerService? = null
@@ -58,6 +58,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     private val _connectionStatus                      = MutableLiveData<Int>()
     private val payload                                = MutableLiveData<Payload>()
     private val connectedEndpointId                    = MutableLiveData<String>(null)
+    private val preStartLatency                        = MutableLiveData<Long>(0)
+    private val offset                                 = MutableLiveData<Long>(0)
+
+
 
     private val _isAdvertising                         = MutableLiveData<Boolean>(false)
         val isAdvertising: LiveData<Boolean> = _isAdvertising
@@ -84,17 +88,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     // a callback which always be called when BPM or isPlaying is changing.
     // it is used to inform mCService to send payload for everytime changes at mService happens.
     private fun onConfigChanged() {
-        packByteArray()
+        packConfigByteArray()
         if (userType.value == UserTypes.SESSION_HOST)
             mCService?.sendByteArray(currentByteArray)
     }
-    private fun pingToAllUsers() {
 
-    }
     private fun connect(e: DiscoveredEndpoint) { mCService?.connect(e,_userName.value!!)}
     private fun disconnect() {mCService?.disconnect()}
 
-    private fun packByteArray() {
+    private fun packConfigByteArray() {
         val bpm = _bpm.value!!
         val isPlaying = _isPlaying.value!!
         val bins:Int = (bpm/100).toInt() - 1
@@ -109,7 +111,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         if (isPlaying) currentByteArray[4] = 1
         else currentByteArray[4] = 0
         //ping
-        updateSystemTime()
     }
 
     private fun Long.setBPM() {
@@ -118,11 +119,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         subscriber.metronomeService?.setBPM(this)
         onConfigChanged()
     }
-    private fun updateSystemTime() {
-        System.currentTimeMillis()
 
-
-    }
     private fun setIsPlaying(b: Boolean) {
         _isPlaying.value = b
         if (b)  {
@@ -169,14 +166,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     }
     private fun unpackPayload(p: Payload) {
         val b = p.asBytes()!!
-        (b[0] + b[1] + b[2] + b[3]).toLong().setBPM()
-        if (b[4].toInt() == 1) {
-            setIsPlaying(true)
-        } else {
-            setIsPlaying(false)
+        if (b[6] == (0).toByte()) {
+            (b[0] + b[1] + b[2] + b[3]).toLong().setBPM()
+            if (b[4].toInt() == 1) {
+                setIsPlaying(true)
+            } else {
+                setIsPlaying(false)
+            }
         }
     }
 
+
+    fun setOffset(offset: Long) {
+        this.offset.value = offset
+        mCService?.offset = offset
+    }
     fun onNewSession(sessionName: String?) {
         setUserName(sessionName)
         setUserType(UserTypes.SESSION_HOST)
@@ -186,7 +190,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         _isAdvertising.value = a
         if (a) mCService?.startAdvertising()
         else mCService?.stopAdvertising()
-        Log.d("connectionService:Ad","${mCService}")
     }
     fun onJoinSession(yourName: String?, it: DiscoveredEndpoint) {
         setUserName(yourName)

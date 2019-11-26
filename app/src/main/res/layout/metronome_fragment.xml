@@ -23,15 +23,15 @@
             android:textColor="@android:color/primary_text_dark"
             android:textSize="12sp"
             android:textStyle="bold|italic"
+            app:connecting="@{viewmodel.connectionStatus}"
             app:layout_constraintBottom_toTopOf="@+id/plus_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.494"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.248"
-            app:userType="@{viewmodel.userType}"
             app:sessionName="@{viewmodel.sessionName}"
-            app:connecting="@{viewmodel.connectionStatus}"/>
+            app:userType="@{viewmodel.userType}" />
         <Button
             android:id="@+id/new_session"
             android:layout_width="130sp"
@@ -184,21 +184,35 @@
                 app:joinedSession="@{viewmodel.userType}"/>
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/offset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/offset"
+            android:textAlignment="center"
+            android:textColor="@android:color/primary_text_dark"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/minus_layout"
+            app:offset="@{viewmodel.offset}"
+           />
+
         <Button
             android:id="@+id/play_button"
             android:layout_width="150sp"
             android:layout_height="75sp"
-            android:layout_marginTop="20sp"
             android:onClick="@{() -> viewmodel.flipIsPlaying()}"
             android:text="@string/play_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/minus_layout"
-            app:layout_constraintVertical_bias="0.06"
+            app:layout_constraintTop_toBottomOf="@+id/offset"
+            app:layout_constraintVertical_bias="0.0"
             app:playState="@{viewmodel.isPlaying()}"
-            app:userType="@{viewmodel.userType}"/>
+            app:userType="@{viewmodel.userType}" />
 
         <TextView
             android:id="@+id/bpm_textView2"

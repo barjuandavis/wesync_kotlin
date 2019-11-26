@@ -13,17 +13,12 @@ import kotlin.math.roundToLong
 class TickHandlerThread(private val context:Context): HandlerThread("TickHandlerThread",
     Process.THREAD_PRIORITY_URGENT_AUDIO) {
 
-    /*
-           TODO: try to reduce audio latency by using Oboe's AudioStream instead of SoundPool
-             DO IT IN EXPERIMENTAL BRANCH. By now, SoundPool is PERCEIVING-LY good enough.
-                Using Oboe can improve this A LOT.
-     */
-
     private lateinit var handler: Handler
     private var tickSound: Int = 0
     private var sp: SoundPool  = buildSoundPool()
     private var bpm:Long = 120
     private var _isPlaying:Boolean? = false
+    private var preStartLatency: Long = 0
 
     override fun run() {
         if (Looper.myLooper() == null) {
@@ -38,18 +33,25 @@ class TickHandlerThread(private val context:Context): HandlerThread("TickHandler
             when (it.what) {
             MetronomeCodes.START_METRONOME -> {
                 _isPlaying = true
-                sp.play(tickSound,1.0f,1.0f, Thread.MAX_PRIORITY,0,1.0f)
-                SystemClock.sleep((60000 / this.bpm).toDouble().roundToLong())
-                if (_isPlaying == true) handler.sendEmptyMessage(MetronomeCodes.START_METRONOME)
+                if (preStartLatency > 0) {
+                    SystemClock.sleep(preStartLatency)
+                }
+                handler.sendEmptyMessage(MetronomeCodes.TICK)
             }
             MetronomeCodes.STOP_METRONOME -> {
                 _isPlaying = false
                 handler.removeMessages(MetronomeCodes.START_METRONOME)
                 handler.removeMessages(MetronomeCodes.ON_BPM_CHANGED)
+                handler.removeMessages(MetronomeCodes.TICK)
                 handler.removeMessages(MetronomeCodes.STOP_METRONOME)
             }
             MetronomeCodes.ON_BPM_CHANGED -> {
                 this.bpm = it.obj as Long
+            }
+            MetronomeCodes.TICK -> {
+                sp.play(tickSound,1.0f,1.0f, Thread.MAX_PRIORITY,0,1.0f)
+                SystemClock.sleep((60000 / this.bpm).toDouble().roundToLong())
+                if (_isPlaying == true) handler.sendEmptyMessage(MetronomeCodes.TICK)
             }
         }
             return@Handler true

@@ -6,7 +6,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.lifecycle.MutableLiveData
 import com.wesync.R
 import com.wesync.util.ConnectionStatus
 import com.wesync.util.UserTypes
@@ -96,25 +96,23 @@ fun Button.setSessionState(item: LiveData<String>,
                 }
             }
         }
-        UserTypes.SLAVE -> {
-            when (id) {
-                R.id.new_session -> {
-                    if (connectionStatus == ConnectionStatus.CONNECTING) {
-                        isEnabled = false
-                        setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisabledButton))
-                        setTextColor(ContextCompat.getColor(context,R.color.colorDisabledButtonText))
-                    } else  {
-                        isEnabled = true
-                        setTextColor(ContextCompat.getColor(context,R.color.colorEnabledButtonText))
-                    }
-                    text = resources.getString(R.string.quit_session)
-                    setBackgroundColor(ContextCompat.getColor(context,
-                        R.color.colorSubtractTempo
-                    ))
+        UserTypes.SLAVE -> when (id) {
+            R.id.new_session -> {
+                if (connectionStatus == ConnectionStatus.CONNECTING) {
+                    isEnabled = false
+                    setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisabledButton))
+                    setTextColor(ContextCompat.getColor(context,R.color.colorDisabledButtonText))
+                } else  {
+                    isEnabled = true
+                    setTextColor(ContextCompat.getColor(context,R.color.colorEnabledButtonText))
                 }
-                R.id.join_session -> {
-                    visibility = View.GONE
-                }
+                text = resources.getString(R.string.quit_session)
+                setBackgroundColor(ContextCompat.getColor(context,
+                    R.color.colorSubtractTempo
+                ))
+            }
+            R.id.join_session -> {
+                visibility = View.GONE
             }
         }
     }
@@ -156,6 +154,11 @@ fun Button.setButtonEnabled(userType: LiveData<String>) {
         }
         setTextColor(ContextCompat.getColor(context, R.color.colorEnabledButtonText))
     }
+}
+
+@BindingAdapter("offset")
+fun TextView.setOffset(offset: MutableLiveData<Long>) {
+    text = resources.getString(R.string.offset,offset.value)
 }
 
 

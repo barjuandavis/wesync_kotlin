@@ -11,12 +11,19 @@ class MetronomeCodes {
         const val START_METRONOME = 1001
         const val STOP_METRONOME = 401
         const val ON_BPM_CHANGED = 123
+        const val TICK = 222
     }
 }
 
 class ServiceUtil {
     companion object {
         const val SERVICE_ID = "com.wesync"
+    }
+}
+
+class NTPUtil {
+    companion object {
+        const val OFFSET = "OFFSET"
     }
 }
 

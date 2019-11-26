@@ -17,6 +17,7 @@ import com.wesync.connection.callbacks.MyEndpointCallback
 import com.wesync.connection.callbacks.MyPayloadCallback
 import com.wesync.connection.callbacks.SessionConnectionLifecycleCallback
 import com.wesync.util.ServiceUtil.Companion.SERVICE_ID
+import com.wesync.util.Tempo
 import com.wesync.util.TestMode
 import com.wesync.util.UserTypes
 import com.wesync.util.service.ForegroundNotification
@@ -42,6 +43,7 @@ class ConnectionManagerService : LifecycleService() {
         var userName                               = ""
     private lateinit var connectionCallback      : MyConnectionLifecycleCallback
     private lateinit var advertiserConnectionCallback : SessionConnectionLifecycleCallback
+    var offset : Long = 0
 
 
 
@@ -54,7 +56,7 @@ class ConnectionManagerService : LifecycleService() {
     private val _connectionStatus                      = MutableLiveData<Int>()
         val connectionStatus:LiveData<Int>                 = _connectionStatus
     private val _connectedSlaves = MutableLiveData<MutableMap<String,ReceivedEndpoint>>()
-        val connectedSlaves:LiveData<MutableMap<String,ReceivedEndpoint>> = _connectedSlaves
+    private val _latencyMap = mutableMapOf<String, Long>()
 
 
     inner class LocalBinder : Binder() {
@@ -105,9 +107,48 @@ class ConnectionManagerService : LifecycleService() {
         return super.onUnbind(intent)
     }
 
+    private fun packPingPayload(): Payload {
+        val b = ByteArray(7) {1}
+        val time = getCurrentTimeWithOffset() % 10000
+        val timeString = time.toString(2)
+        var timeString18 = timeString
+        if (timeString.length < 18) {
+            timeString18 = timeString.padStart(18)
+        }
+        val arr = Array(7) {""}
+        arr[0] = timeString18.substring(0..6)
+        arr[1] = timeString18.substring(7..13)
+        arr[2] = timeString18.substring(14..17)
+
+        b[0] = arr[0].toByte(2)
+        b[0] = arr[1].toByte(2)
+        b[0] = arr[2].toByte(2)
+
+        return Payload.fromBytes(b)
+    }
+    private fun unpackPingPayload(payload: Payload) {
+        val b = payload.asBytes()!!
+        if (b[6] == 1.toByte()) {
+            val b0 = b[0].toString(2)
+            val b1 = b[1].toString(2)
+            val b2 = b[2].toString(2)
+            val advertiserTimestampString = b0 + b1 + b2
+            val advertiserTimestamp = advertiserTimestampString.toLong(2)
+
+
+
+        }
+    }
+
+    private fun getCurrentTimeWithOffset(): Long {
+        return System.currentTimeMillis() + offset
+    }
+
     private fun observePayloadEndpointsAndCallbacks() {
         payloadCallback.payload.observe(this , Observer {
-            this@ConnectionManagerService._payload.value = it})
+            this@ConnectionManagerService._payload.value = it
+            unpackPingPayload(it)
+        })
         endpointCallback.sessions.observe(this, Observer {
             this@ConnectionManagerService._foundSessions.value = it
             Log.d("onEndpointFound","DiscoveredEndpoint added. List in ConnectionManagerService updated")})
@@ -116,8 +157,13 @@ class ConnectionManagerService : LifecycleService() {
             this@ConnectionManagerService._connectedEndpointId.value = it})
         connectionCallback.connectionStatus.observe(this, Observer {
             this@ConnectionManagerService._connectionStatus.value = it })
+
         advertiserConnectionCallback.connectedSlaves.observe(this, Observer {
-            this@ConnectionManagerService._connectedSlaves.value = it })
+            this@ConnectionManagerService._connectedSlaves.value = it
+            for (slave in it) {
+                sendPayload(slave.key,packPingPayload())
+            }
+        })
     }
 
     override fun onDestroy() {
@@ -152,16 +198,21 @@ class ConnectionManagerService : LifecycleService() {
             Nearby.getConnectionsClient(applicationContext).stopDiscovery()
     }
 
+
     fun sendByteArray(b: ByteArray) {
-        for (endpoint in connectedSlaves.value!!) {
-            sendPayload(endpoint.key,b)
+        for (endpoint in _connectedSlaves.value!!) {
+            sendByteArray(endpoint.key,b)
         }
     }
 
-    fun sendPayload(toEndpointId: String, b: ByteArray) {
+    private fun sendByteArray(toEndpointId: String, b: ByteArray) {
+        sendPayload(toEndpointId, Payload.fromBytes(b))
+    }
+
+    private fun sendPayload(toEndpointId: String,payload: Payload) {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             Nearby.getConnectionsClient(applicationContext)
-                .sendPayload(toEndpointId, Payload.fromBytes(b))
+                .sendPayload(toEndpointId, payload)
         }
     }
 

@@ -30,6 +30,7 @@ class MetronomeService: LifecycleService() {
     private lateinit var handlerThread : TickHandlerThread
     private var bpm                    :Long            = 120
     private var isPlaying                               = false
+    var preStartLatency                 :Long           = 0
 
     inner class LocalBinder : Binder() {
         fun getService() : MetronomeService {
@@ -60,8 +61,13 @@ class MetronomeService: LifecycleService() {
 
     fun play(){
         isPlaying = true
-        handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.START_METRONOME)
+        val m = Message()
+        m.what = MetronomeCodes.START_METRONOME
+        m.obj = preStartLatency
+        handlerThread.getHandler().sendMessage(m)
      }
+
+
     fun stop() {
         isPlaying = false
         handlerThread.getHandler().sendEmptyMessage(MetronomeCodes.STOP_METRONOME)
