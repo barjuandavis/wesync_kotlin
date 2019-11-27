@@ -128,9 +128,12 @@ class ConnectionManagerService : LifecycleService() {
                 _latencyMap[_payloadSender.value!!] = time
                 var longest: Long = 0
                 for (i in _latencyMap) {
-                    if (i.value > longest) longest = i.value
+                    if (i.value > longest) longest = i.value }
+                for (i in _latencyMap) {
+                    sendTimestampedByteArray(longest - i.value, PayloadType.PING_PRE_START_LATENCY)
                 }
-                sendTimestampedByteArray(longest,PayloadType.PING_PRE_START_LATENCY)
+
+
             }
             PayloadType.PING_PRE_START_LATENCY -> {
                 //slave terima ini dari HOST
@@ -138,7 +141,7 @@ class ConnectionManagerService : LifecycleService() {
                 // makeSure viewModel tau tentang berapa preStartLatencynya.
                 // Karena akan dipakai oleh MetronomeService
                 _preStartLatency.value = time
-
+                _connectionStatus.value = ConnectionStatus.CONNECTED
             }
         }
 
@@ -176,7 +179,7 @@ class ConnectionManagerService : LifecycleService() {
             if (it.isNotEmpty()) sendTimestampedByteArray(type = PayloadType.PING)
         })
     }
-    private fun sendTimestampedByteArray(time: Long? = 0, type: Byte) {
+    private fun sendTimestampedByteArray(time: Long? = 0, type: Byte, to: String? = null) {
         when (type) {
             PayloadType.PING -> {
                 this.sendByteArrayToAll(ByteArrayEncoderDecoder
@@ -192,11 +195,9 @@ class ConnectionManagerService : LifecycleService() {
                 }
             }
             PayloadType.PING_PRE_START_LATENCY -> {
-                if (time != null && time > 0)
-                this.sendByteArrayToAll(ByteArrayEncoderDecoder
-                    .encodeTimestampByteArray(
-                        time, type
-                    ))
+                if (time != null && time > 0 && to != null)
+                this.sendByteArray(to,ByteArrayEncoderDecoder
+                    .encodeTimestampByteArray(time,type))
             }
         }
 
@@ -216,9 +217,10 @@ class ConnectionManagerService : LifecycleService() {
             Nearby.getConnectionsClient(applicationContext).stopAdvertising()
     }
     fun startDiscovery() {
-        Log.d("startDiscovery","DISCOVERUING")
+        Log.d("startDiscovery","DISCOVERING")
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             val discoveryOptions = DiscoveryOptions.Builder().setStrategy(strategy).build()
+            if (_foundSessions.value!!.size > 0) _foundSessions.value = mutableListOf()
             Nearby.getConnectionsClient(applicationContext)
                 .startDiscovery(SERVICE_ID, endpointCallback, discoveryOptions)
                 .addOnSuccessListener { Toast.makeText(this, "Finding nearby session...", Toast.LENGTH_SHORT).show()}
@@ -239,10 +241,14 @@ class ConnectionManagerService : LifecycleService() {
             Nearby.getConnectionsClient(application)
                 .requestConnection(name, discoveredEndpoint.endpointId, connectionCallback)
                 .addOnSuccessListener { Toast.makeText(applicationContext,
-                    "Connecting to ${discoveredEndpoint.endpointId}", Toast.LENGTH_SHORT).show() }
+                    "Connecting to ${discoveredEndpoint.endpointId}", Toast.LENGTH_SHORT).show()
+                    _connectionStatus.value = ConnectionStatus.CONNECTING
+                }
                 .addOnFailureListener { Toast.makeText(applicationContext,
                         "Failed to request connection to ${discoveredEndpoint.info.endpointName} " +
-                                "(${discoveredEndpoint.endpointId})", Toast.LENGTH_SHORT).show() }
+                                "(${discoveredEndpoint.endpointId})", Toast.LENGTH_SHORT).show()
+                    _connectionStatus.value = ConnectionStatus.DISCONNECTED
+                }
         }
     }
     fun disconnect() {

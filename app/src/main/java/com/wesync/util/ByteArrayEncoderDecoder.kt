@@ -21,7 +21,7 @@ class ByteArrayEncoderDecoder {
             var lim = 6
 
             for (i in 1..2) {
-                val curr = b.substring((lim-(lim-1))..lim)
+                val curr = b.substring((lim-6)..lim)
                 arr[i] = curr.toByte(2)
                 lim += 7
             }
@@ -38,14 +38,14 @@ class ByteArrayEncoderDecoder {
             var lim = 6
 
             for (i in 1..2) {
-                val curr = b.substring((lim-(lim-1))..lim)
+                val curr = b.substring((lim-6)..lim)
                 arr[i] = curr.toByte(2)
                 lim += 7
             }
 
             arr[0] = PayloadType.CONFIG
 
-            if (isPlaying) arr[4] = 1
+            if (isPlaying) arr[3] = 1
 
             return arr
         }

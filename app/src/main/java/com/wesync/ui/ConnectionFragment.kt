@@ -1,7 +1,5 @@
 package com.wesync.ui
 
-
-
 import android.app.AlertDialog
 import androidx.lifecycle.Observer
 import android.os.Bundle

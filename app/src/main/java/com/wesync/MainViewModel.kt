@@ -69,7 +69,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     private val _foundSessions = MutableLiveData<MutableList<DiscoveredEndpoint>>()
         val foundSessions: LiveData<MutableList<DiscoveredEndpoint>> = _foundSessions
     var currentFragment = MutableLiveData(0)
-    private var currentByteArray  = ByteArray(7) {0}
+
+
+
     private fun observeService() {
         subscriber.connectionService?.foundSessions?.observeForever { _foundSessions.value = it}
         subscriber.connectionService?.payload?.observeForever{
@@ -82,7 +84,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
                endSession()
            }
         }
+        subscriber.connectionService?.preStartLatency?.observeForever {
+            subscriber.metronomeService?.preStartLatency = it
+        }
     }
+
     // a callback which always be called when BPM or isPlaying is changing.
     // it is used to inform mCService to send payload for every time changes at mService happens.
     private fun onConfigChanged() {

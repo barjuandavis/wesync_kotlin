@@ -1,6 +1,5 @@
 package com.wesync.connection.callbacks
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
@@ -20,7 +19,6 @@ class MyEndpointCallback : EndpointDiscoveryCallback() {
         val cl = _sessions.value!!
         if (!cl.any{it.endpointId == endpointId} ) {
             cl.add(DiscoveredEndpoint(endpointId,info))
-            Log.d("onEndpointFound","DiscoveredEndpoint added. List in MyEndpointCallback Updated")
         }
         _sessions.value = cl
     }
