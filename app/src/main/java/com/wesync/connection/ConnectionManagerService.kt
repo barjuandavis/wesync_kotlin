@@ -16,10 +16,8 @@ import com.wesync.connection.callbacks.MyConnectionLifecycleCallback
 import com.wesync.connection.callbacks.MyEndpointCallback
 import com.wesync.connection.callbacks.MyPayloadCallback
 import com.wesync.connection.callbacks.SessionConnectionLifecycleCallback
+import com.wesync.util.*
 import com.wesync.util.ServiceUtil.Companion.SERVICE_ID
-import com.wesync.util.Tempo
-import com.wesync.util.TestMode
-import com.wesync.util.UserTypes
 import com.wesync.util.service.ForegroundNotification
 import com.wesync.util.service.ForegroundServiceLauncher
 
@@ -43,12 +41,13 @@ class ConnectionManagerService : LifecycleService() {
         var userName                               = ""
     private lateinit var connectionCallback      : MyConnectionLifecycleCallback
     private lateinit var advertiserConnectionCallback : SessionConnectionLifecycleCallback
-    var offset : Long = 0
+    var ntpOffset : Long = 0
 
 
 
     private val _payload                               = MutableLiveData<Payload>()
         val payload: LiveData<Payload>                     = _payload //INI YANG DITERIMA, BUKAN YANG DIKIRIM
+    private val _payloadSender                         = MutableLiveData<String>()
     private val _foundSessions                         = MutableLiveData<MutableList<DiscoveredEndpoint>>()
         val foundSessions: LiveData<MutableList<DiscoveredEndpoint>> = _foundSessions
     private val _connectedEndpointId                   = MutableLiveData<String>(null)
@@ -57,6 +56,9 @@ class ConnectionManagerService : LifecycleService() {
         val connectionStatus:LiveData<Int>                 = _connectionStatus
     private val _connectedSlaves = MutableLiveData<MutableMap<String,ReceivedEndpoint>>()
     private val _latencyMap = mutableMapOf<String, Long>()
+    private val _preStartLatency = MutableLiveData<Long>()
+        val preStartLatency: LiveData<Long> = _preStartLatency
+
 
 
     inner class LocalBinder : Binder() {
@@ -79,7 +81,6 @@ class ConnectionManagerService : LifecycleService() {
         l.add(DiscoveredEndpoint("test10", DiscoveredEndpointInfo("test1","test1")))
         return l
     }
-
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         startForeground(
             ForegroundNotification.NOTIFICATION_ID,
@@ -88,7 +89,6 @@ class ConnectionManagerService : LifecycleService() {
         super.onStartCommand(intent, flags, startId)
         return START_STICKY
     }
-
     override fun onBind(intent: Intent): IBinder {
         connectionCallback = MyConnectionLifecycleCallback(
             applicationContext,payloadCallback)
@@ -98,7 +98,6 @@ class ConnectionManagerService : LifecycleService() {
         super.onBind(intent)
         return this._binder
     }
-
     override fun onUnbind(intent: Intent?): Boolean {
         Log.d("_con","connectionmanagerservice DISCONNECTED")
         if (userType == UserTypes.SOLO) {
@@ -106,48 +105,63 @@ class ConnectionManagerService : LifecycleService() {
         }
         return super.onUnbind(intent)
     }
-
-    private fun packPingPayload(): Payload {
-        val b = ByteArray(7) {1}
-        val time = getCurrentTimeWithOffset() % 10000
-        val timeString = time.toString(2)
-        var timeString18 = timeString
-        if (timeString.length < 18) {
-            timeString18 = timeString.padStart(18)
-        }
-        val arr = Array(7) {""}
-        arr[0] = timeString18.substring(0..6)
-        arr[1] = timeString18.substring(7..13)
-        arr[2] = timeString18.substring(14..17)
-
-        b[0] = arr[0].toByte(2)
-        b[0] = arr[1].toByte(2)
-        b[0] = arr[2].toByte(2)
-
-        return Payload.fromBytes(b)
+    override fun onDestroy() {
+        stopSelf()
+        super.onDestroy()
     }
+
+
     private fun unpackPingPayload(payload: Payload) {
         val b = payload.asBytes()!!
-        if (b[6] == 1.toByte()) {
-            val b0 = b[0].toString(2)
-            val b1 = b[1].toString(2)
-            val b2 = b[2].toString(2)
-            val advertiserTimestampString = b0 + b1 + b2
-            val advertiserTimestamp = advertiserTimestampString.toLong(2)
+        val time = ByteArrayEncoderDecoder.decodeTimestamp(b)
+        var currTime = getCurrentTimeWithOffset() % ByteArrayEncoderDecoder.TWO_14
+        when (b[0]) {
+            PayloadType.PING -> {
+                // SLAVE balas ke HOST
+                if (time > currTime) currTime += ByteArrayEncoderDecoder.TWO_14
+                val hostToHereTime = currTime - time
+                sendTimestampedByteArray(hostToHereTime,PayloadType.PING_RESPONSE)
+            }
+            PayloadType.PING_RESPONSE -> {
+                // DITERIMA oleh HOST
+                //HOST mencatat berapa pingnya?
+                _latencyMap[_payloadSender.value!!] = time
+                var longest: Long = 0
+                for (i in _latencyMap) {
+                    if (i.value > longest) longest = i.value
+                }
+                sendTimestampedByteArray(longest,PayloadType.PING_PRE_START_LATENCY)
+            }
+            PayloadType.PING_PRE_START_LATENCY -> {
+                //slave terima ini dari HOST
+                // ganti ini jadi waktu preStartLatency.
+                // makeSure viewModel tau tentang berapa preStartLatencynya.
+                // Karena akan dipakai oleh MetronomeService
+                _preStartLatency.value = time
 
+            }
+        }
 
-
+    }
+    private fun getCurrentTimeWithOffset(): Long {
+        return System.currentTimeMillis() + ntpOffset
+    }
+    private fun sendByteArray(toEndpointId: String, b: ByteArray) {
+        sendPayload(toEndpointId, Payload.fromBytes(b))
+    }
+    private fun sendPayload(toEndpointId: String,payload: Payload) {
+        if (TestMode.STATUS == TestMode.NEARBY_ON) {
+            Nearby.getConnectionsClient(applicationContext)
+                .sendPayload(toEndpointId, payload)
         }
     }
-
-    private fun getCurrentTimeWithOffset(): Long {
-        return System.currentTimeMillis() + offset
-    }
-
     private fun observePayloadEndpointsAndCallbacks() {
         payloadCallback.payload.observe(this , Observer {
-            this@ConnectionManagerService._payload.value = it
-            unpackPingPayload(it)
+            this@ConnectionManagerService._payload.value = it // oper Config Payload ke MutableLiveData (observed by VM)
+            unpackPingPayload(it) //kalo ternyata bukan Config, payload akan diproses disini
+        })
+        payloadCallback.payloadSender.observe(this, Observer {
+            _payloadSender.value = it
         })
         endpointCallback.sessions.observe(this, Observer {
             this@ConnectionManagerService._foundSessions.value = it
@@ -157,19 +171,37 @@ class ConnectionManagerService : LifecycleService() {
             this@ConnectionManagerService._connectedEndpointId.value = it})
         connectionCallback.connectionStatus.observe(this, Observer {
             this@ConnectionManagerService._connectionStatus.value = it })
-
         advertiserConnectionCallback.connectedSlaves.observe(this, Observer {
             this@ConnectionManagerService._connectedSlaves.value = it
-            for (slave in it) {
-                sendPayload(slave.key,packPingPayload())
-            }
+            if (it.isNotEmpty()) sendTimestampedByteArray(type = PayloadType.PING)
         })
     }
+    private fun sendTimestampedByteArray(time: Long? = 0, type: Byte) {
+        when (type) {
+            PayloadType.PING -> {
+                this.sendByteArrayToAll(ByteArrayEncoderDecoder
+                    .encodeTimestampByteArray(
+                        getCurrentTimeWithOffset(),type))
+            }
+            PayloadType.PING_RESPONSE -> {
+                if (userType == UserTypes.SLAVE) {
+                    if (time != null && time > 0)
+                        sendByteArray(_connectedEndpointId.value!!,
+                            ByteArrayEncoderDecoder
+                                .encodeTimestampByteArray(time,type))
+                }
+            }
+            PayloadType.PING_PRE_START_LATENCY -> {
+                if (time != null && time > 0)
+                this.sendByteArrayToAll(ByteArrayEncoderDecoder
+                    .encodeTimestampByteArray(
+                        time, type
+                    ))
+            }
+        }
 
-    override fun onDestroy() {
-        stopSelf()
-        super.onDestroy()
     }
+
     fun startAdvertising() {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()
@@ -197,25 +229,11 @@ class ConnectionManagerService : LifecycleService() {
         if (TestMode.STATUS == TestMode.NEARBY_ON)
             Nearby.getConnectionsClient(applicationContext).stopDiscovery()
     }
-
-
-    fun sendByteArray(b: ByteArray) {
-        for (endpoint in _connectedSlaves.value!!) {
+    fun sendByteArrayToAll(b: ByteArray) {
+        if (userType == UserTypes.SESSION_HOST) for (endpoint in _connectedSlaves.value!!) {
             sendByteArray(endpoint.key,b)
         }
     }
-
-    private fun sendByteArray(toEndpointId: String, b: ByteArray) {
-        sendPayload(toEndpointId, Payload.fromBytes(b))
-    }
-
-    private fun sendPayload(toEndpointId: String,payload: Payload) {
-        if (TestMode.STATUS == TestMode.NEARBY_ON) {
-            Nearby.getConnectionsClient(applicationContext)
-                .sendPayload(toEndpointId, payload)
-        }
-    }
-
     fun connect(discoveredEndpoint: DiscoveredEndpoint, name: String) {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             Nearby.getConnectionsClient(application)
@@ -227,7 +245,6 @@ class ConnectionManagerService : LifecycleService() {
                                 "(${discoveredEndpoint.endpointId})", Toast.LENGTH_SHORT).show() }
         }
     }
-
     fun disconnect() {
         Nearby.getConnectionsClient(application).stopAllEndpoints()
         userType = UserTypes.SOLO

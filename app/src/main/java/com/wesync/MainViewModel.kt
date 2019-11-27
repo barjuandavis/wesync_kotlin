@@ -7,10 +7,7 @@ import androidx.lifecycle.*
 import com.google.android.gms.nearby.connection.Payload
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.connection.DiscoveredEndpoint
-import com.wesync.util.Config
-import com.wesync.util.ConnectionStatus
-import com.wesync.util.Tempo
-import com.wesync.util.UserTypes
+import com.wesync.util.*
 import com.wesync.util.service.ServiceSubscriber
 
 class MainViewModel(application: Application) : AndroidViewModel(application), LifecycleObserver {
@@ -59,7 +56,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     private val payload                                = MutableLiveData<Payload>()
     private val connectedEndpointId                    = MutableLiveData<String>(null)
     private val preStartLatency                        = MutableLiveData<Long>(0)
-    private val offset                                 = MutableLiveData<Long>(0)
+    private val _ntpOffset                                 = MutableLiveData<Long>(0)
+        val ntpOffset: LiveData<Long> =_ntpOffset
 
 
 
@@ -76,7 +74,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         subscriber.connectionService?.foundSessions?.observeForever { _foundSessions.value = it}
         subscriber.connectionService?.payload?.observeForever{
             payload.value = it
-            unpackPayload(it)
+            unpackConfigPayload(it)
         }
         subscriber.connectionService?.connectionStatus?.observeForever {
            _connectionStatus.value = it
@@ -86,32 +84,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         }
     }
     // a callback which always be called when BPM or isPlaying is changing.
-    // it is used to inform mCService to send payload for everytime changes at mService happens.
+    // it is used to inform mCService to send payload for every time changes at mService happens.
     private fun onConfigChanged() {
-        packConfigByteArray()
         if (userType.value == UserTypes.SESSION_HOST)
-            mCService?.sendByteArray(currentByteArray)
+            mCService?.sendByteArrayToAll(ByteArrayEncoderDecoder
+                .encodeConfigByteArray(_bpm.value!!,_isPlaying.value!!))
     }
 
     private fun connect(e: DiscoveredEndpoint) { mCService?.connect(e,_userName.value!!)}
     private fun disconnect() {mCService?.disconnect()}
 
-    private fun packConfigByteArray() {
-        val bpm = _bpm.value!!
-        val isPlaying = _isPlaying.value!!
-        val bins:Int = (bpm/100).toInt() - 1
-        for (i in 0..2){
-            if (i <= bins) {
-                currentByteArray[i] = 100
-            } else {
-                currentByteArray[i] = 0
-            }
-        }
-        currentByteArray[3] = (bpm % 100).toByte()
-        if (isPlaying) currentByteArray[4] = 1
-        else currentByteArray[4] = 0
-        //ping
-    }
+
 
     private fun Long.setBPM() {
         //state.set(BPM_KEY, this)
@@ -164,22 +147,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         _connectionStatus.value = ConnectionStatus.DISCONNECTED
         connectedEndpointId.value = null
     }
-    private fun unpackPayload(p: Payload) {
+    private fun unpackConfigPayload(p: Payload) {
         val b = p.asBytes()!!
-        if (b[6] == (0).toByte()) {
-            (b[0] + b[1] + b[2] + b[3]).toLong().setBPM()
-            if (b[4].toInt() == 1) {
-                setIsPlaying(true)
-            } else {
-                setIsPlaying(false)
-            }
+        if (b[0] == PayloadType.CONFIG) {
+            val pair: Pair<Long, Boolean> = ByteArrayEncoderDecoder.decodeConfig(b)
+            setIsPlaying(pair.second)
+            pair.first.setBPM()
         }
     }
 
 
     fun setOffset(offset: Long) {
-        this.offset.value = offset
-        mCService?.offset = offset
+        this._ntpOffset.value = offset
+        mCService?.ntpOffset = offset
     }
     fun onNewSession(sessionName: String?) {
         setUserName(sessionName)

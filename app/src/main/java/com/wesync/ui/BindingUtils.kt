@@ -157,7 +157,7 @@ fun Button.setButtonEnabled(userType: LiveData<String>) {
 }
 
 @BindingAdapter("offset")
-fun TextView.setOffset(offset: MutableLiveData<Long>) {
+fun TextView.setOffset(offset: LiveData<Long>) {
     text = resources.getString(R.string.offset,offset.value)
 }
 

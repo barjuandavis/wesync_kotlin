@@ -12,9 +12,12 @@ class MyPayloadCallback: PayloadCallback() {
 
     private var _observablePayload = MutableLiveData<Payload>()
         val payload = _observablePayload
+    private var _payloadSender = MutableLiveData<String>("")
+        val payloadSender = _payloadSender
 
-    override fun onPayloadReceived(p0: String, p1: Payload) {
-        _observablePayload.value = p1
+    override fun onPayloadReceived(sender: String, payload: Payload) {
+        _observablePayload.value = payload
+        _payloadSender.value = sender
     }
 
     override fun onPayloadTransferUpdate(p0: String, p1: PayloadTransferUpdate) {}

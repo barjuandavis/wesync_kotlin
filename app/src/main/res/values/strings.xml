@@ -24,5 +24,5 @@
     <string name="not_connected">You are playing by yourself.\nCreate a new Session or join an existing Session around you.</string>
     <string name="need_auto_time">To ensure accuracy of this application, We recommend you to turn on automatic date and time on your Settings.</string>
     <string name="no_internet">No internet connection detected. If you wish to improve your sync, please connect to the internet and restart the app.</string>
-    <string name="offset">Offset: %1$d ms</string>
+    <string name="offset">Clock Offset (with NTP server): %1$d ms</string>
 </resources>

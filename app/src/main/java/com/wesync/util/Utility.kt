@@ -80,4 +80,23 @@ class TestMode {
     }
 }
 
+class PayloadType { //ByteArray[0] adalah PAYLOADTYPE.
+    companion object {
+        const val CONFIG: Byte = 0 // onConfigChange. Dikirim setiap config berubah.
+        const val PING: Byte = 1 // Dikirim dari HOST ke SLAVE. Untuk hitung latency ke semua slave.
+        const val PING_RESPONSE: Byte = 2 // dikirim dari SLAVE ke HOST sebagai balasan dari PayloadType.PING
+        const val PING_PRE_START_LATENCY: Byte = 3 // dikirim dari HOST ke SLAVE setelah HOST tahu latency dari semua user.
+                                                    // Slot timestamp isinya adalah berapa offset yang SLAVE harus tambah ke preStartLatency di MetronomeService.
+    }
+}
+
+class PayloadSizes {
+    companion object {
+        const val CONFIG = 4
+        const val PING = 3
+        const val PING_RESPONSE = 3
+        const val PING_PRE_START_LATENCY = 3
+    }
+}
+
 
