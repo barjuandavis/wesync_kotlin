@@ -122,8 +122,8 @@ class MainActivity : AppCompatActivity() {
         if (!connectionIsAlive) ConnectionManagerService.start(applicationContext)
     }
     private fun stopServices() {
-        if (metronomeIsAlive) MetronomeService.stop(applicationContext)
-        if (connectionIsAlive)ConnectionManagerService.stop(applicationContext)
+        MetronomeService.stop(applicationContext)
+        ConnectionManagerService.stop(applicationContext)
     }
     private fun syncSystemClock() {
         val builder = AlertDialog.Builder(this)
