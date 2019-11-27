@@ -52,9 +52,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         val userName     :LiveData<String>                 = _userName
     private val _userType                              = MutableLiveData<String>(UserTypes.SOLO)
         val userType    :LiveData<String>                  = _userType
+
     private val _connectionStatus                      = MutableLiveData<Int>()
+    private val _connectedEndpointId                    = MutableLiveData<String>(null)
+        val connectedEndpointId: LiveData<String>       =_connectedEndpointId
     private val payload                                = MutableLiveData<Payload>()
-    private val connectedEndpointId                    = MutableLiveData<String>(null)
     private val preStartLatency                        = MutableLiveData<Long>(0)
     private val _ntpOffset                                 = MutableLiveData<Long>(0)
         val ntpOffset: LiveData<Long> =_ntpOffset
@@ -83,6 +85,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
            if (it == ConnectionStatus.DISCONNECTED) {
                endSession()
            }
+        }
+        subscriber.connectionService?.connectedEndpointId?.observeForever {
+            _connectedEndpointId.value = it
         }
         subscriber.connectionService?.preStartLatency?.observeForever {
             subscriber.metronomeService?.preStartLatency = it
@@ -152,7 +157,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         setUserName("MusicDirector")
         setUserType(UserTypes.SOLO)
         _connectionStatus.value = ConnectionStatus.DISCONNECTED
-        connectedEndpointId.value = null
+        _connectedEndpointId.value = null
     }
     private fun unpackConfigPayload(p: Payload) {
         val b = p.asBytes()!!

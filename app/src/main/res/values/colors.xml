@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#242D68</color>
+    <color name="colorAccent">#6F6F6F</color>
     <color name="colorBackground">#424242</color>
     <color name="colorBackgroundDark">#363636</color>
-    <color name="colorAddTempo">#5C6BC0</color>
-    <color name="colorSubtractTempo">#EF5350</color>
-    <color name="colorPlay">#43A047</color>
-    <color name="colorStop">#D81B60</color>
+    <color name="colorAddTempo">#283E88</color>
+    <color name="colorSubtractTempo">#B9BB3735</color>
+    <color name="colorPlay">#336B34</color>
+    <color name="colorStop">#8135BD</color>
     <color name="colorDisabledButton">#525252</color>
     <color name="colorDisabledButtonText">#727272</color>
     <color name="colorEnabledButtonText">#FFFFFF</color>

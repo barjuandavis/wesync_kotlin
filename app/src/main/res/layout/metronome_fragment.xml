@@ -12,10 +12,12 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/colorBackgroundDark"
         tools:context=".ui.MetronomeFragment">
 
         <TextView
             android:id="@+id/notification"
+            style="@style/Widget.MaterialComponents.TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/not_connected"
@@ -23,56 +25,56 @@
             android:textColor="@android:color/primary_text_dark"
             android:textSize="12sp"
             android:textStyle="bold|italic"
+            app:connectedEndpointId="@{viewmodel.connectedEndpointId}"
             app:connecting="@{viewmodel.connectionStatus}"
             app:layout_constraintBottom_toTopOf="@+id/plus_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.494"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.248"
+            app:layout_constraintVertical_bias="0.116"
             app:sessionName="@{viewmodel.sessionName}"
             app:userType="@{viewmodel.userType}" />
-        <Button
-            android:id="@+id/new_session"
-            android:layout_width="100sp"
-            android:layout_height="56sp"
-            android:layout_marginStart="44sp"
-            android:layout_marginBottom="40sp"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:text="@string/new_session"
-            android:textColor="#ffffff"
-            app:layout_constraintBottom_toTopOf="@+id/plus_layout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0"
-            app:userType="@{viewmodel.userType}"
-            app:isAdvertising="@{viewmodel.isAdvertising}"
-            app:playState="@{viewmodel.isPlaying}"
-            app:connectionStatus="@{viewmodel.connectionStatus}"
-            />
+
         <Button
             android:id="@+id/join_session"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="100sp"
             android:layout_height="56sp"
+            android:layout_marginTop="56sp"
             android:layout_marginEnd="44sp"
-            android:layout_marginBottom="40sp"
             android:layout_weight="1"
             android:background="@color/colorPrimaryDark"
             android:text="@string/join_session"
             android:textColor="#ffffff"
-            app:layout_constraintBottom_toTopOf="@+id/plus_layout"
+            app:connectionStatus="@{viewmodel.connectionStatus}"
+            app:isAdvertising="@{viewmodel.isAdvertising}"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintHorizontal_bias="0.977"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0"
-            app:userType="@{viewmodel.userType}"
-            app:isAdvertising="@{viewmodel.isAdvertising}"
+            app:playState="@{viewmodel.isPlaying()}"
+            app:userType="@{viewmodel.userType}" />
+
+        <Button
+            android:id="@+id/new_session"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="100sp"
+            android:layout_height="56sp"
+            android:layout_marginStart="44sp"
+            android:layout_marginTop="56sp"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:text="@string/new_session"
+            android:textColor="#ffffff"
             app:connectionStatus="@{viewmodel.connectionStatus}"
-            app:playState="@{viewmodel.isPlaying()}"/>
+            app:isAdvertising="@{viewmodel.isAdvertising}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:playState="@{viewmodel.isPlaying}"
+            app:userType="@{viewmodel.userType}" />
 
         <LinearLayout
             android:id="@+id/minus_layout"
@@ -85,8 +87,10 @@
             app:layout_constraintHorizontal_bias="0.507"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/bpm_textView">
+
             <Button
                 android:id="@+id/minus_50"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="42sp"
                 android:layout_height="wrap_content"
                 android:layout_margin="5sp"
@@ -95,12 +99,13 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(-50)}"
                 android:text="@string/minus_50"
                 android:textColor="#ffffff"
+                app:joinedSession="@{viewmodel.userType}"
                 tools:layout_editor_absoluteX="37dp"
-                tools:layout_editor_absoluteY="351dp"
-                app:joinedSession="@{viewmodel.userType}"/>
+                tools:layout_editor_absoluteY="351dp" />
 
             <Button
                 android:id="@+id/minus_10"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="42sp"
                 android:layout_height="wrap_content"
                 android:layout_margin="5sp"
@@ -109,12 +114,13 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(-10)}"
                 android:text="@string/minus_10"
                 android:textColor="#ffffff"
+                app:joinedSession="@{viewmodel.userType}"
                 tools:layout_editor_absoluteX="153dp"
-                tools:layout_editor_absoluteY="351dp"
-                app:joinedSession="@{viewmodel.userType}"/>
+                tools:layout_editor_absoluteY="351dp" />
 
             <Button
                 android:id="@+id/minus_1"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="42sp"
                 android:layout_height="wrap_content"
                 android:layout_margin="5sp"
@@ -123,26 +129,27 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(-1)}"
                 android:text="@string/minus_1"
                 android:textColor="#ffffff"
+                app:joinedSession="@{viewmodel.userType}"
                 tools:layout_editor_absoluteX="269dp"
-                tools:layout_editor_absoluteY="351dp"
-                app:joinedSession="@{viewmodel.userType}"/>
+                tools:layout_editor_absoluteY="351dp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/plus_layout"
             android:layout_width="348sp"
-            android:layout_height="69dp"
-            android:layout_marginTop="168dp"
+            android:layout_height="69sp"
+            android:layout_marginTop="20sp"
             android:layout_marginEnd="2sp"
             android:gravity="center|fill"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.508"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@+id/new_session">
 
             <Button
                 android:id="@+id/plus_50"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5sp"
@@ -151,12 +158,13 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(50)}"
                 android:text="@string/plus_50"
                 android:textColor="#ffffff"
+                app:joinedSession="@{viewmodel.userType}"
                 tools:layout_editor_absoluteX="36dp"
-                tools:layout_editor_absoluteY="141dp"
-                app:joinedSession="@{viewmodel.userType}"/>
+                tools:layout_editor_absoluteY="141dp" />
 
             <Button
                 android:id="@+id/plus_10"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5sp"
@@ -165,12 +173,13 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(10)}"
                 android:text="@string/plus_10"
                 android:textColor="#ffffff"
+                app:joinedSession="@{viewmodel.userType}"
                 tools:layout_editor_absoluteX="152dp"
-                tools:layout_editor_absoluteY="141dp"
-                app:joinedSession="@{viewmodel.userType}"/>
+                tools:layout_editor_absoluteY="141dp" />
 
             <Button
                 android:id="@+id/plus_1"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5sp"
@@ -179,30 +188,33 @@
                 android:onClick="@{() -> viewmodel.modifyBPM(1)}"
                 android:text="@string/plus_1"
                 android:textColor="#ffffff"
+                app:joinedSession="@{viewmodel.userType}"
                 tools:layout_editor_absoluteX="268dp"
-                tools:layout_editor_absoluteY="141dp"
-                app:joinedSession="@{viewmodel.userType}"/>
+                tools:layout_editor_absoluteY="141dp" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/offset"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="@string/offset"
             android:textAlignment="center"
             android:textColor="@android:color/primary_text_dark"
             android:textSize="12sp"
             android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/minus_layout"
-            app:offset="@{viewmodel.ntpOffset}"
-           />
+            app:offset="@{viewmodel.ntpOffset}" />
 
         <Button
             android:id="@+id/play_button"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="150sp"
             android:layout_height="75sp"
+            android:background="@color/colorPlay"
             android:onClick="@{() -> viewmodel.flipIsPlaying()}"
             android:text="@string/play_button"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -210,12 +222,13 @@
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/offset"
-            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintVertical_bias="0.044"
             app:playState="@{viewmodel.isPlaying()}"
             app:userType="@{viewmodel.userType}" />
 
         <TextView
             android:id="@+id/bpm_textView2"
+            style="@style/Widget.MaterialComponents.TextView"
             android:layout_width="100sp"
             android:layout_height="135sp"
             android:ems="10"

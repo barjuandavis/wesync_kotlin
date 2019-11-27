@@ -33,6 +33,7 @@ class TickHandlerThread(private val context:Context): HandlerThread("TickHandler
             when (it.what) {
             MetronomeCodes.START_METRONOME -> {
                 _isPlaying = true
+                this.preStartLatency = it.obj as Long
                 if (preStartLatency > 0) {
                     SystemClock.sleep(preStartLatency)
                 }

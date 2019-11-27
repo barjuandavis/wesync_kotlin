@@ -51,7 +51,7 @@ class ConnectionManagerService : LifecycleService() {
     private val _payloadSender                         = MutableLiveData<String>()
     private val _foundSessions                         = MutableLiveData<MutableList<DiscoveredEndpoint>>()
         val foundSessions: LiveData<MutableList<DiscoveredEndpoint>> = _foundSessions
-    private val _connectedEndpointId                   = MutableLiveData<String>(null)
+    private val _connectedEndpointId                   = MutableLiveData<String>("")
         val connectedEndpointId:LiveData<String>           = _connectedEndpointId
     private val _connectionStatus                      = MutableLiveData<Int>()
         val connectionStatus:LiveData<Int>                 = _connectionStatus
@@ -253,7 +253,7 @@ class ConnectionManagerService : LifecycleService() {
             Nearby.getConnectionsClient(application)
                 .requestConnection(name, discoveredEndpoint.endpointId, connectionCallback)
                 .addOnSuccessListener { Toast.makeText(applicationContext,
-                    "Connecting to ${discoveredEndpoint.endpointId}", Toast.LENGTH_SHORT).show()
+                    "Connecting to ${discoveredEndpoint.info.endpointName} (${discoveredEndpoint.endpointId})", Toast.LENGTH_SHORT).show()
                     _connectionStatus.value = ConnectionStatus.CONNECTING
                 }
                 .addOnFailureListener { Toast.makeText(applicationContext,

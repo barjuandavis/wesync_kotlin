@@ -14,7 +14,7 @@ class NTPClientWorker(val context: Context,val params: WorkerParameters)
     : Worker(context, params) {
     var offset: Long         = 0
     var time: Long           = 0
-    private val s                    = "0.id.pool.ntp.org"
+    private val s            = "0.id.pool.ntp.org"
 
     override fun doWork(): Result {
         try {

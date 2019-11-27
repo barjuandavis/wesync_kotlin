@@ -120,8 +120,8 @@ fun Button.setSessionState(item: LiveData<String>,
     }
 }
 
-@BindingAdapter("userType","sessionName","connecting")
-fun TextView.setSessionState(userType: LiveData<String>, sessionName: String?, connectionStatus: Int?) {
+@BindingAdapter("userType","sessionName","connecting","connectedEndpointId")
+fun TextView.setSessionState(userType: LiveData<String>, sessionName: String?, connectionStatus: Int?,connectedEndpointId: LiveData<String>) {
     when (userType.value) {
        UserTypes.SOLO -> {
            text = resources.getString(R.string.not_connected)
@@ -131,9 +131,9 @@ fun TextView.setSessionState(userType: LiveData<String>, sessionName: String?, c
         }
         UserTypes.SLAVE -> {
             text = if (connectionStatus == ConnectionStatus.CONNECTING) {
-                resources.getString(R.string.connecting, sessionName)
+                resources.getString(R.string.connecting, connectedEndpointId.value)
             } else {
-                resources.getString(R.string.current_joined_session, sessionName)
+                resources.getString(R.string.current_joined_session, connectedEndpointId.value)
             }
         }
     }

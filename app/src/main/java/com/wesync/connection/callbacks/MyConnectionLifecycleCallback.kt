@@ -16,13 +16,13 @@ open class MyConnectionLifecycleCallback(
     private val pay: MyPayloadCallback) : ConnectionLifecycleCallback() {
 
     private val _connectedSessionId = MutableLiveData<String>(null)
-        val connectedSessionId:LiveData<String> = _connectedSessionId
+        val connectedSessionId: LiveData<String> = _connectedSessionId
 
     private val _connectionStatus = MutableLiveData(ConnectionStatus.DISCONNECTED)
         val connectionStatus: LiveData<Int> = _connectionStatus
 
     override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
-        Toast.makeText(context, "Initiating connection to ${endpointId}...",Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Initiating connection to ${info.endpointName}...",Toast.LENGTH_SHORT).show()
         Nearby.getConnectionsClient(context).acceptConnection(endpointId, pay)
     }
     override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
