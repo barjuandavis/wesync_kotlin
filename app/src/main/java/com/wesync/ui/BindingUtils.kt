@@ -1,9 +1,11 @@
 package com.wesync.ui
 
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -159,6 +161,22 @@ fun Button.setButtonEnabled(userType: LiveData<String>) {
 @BindingAdapter("offset")
 fun TextView.setOffset(offset: LiveData<Long>) {
     text = resources.getString(R.string.offset,offset.value)
+}
+@BindingAdapter("isDiscovering")
+fun View.setIsDiscovering(isDiscovering: LiveData<Boolean>) {
+    when(id) {
+        R.id.progressBar2 -> {
+            visibility =
+                if (isDiscovering.value!!) {
+                View.VISIBLE
+            } else View.GONE
+        }
+        R.id.floatingActionButton -> {
+            visibility = if (isDiscovering.value!!) {
+                View.GONE
+            } else View.VISIBLE
+        }
+    }
 }
 
 

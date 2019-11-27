@@ -42,7 +42,6 @@ class ConnectionFragment : Fragment() {
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         activity?.let {
             mainViewModel = ViewModelProviders.of(it).get(MainViewModel::class.java)
@@ -55,12 +54,10 @@ class ConnectionFragment : Fragment() {
             subscribeToViewModel()
         }
     }
-
     override fun onResume() {
         mainViewModel.currentFragment.value = 2
         super.onResume()
     }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val builder = AlertDialog.Builder(context)
@@ -85,19 +82,15 @@ class ConnectionFragment : Fragment() {
             addItemDecoration(DividerItemDecoration(context,
                 DividerItemDecoration.VERTICAL))
         }
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            mainViewModel.startDiscovery()
-        }
-        binding.swipeRefreshLayout.isEnabled = true
         mainViewModel.subscriber.connServiceConnected.observe(this, Observer {
             if (!discovering && it) {
                 mainViewModel.startDiscovery()
-                binding.swipeRefreshLayout.isRefreshing = true
-                discovering = true
             }
         })
+        mainViewModel.isDiscovering.observe(this, Observer {
+            discovering = it
+        })
     }
-
     override fun onDestroy() {
         mainViewModel.stopDiscovery()
         super.onDestroy()
@@ -106,8 +99,7 @@ class ConnectionFragment : Fragment() {
        mainViewModel.foundSessions.observe(this, Observer {
            if (it.isNotEmpty()) {
                sessionAdapter.submitList(it)
-               Log.d("onEndpointFound", "DiscoveredEndpoint added. List in SessionAdapted updated")
-               binding.swipeRefreshLayout.isRefreshing = false
+               mainViewModel.stopDiscovery()
            }
        })
     }

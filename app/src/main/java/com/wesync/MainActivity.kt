@@ -84,7 +84,6 @@ class MainActivity : AppCompatActivity() {
             builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
             if (id == R.id.connectionFragment) builder.show()
         } else {
-
             super.onBackPressed()
         }
     }

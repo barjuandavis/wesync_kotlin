@@ -64,7 +64,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     private val _isAdvertising                         = MutableLiveData<Boolean>(false)
         val isAdvertising: LiveData<Boolean> = _isAdvertising
     private val _isDiscovering           = MutableLiveData<Boolean>(false)
-        val isDiscovering: LiveData<Boolean> = _isAdvertising
+        val isDiscovering: LiveData<Boolean> = _isDiscovering
 
     private val _foundSessions = MutableLiveData<MutableList<DiscoveredEndpoint>>()
         val foundSessions: LiveData<MutableList<DiscoveredEndpoint>> = _foundSessions
@@ -86,6 +86,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         }
         subscriber.connectionService?.preStartLatency?.observeForever {
             subscriber.metronomeService?.preStartLatency = it
+        }
+        subscriber.connectionService?.isDiscovering?.observeForever {
+            _isDiscovering.value = it
         }
     }
 
@@ -136,14 +139,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         mCService?.userType = _userType.value!!
     }
     private fun setIsDiscovering(a: Boolean){
-        _isDiscovering.value = a
-            if (a) {
-                subscriber.connectionService?.startDiscovery()
-            }
-                else {
-                subscriber.connectionService?.stopDiscovery()
-            }
-        Log.d("connectionService:Dc","${subscriber.connectionService}")
+        if (a) {
+            subscriber.connectionService?.startDiscovery()
+        }
+        else {
+            subscriber.connectionService?.stopDiscovery()
+        }
     }
     private fun reset(){
         Tempo.DEFAULT_BPM.setBPM()

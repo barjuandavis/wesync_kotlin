@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
@@ -17,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="@{() -> clickListener.onClick(discoveredEndpoint)}"
-        >
+        app:cardBackgroundColor="@color/colorBackgroundDark">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -29,8 +30,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:text="@{discoveredEndpoint.component2().endpointName +` (`+ discoveredEndpoint.component1() + `)`}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+                android:text="@{`(Unique ID: `+ discoveredEndpoint.component1() + `)`}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorEnabledButtonText" />
 
             <TextView
                 android:id="@+id/session_name"
@@ -40,8 +42,9 @@
                 android:layout_toStartOf="@+id/text_view_priority"
                 android:maxLines="1"
                 android:shadowColor="#00000000"
-                android:text="@string/app_name"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+                android:text="@{discoveredEndpoint.component2().endpointName}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorEnabledButtonText" />
         </RelativeLayout>
 
     </androidx.cardview.widget.CardView>

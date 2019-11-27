@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LifecycleService
@@ -56,6 +57,9 @@ class ConnectionManagerService : LifecycleService() {
         val connectionStatus:LiveData<Int>                 = _connectionStatus
     private val _connectedSlaves = MutableLiveData<MutableMap<String,ReceivedEndpoint>>()
     private val _latencyMap = mutableMapOf<String, Long>()
+    private val _isDiscovering = MutableLiveData<Boolean>(false)
+        val isDiscovering: LiveData<Boolean>  = _isDiscovering
+
     private val _preStartLatency = MutableLiveData<Long>()
         val preStartLatency: LiveData<Long> = _preStartLatency
 
@@ -223,13 +227,21 @@ class ConnectionManagerService : LifecycleService() {
             if (_foundSessions.value!!.size > 0) _foundSessions.value = mutableListOf()
             Nearby.getConnectionsClient(applicationContext)
                 .startDiscovery(SERVICE_ID, endpointCallback, discoveryOptions)
-                .addOnSuccessListener { Toast.makeText(this, "Finding nearby session...", Toast.LENGTH_SHORT).show()}
-                .addOnFailureListener { throw it }
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Finding nearby session...", Toast.LENGTH_SHORT).show()
+                    _isDiscovering.value = true
+                }
+                .addOnFailureListener {
+                    _isDiscovering.value = false
+                    throw it
+                }
         }
     }
     fun stopDiscovery() {
-        if (TestMode.STATUS == TestMode.NEARBY_ON)
+        if (TestMode.STATUS == TestMode.NEARBY_ON) {
+            _isDiscovering.value = false
             Nearby.getConnectionsClient(applicationContext).stopDiscovery()
+        }
     }
     fun sendByteArrayToAll(b: ByteArray) {
         if (userType == UserTypes.SESSION_HOST) for (endpoint in _connectedSlaves.value!!) {
