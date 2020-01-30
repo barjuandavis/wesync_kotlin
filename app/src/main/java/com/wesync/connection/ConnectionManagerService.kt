@@ -203,6 +203,9 @@ class ConnectionManagerService : LifecycleService() {
                 this.sendByteArray(to,ByteArrayEncoderDecoder
                     .encodeTimestampByteArray(time,type))
             }
+            PayloadType.PING_EXP -> {
+
+            }
         }
 
     }
@@ -244,7 +247,8 @@ class ConnectionManagerService : LifecycleService() {
         }
     }
     fun sendByteArrayToAll(b: ByteArray) {
-        if (userType == UserTypes.SESSION_HOST) for (endpoint in _connectedSlaves.value!!) {
+        if (userType == UserTypes.SESSION_HOST)
+            for (endpoint in _connectedSlaves.value!!) {
             sendByteArray(endpoint.key,b)
         }
     }

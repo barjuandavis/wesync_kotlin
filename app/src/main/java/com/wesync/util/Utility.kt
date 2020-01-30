@@ -87,6 +87,7 @@ class PayloadType { //ByteArray[0] adalah PAYLOADTYPE.
         const val PING_RESPONSE: Byte = 2 // dikirim dari SLAVE ke HOST sebagai balasan dari PayloadType.PING
         const val PING_PRE_START_LATENCY: Byte = 3 // dikirim dari HOST ke SLAVE setelah HOST tahu latency dari semua user.
                                                     // Slot timestamp isinya adalah berapa offset yang SLAVE harus tambah ke preStartLatency di MetronomeService.
+        const val PING_EXP: Byte = 4
     }
 }
 

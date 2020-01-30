@@ -168,6 +168,6 @@ class MainActivity : AppCompatActivity() {
                         mainViewModel.setOffset(data.getLong(NTPUtil.OFFSET, 0))
                     }
                 })
-        }
+       }
     }
 }

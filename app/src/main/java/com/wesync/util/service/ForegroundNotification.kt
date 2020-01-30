@@ -35,7 +35,7 @@ object ForegroundNotification {
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("Wesync: Synchronized Metronome")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_launcher_background)
             .setContentIntent(pendingIntent).setPriority(NotificationCompat.PRIORITY_MIN)
             .build()
     }
