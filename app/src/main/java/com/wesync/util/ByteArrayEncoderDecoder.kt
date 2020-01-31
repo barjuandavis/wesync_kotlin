@@ -2,7 +2,7 @@ package com.wesync.util
 
 class ByteArrayEncoderDecoder {
     companion object {
-        const val TWO_14: Long = 16383
+        const val TWO_14: Long = 10000
 
         private fun typeToSize(type: Byte): Int {
             if (type == PayloadType.CONFIG) {

@@ -124,28 +124,43 @@ class ConnectionManagerService : LifecycleService() {
                 // SLAVE balas ke HOST
                 if (time > currTime) currTime += ByteArrayEncoderDecoder.TWO_14
                 val hostToHereTime = currTime - time
-                sendTimestampedByteArray(hostToHereTime,PayloadType.PING_RESPONSE)
+                Log.d("rec_ping","ping received! htth = $hostToHereTime. Sending back to host")
+            sendTimestampedByteArray(hostToHereTime,PayloadType.PING_RESPONSE)
+        }
+        PayloadType.PING_RESPONSE -> {
+            // DITERIMA oleh HOST
+            //HOST mencatat berapa pingnya?
+            _latencyMap[_payloadSender.value!!] = time
+            var longest: Long = 0
+            val longestAddress = _payloadSender.value!!
+            for (i in _latencyMap) {
+                if (i.value > longest) longest = i.value }
+            for (i in _latencyMap) {
+                if (i.key != longestAddress)
+                    sendTimestampedByteArray(longest - i.value, PayloadType.PING_PRE_START_LATENCY,to = i.key)
+                else
+                    sendTimestampedByteArray(0,PayloadType.PING_PRE_START_LATENCY,i.key)
             }
-            PayloadType.PING_RESPONSE -> {
-                // DITERIMA oleh HOST
-                //HOST mencatat berapa pingnya?
-                _latencyMap[_payloadSender.value!!] = time
-                var longest: Long = 0
-                for (i in _latencyMap) {
-                    if (i.value > longest) longest = i.value }
-                for (i in _latencyMap) {
-                    sendTimestampedByteArray(longest - i.value, PayloadType.PING_PRE_START_LATENCY)
-                }
-
-
-            }
+            _preStartLatency.value = longest
+        }
             PayloadType.PING_PRE_START_LATENCY -> {
                 //slave terima ini dari HOST
                 // ganti ini jadi waktu preStartLatency.
                 // makeSure viewModel tau tentang berapa preStartLatencynya.
                 // Karena akan dipakai oleh MetronomeService
                 _preStartLatency.value = time
+                Log.d("rec_pre_start","prestart = $time")
                 _connectionStatus.value = ConnectionStatus.CONNECTED
+            }
+            PayloadType.PING_EXP -> {
+                /**
+                    implemented FOR TESTING PURPOSES
+                 */
+                if (time > currTime) currTime += ByteArrayEncoderDecoder.TWO_14
+                val actual = currTime - time
+                val expected: Long? = _preStartLatency.value
+                Log.d("ping_exp","expected = $expected")
+                Log.d("ping_exp","actual = $actual")
             }
         }
 
@@ -165,10 +180,10 @@ class ConnectionManagerService : LifecycleService() {
     private fun observePayloadEndpointsAndCallbacks() {
         payloadCallback.payload.observe(this , Observer {
             this@ConnectionManagerService._payload.value = it // oper Config Payload ke MutableLiveData (observed by VM)
-            unpackPingPayload(it) //kalo ternyata bukan Config, payload akan diproses disini
         })
         payloadCallback.payloadSender.observe(this, Observer {
-            _payloadSender.value = it
+          _payloadSender.value = it
+            unpackPingPayload(this@ConnectionManagerService._payload.value!!)
         })
         endpointCallback.sessions.observe(this, Observer {
             this@ConnectionManagerService._foundSessions.value = it
@@ -183,12 +198,30 @@ class ConnectionManagerService : LifecycleService() {
             if (it.isNotEmpty()) sendTimestampedByteArray(type = PayloadType.PING)
         })
     }
-    private fun sendTimestampedByteArray(time: Long? = 0, type: Byte, to: String? = null) {
+    private fun ppl(sr: Boolean = false, type: Byte = 0, value: Long = -1, toEndpointId: String = "") {
+        //send := (sr = 0)
+        //receive := (sr = 1)
+        var tag = ""
+        if (sr) tag = "send"
+        else tag = "rec"
+        when(type) {
+            PayloadType.PING -> tag += "_ping"
+            PayloadType.PING_PRE_START_LATENCY -> tag += "_pre_start"
+            PayloadType.PING_RESPONSE -> tag += "_response"
+            PayloadType.PING_EXP -> tag += "_exp"
+            PayloadType.CONFIG -> tag += "_config"
+        }
+        Log.d(tag,"value = $value, s/r to $toEndpointId")
+
+    }
+    fun sendTimestampedByteArray(time: Long? = 0, type: Byte, to: String? = null) {
         when (type) {
             PayloadType.PING -> {
                 this.sendByteArrayToAll(ByteArrayEncoderDecoder
                     .encodeTimestampByteArray(
                         getCurrentTimeWithOffset(),type))
+                Log.d("send_ping","sending ping to all clients, ntpOffset = $ntpOffset, getCurrentTimeWithOffset = ${getCurrentTimeWithOffset() % ByteArrayEncoderDecoder.TWO_14}")
+
             }
             PayloadType.PING_RESPONSE -> {
                 if (userType == UserTypes.SLAVE) {
@@ -196,20 +229,23 @@ class ConnectionManagerService : LifecycleService() {
                         sendByteArray(_connectedEndpointId.value!!,
                             ByteArrayEncoderDecoder
                                 .encodeTimestampByteArray(time,type))
+                    Log.d("send_ping_res","Sending back to host -> ${_connectedEndpointId.value}")
                 }
             }
             PayloadType.PING_PRE_START_LATENCY -> {
                 if (time != null && time > 0 && to != null)
                 this.sendByteArray(to,ByteArrayEncoderDecoder
                     .encodeTimestampByteArray(time,type))
+
             }
             PayloadType.PING_EXP -> {
-
+                this.sendByteArrayToAll(ByteArrayEncoderDecoder
+                    .encodeTimestampByteArray(
+                        getCurrentTimeWithOffset(),type))
             }
         }
 
     }
-
     fun startAdvertising() {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
             val advertisingOptions = AdvertisingOptions.Builder().setStrategy(strategy).build()

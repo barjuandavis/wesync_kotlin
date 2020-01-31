@@ -100,9 +100,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     // a callback which always be called when BPM or isPlaying is changing.
     // it is used to inform mCService to send payload for every time changes at mService happens.
     private fun onConfigChanged() {
-        if (userType.value == UserTypes.SESSION_HOST)
+        if (userType.value == UserTypes.SESSION_HOST) {
             mCService?.sendByteArrayToAll(ByteArrayEncoderDecoder
                 .encodeConfigByteArray(_bpm.value!!,_isPlaying.value!!))
+            mCService?.sendTimestampedByteArray(type = PayloadType.PING_EXP)
+        }
     }
 
     private fun connect(e: DiscoveredEndpoint) { mCService?.connect(e,_userName.value!!)}
@@ -165,6 +167,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
             val pair: Pair<Long, Boolean> = ByteArrayEncoderDecoder.decodeConfig(b)
             setIsPlaying(pair.second)
             pair.first.setBPM()
+        } else if (b[0] == PayloadType.PING_EXP) {
+
         }
     }
 
