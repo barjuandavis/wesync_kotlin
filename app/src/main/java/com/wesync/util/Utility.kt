@@ -77,7 +77,7 @@ class TestMode {
         const val NEARBY_OFF = false
         const val NEARBY_ON = true
         const val STATUS = NEARBY_ON
-        const val PRE_START_TEST = 0 //0 = no pre start latency, 1: counted every time user is connected 2: counted every time config is changed
+        const val PRE_START_TEST = 2 //0 = no pre start latency, 1: counted every time user is connected 2: counted every time config is changed
     }
 }
 

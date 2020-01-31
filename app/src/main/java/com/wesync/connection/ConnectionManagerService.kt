@@ -138,7 +138,7 @@ class ConnectionManagerService : LifecycleService() {
                 if (i.value > longest) longest = i.value }
             for (i in _latencyMap) {
                 if (i.key != longestAddress)
-                    sendTimestampedByteArray(longest - i.value, PayloadType.PING_PRE_START_LATENCY,to = i.key)
+                    sendTimestampedByteArray((longest - i.value)/2, PayloadType.PING_PRE_START_LATENCY,to = i.key)
                 else
                     sendTimestampedByteArray(0,PayloadType.PING_PRE_START_LATENCY,i.key)
             }
@@ -287,6 +287,7 @@ class ConnectionManagerService : LifecycleService() {
     fun disconnect() {
         Nearby.getConnectionsClient(application).stopAllEndpoints()
         userType = UserTypes.SOLO
+        _preStartLatency.value = 0
     }
 
 }

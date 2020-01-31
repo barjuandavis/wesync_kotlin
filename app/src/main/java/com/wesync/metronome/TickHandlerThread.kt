@@ -51,7 +51,9 @@ class TickHandlerThread(private val context:Context): HandlerThread("TickHandler
             }
             MetronomeCodes.TICK -> {
                 sp.play(tickSound,1.0f,1.0f, Thread.MAX_PRIORITY,0,1.0f)
-                SystemClock.sleep((60000 / this.bpm).toDouble().roundToLong())
+                SystemClock.sleep((60000 / this.bpm)
+                    //.toDouble().roundToLong()
+                )
                 if (_isPlaying == true) handler.sendEmptyMessage(MetronomeCodes.TICK)
             }
         }

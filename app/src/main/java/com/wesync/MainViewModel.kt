@@ -113,14 +113,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
 
 
     private fun Long.setBPM() {
-        onConfigChanged()
         _bpm.value = this
+        onConfigChanged()
         subscriber.metronomeService?.setBPM(this)
     }
 
     private fun setIsPlaying(b: Boolean) {
-        onConfigChanged()
         _isPlaying.value = b
+        onConfigChanged()
         if (b)  {
             subscriber.metronomeService?.play() //KASIH FAIL SAFE?
             if (userType.value!! == UserTypes.SESSION_HOST && isAdvertising.value!!) {
