@@ -101,9 +101,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
     // it is used to inform mCService to send payload for every time changes at mService happens.
     private fun onConfigChanged() {
         if (userType.value == UserTypes.SESSION_HOST) {
+            if (TestMode.PRE_START_TEST == 2) mCService?.sendTimestampedByteArray(type = PayloadType.PING)
             mCService?.sendByteArrayToAll(ByteArrayEncoderDecoder
                 .encodeConfigByteArray(_bpm.value!!,_isPlaying.value!!))
-            mCService?.sendTimestampedByteArray(type = PayloadType.PING_EXP)
         }
     }
 
@@ -113,22 +113,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
 
 
     private fun Long.setBPM() {
-        //state.set(BPM_KEY, this)
+        onConfigChanged()
         _bpm.value = this
         subscriber.metronomeService?.setBPM(this)
-        onConfigChanged()
     }
 
     private fun setIsPlaying(b: Boolean) {
+        onConfigChanged()
         _isPlaying.value = b
         if (b)  {
-            subscriber.metronomeService?.play()
+            subscriber.metronomeService?.play() //KASIH FAIL SAFE?
             if (userType.value!! == UserTypes.SESSION_HOST && isAdvertising.value!!) {
                 setIsAdvertising(false)
             }
         }
         else subscriber.metronomeService?.stop()
-        onConfigChanged()
     }
     private fun setUserName(sessionName: String?) {
         if (sessionName != null && sessionName.isNotEmpty()) {

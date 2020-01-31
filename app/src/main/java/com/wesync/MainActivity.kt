@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         initSupportActionBar()
         checkForPermission()
         startServices()
-        syncSystemClock()
+      //  syncSystemClock()
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         this.lifecycle.addObserver(mainViewModel)
         mainViewModel.unpackBundle(savedInstanceState)
@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         MetronomeService.stop(applicationContext)
         ConnectionManagerService.stop(applicationContext)
     }
-    private fun syncSystemClock() {
+    /*private fun syncSystemClock() {
         val builder = AlertDialog.Builder(this)
         if (android.
                 provider.
@@ -169,5 +169,5 @@ class MainActivity : AppCompatActivity() {
                     }
                 })
        }
-    }
+    }*/
 }

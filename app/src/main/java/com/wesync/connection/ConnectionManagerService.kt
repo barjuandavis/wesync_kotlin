@@ -57,6 +57,7 @@ class ConnectionManagerService : LifecycleService() {
         val connectionStatus:LiveData<Int>                 = _connectionStatus
     private val _connectedSlaves = MutableLiveData<MutableMap<String,ReceivedEndpoint>>()
     private val _latencyMap = mutableMapOf<String, Long>()
+    private val _leaveMap = mutableMapOf<String, Long>()
     private val _isDiscovering = MutableLiveData<Boolean>(false)
         val isDiscovering: LiveData<Boolean>  = _isDiscovering
 
@@ -124,13 +125,13 @@ class ConnectionManagerService : LifecycleService() {
                 // SLAVE balas ke HOST
                 if (time > currTime) currTime += ByteArrayEncoderDecoder.TWO_14
                 val hostToHereTime = currTime - time
-                Log.d("rec_ping","ping received! htth = $hostToHereTime. Sending back to host")
-            sendTimestampedByteArray(hostToHereTime,PayloadType.PING_RESPONSE)
+                sendTimestampedByteArray(hostToHereTime,PayloadType.PING_RESPONSE)
         }
-        PayloadType.PING_RESPONSE -> {
+            PayloadType.PING_RESPONSE -> {
             // DITERIMA oleh HOST
             //HOST mencatat berapa pingnya?
-            _latencyMap[_payloadSender.value!!] = time
+            _latencyMap[_payloadSender.value!!] = getCurrentTimeWithOffset() - _leaveMap[_payloadSender.value!!]!!
+            Log.d("leave_response","Received response from ${_payloadSender.value}. Latency = ${_latencyMap[_payloadSender.value!!]} ")
             var longest: Long = 0
             val longestAddress = _payloadSender.value!!
             for (i in _latencyMap) {
@@ -156,11 +157,7 @@ class ConnectionManagerService : LifecycleService() {
                 /**
                     implemented FOR TESTING PURPOSES
                  */
-                if (time > currTime) currTime += ByteArrayEncoderDecoder.TWO_14
-                val actual = currTime - time
-                val expected: Long? = _preStartLatency.value
-                Log.d("ping_exp","expected = $expected")
-                Log.d("ping_exp","actual = $actual")
+
             }
         }
 
@@ -198,30 +195,15 @@ class ConnectionManagerService : LifecycleService() {
             if (it.isNotEmpty()) sendTimestampedByteArray(type = PayloadType.PING)
         })
     }
-    private fun ppl(sr: Boolean = false, type: Byte = 0, value: Long = -1, toEndpointId: String = "") {
-        //send := (sr = 0)
-        //receive := (sr = 1)
-        var tag = ""
-        if (sr) tag = "send"
-        else tag = "rec"
-        when(type) {
-            PayloadType.PING -> tag += "_ping"
-            PayloadType.PING_PRE_START_LATENCY -> tag += "_pre_start"
-            PayloadType.PING_RESPONSE -> tag += "_response"
-            PayloadType.PING_EXP -> tag += "_exp"
-            PayloadType.CONFIG -> tag += "_config"
-        }
-        Log.d(tag,"value = $value, s/r to $toEndpointId")
-
-    }
     fun sendTimestampedByteArray(time: Long? = 0, type: Byte, to: String? = null) {
         when (type) {
             PayloadType.PING -> {
-                this.sendByteArrayToAll(ByteArrayEncoderDecoder
-                    .encodeTimestampByteArray(
-                        getCurrentTimeWithOffset(),type))
-                Log.d("send_ping","sending ping to all clients, ntpOffset = $ntpOffset, getCurrentTimeWithOffset = ${getCurrentTimeWithOffset() % ByteArrayEncoderDecoder.TWO_14}")
-
+                for (endpoint in _connectedSlaves.value!!) {
+                    sendByteArray(endpoint.key,ByteArrayEncoderDecoder.encodeTimestampByteArray(getCurrentTimeWithOffset(),type))
+                    //catet waktu untuk slave itu
+                    _leaveMap[endpoint.key] = getCurrentTimeWithOffset()
+                    Log.d("leave_time","send to ${endpoint.key}. LeaveTime = ${_leaveMap[endpoint.key]}")
+                }
             }
             PayloadType.PING_RESPONSE -> {
                 if (userType == UserTypes.SLAVE) {
@@ -229,7 +211,6 @@ class ConnectionManagerService : LifecycleService() {
                         sendByteArray(_connectedEndpointId.value!!,
                             ByteArrayEncoderDecoder
                                 .encodeTimestampByteArray(time,type))
-                    Log.d("send_ping_res","Sending back to host -> ${_connectedEndpointId.value}")
                 }
             }
             PayloadType.PING_PRE_START_LATENCY -> {
