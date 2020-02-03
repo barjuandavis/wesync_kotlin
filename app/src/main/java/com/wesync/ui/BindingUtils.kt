@@ -64,6 +64,7 @@ fun Button.setSessionState(item: LiveData<String>,
                         R.color.colorPrimaryDark
                     ))
                 }
+                R.id.test_button -> visibility = View.GONE
             }
         }
         UserTypes.SESSION_HOST -> {
@@ -96,6 +97,7 @@ fun Button.setSessionState(item: LiveData<String>,
                         setTextColor(ContextCompat.getColor(context,R.color.colorEnabledButtonText))
                     }
                 }
+                R.id.test_button -> visibility = View.VISIBLE
             }
         }
         UserTypes.SLAVE -> when (id) {
@@ -116,6 +118,7 @@ fun Button.setSessionState(item: LiveData<String>,
             R.id.join_session -> {
                 visibility = View.GONE
             }
+            R.id.test_button -> visibility = View.GONE
         }
     }
 }

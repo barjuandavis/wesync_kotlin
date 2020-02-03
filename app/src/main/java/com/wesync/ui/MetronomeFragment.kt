@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.*
@@ -51,6 +52,13 @@ class MetronomeFragment : Fragment(){
     private fun subscribeToViewModel() {
         binding.newSession.setOnClickListener(OnConnectionFragmentClickListener())
         binding.joinSession.setOnClickListener(OnConnectionFragmentClickListener())
+        binding.testButton.setOnClickListener {
+            if (!mainViewModel.pingTest()) {
+                Toast.makeText(this.context,"Failed to do ping! Service is preparing.",Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this.context,"Ping success! Check your logcats, nyan!",Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     inner class OnConnectionFragmentClickListener: View.OnClickListener {

@@ -2,34 +2,24 @@ package com.wesync
 
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
-import android.widget.EditText
-import android.widget.TextView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
-import androidx.work.*
 import com.wesync.connection.ConnectionManagerService
 import com.wesync.metronome.MetronomeService
-import com.wesync.ntp.NTPClientWorker
-import com.wesync.util.NTPUtil
 import com.wesync.util.service.ServiceSubscriber
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mainViewModel: MainViewModel
-    private val serviceSubscriber = ServiceSubscriber(this, this)
     private lateinit var toolbar: ActionBar
 
     companion object {
@@ -44,7 +34,6 @@ class MainActivity : AppCompatActivity() {
         initSupportActionBar()
         checkForPermission()
         startServices()
-      //  syncSystemClock()
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         this.lifecycle.addObserver(mainViewModel)
         mainViewModel.unpackBundle(savedInstanceState)
@@ -111,12 +100,6 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.toolbar))
         toolbar = supportActionBar!!
     }
-    private fun isNetworkAvailable(): Boolean {
-        val connectivityManager =
-            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected
-    }
     private fun startServices() {
         if (!metronomeIsAlive) MetronomeService.start(applicationContext)
         if (!connectionIsAlive) ConnectionManagerService.start(applicationContext)
@@ -125,49 +108,4 @@ class MainActivity : AppCompatActivity() {
         MetronomeService.stop(applicationContext)
         ConnectionManagerService.stop(applicationContext)
     }
-    /*private fun syncSystemClock() {
-        val builder = AlertDialog.Builder(this)
-        if (android.
-                provider.
-                Settings.Global.
-                getInt(contentResolver, android.provider.Settings.Global.AUTO_TIME, 0) != 1) {
-            val tv = TextView(this)
-            tv.text = getString(R.string.need_auto_time)
-            builder.setCustomTitle(tv)
-            val input = EditText(this)
-            builder.setPositiveButton("OK") { _, _ ->
-                val i = Intent(android.provider.Settings.ACTION_DATE_SETTINGS)
-                startActivityForResult(i,0)
-            }
-            builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
-            builder.show()
-        } //persuade user to turn on NITZ
-        //here is an attempt to connect to an NTP Service. Embrace yourselves!
-        val constrains = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-        if (!isNetworkAvailable()) {
-            val tv = TextView(this)
-            tv.text = getString(R.string.no_internet)
-            builder.setCustomTitle(tv)
-            val input = EditText(this)
-            builder.setPositiveButton("OK") { _, _ -> finish() }
-            builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
-            builder.show()
-        } else {
-            val otr = OneTimeWorkRequest.Builder(NTPClientWorker::class.java)
-                .setConstraints(constrains).build()
-            WorkManager.getInstance(this)
-                .beginWith(otr)
-                .enqueue()
-            WorkManager.getInstance(this)
-                .getWorkInfoByIdLiveData(otr.id)
-                .observe(this, Observer {
-                    if (it.state == WorkInfo.State.SUCCEEDED) {
-                        val data = it.outputData
-                        mainViewModel.setOffset(data.getLong(NTPUtil.OFFSET, 0))
-                    }
-                })
-       }
-    }*/
 }

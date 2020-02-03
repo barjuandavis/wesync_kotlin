@@ -64,6 +64,8 @@ class ConnectionManagerService : LifecycleService() {
     private val _preStartLatency = MutableLiveData<Long>()
         val preStartLatency: LiveData<Long> = _preStartLatency
 
+    private val _pingTestLeaveTimes: Array<Long> = Array(30) { 0.toLong() }
+
 
 
     inner class LocalBinder : Binder() {
@@ -157,7 +159,12 @@ class ConnectionManagerService : LifecycleService() {
                 /**
                     implemented FOR TESTING PURPOSES
                  */
-
+                Log.d("leave_response_exp","bales!")
+                sendTimestampedByteArray(0,PayloadType.PING_RESPONSE_EXP) // langsung bales
+            }
+            PayloadType.PING_RESPONSE_EXP -> {
+                _latencyMap[_payloadSender.value!!] = getCurrentTimeWithOffset() - _leaveMap[_payloadSender.value!!]!!
+                Log.d("leave_response_exp","From:${_payloadSender.value}. Latency = ${_latencyMap[_payloadSender.value!!]} ")
             }
         }
 
@@ -220,12 +227,19 @@ class ConnectionManagerService : LifecycleService() {
 
             }
             PayloadType.PING_EXP -> {
-                this.sendByteArrayToAll(ByteArrayEncoderDecoder
-                    .encodeTimestampByteArray(
-                        getCurrentTimeWithOffset(),type))
+                for (endpoint in _connectedSlaves.value!!) {
+                    sendByteArray(endpoint.key,ByteArrayEncoderDecoder.encodeTimestampByteArray(getCurrentTimeWithOffset(),type))
+                    //catet waktu untuk slave itu
+                    _leaveMap[endpoint.key] = getCurrentTimeWithOffset()
+                    Log.d("leave_time_exp","send to ${endpoint.key}. LeaveTime = ${_leaveMap[endpoint.key]}")
+                }
+            }
+            PayloadType.PING_RESPONSE_EXP -> {
+                sendByteArray(_connectedEndpointId.value!!,
+                    ByteArrayEncoderDecoder
+                        .encodeTimestampByteArray(0,PayloadType.PING_RESPONSE_EXP))
             }
         }
-
     }
     fun startAdvertising() {
         if (TestMode.STATUS == TestMode.NEARBY_ON) {
@@ -288,6 +302,9 @@ class ConnectionManagerService : LifecycleService() {
         Nearby.getConnectionsClient(application).stopAllEndpoints()
         userType = UserTypes.SOLO
         _preStartLatency.value = 0
+    }
+    fun pingTest() {
+        sendTimestampedByteArray(0,PayloadType.PING_EXP)
     }
 
 }

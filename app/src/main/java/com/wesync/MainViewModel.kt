@@ -249,6 +249,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application), L
         Log.d("states","session: ${userName.value}")
         Log.d("states","userType: ${userType.value}")
     }
+    fun pingTest(): Boolean {
+        if (mCService == null) return false
+        else {
+            mCService?.pingTest()
+        }
+        return true
+    }
 
 
 

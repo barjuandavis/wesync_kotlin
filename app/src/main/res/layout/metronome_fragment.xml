@@ -57,6 +57,30 @@
             app:userType="@{viewmodel.userType}" />
 
         <Button
+            android:id="@+id/test_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="68dp"
+            android:layout_height="38dp"
+            android:layout_marginTop="428dp"
+            android:layout_marginEnd="44sp"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
+            android:text="@string/test_button"
+            android:textColor="#ffffff"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.026"
+            app:playState="@{viewmodel.isPlaying}"
+            app:userType="@{viewmodel.userType}"
+            app:connectionStatus="@{viewmodel.connectionStatus}"
+            app:isAdvertising="@{viewmodel.isAdvertising}"
+
+        />
+
+        <Button
             android:id="@+id/new_session"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="100sp"
@@ -193,22 +217,6 @@
                 tools:layout_editor_absoluteY="141dp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/offset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/offset"
-            android:textAlignment="center"
-            android:textColor="@android:color/primary_text_dark"
-            android:textSize="12sp"
-            android:textStyle="italic"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/minus_layout"
-            app:offset="@{viewmodel.ntpOffset}" />
-
         <Button
             android:id="@+id/play_button"
             style="@style/Widget.AppCompat.Button.Colored"
@@ -221,7 +229,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/offset"
+            app:layout_constraintTop_toBottomOf="@+id/minus_layout"
             app:layout_constraintVertical_bias="0.044"
             app:playState="@{viewmodel.isPlaying()}"
             app:userType="@{viewmodel.userType}" />
