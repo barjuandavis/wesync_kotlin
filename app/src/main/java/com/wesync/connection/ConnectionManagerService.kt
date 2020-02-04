@@ -164,7 +164,7 @@ class ConnectionManagerService : LifecycleService() {
             }
             PayloadType.PING_RESPONSE_EXP -> {
                 _latencyMap[_payloadSender.value!!] = getCurrentTimeWithOffset() - _leaveMap[_payloadSender.value!!]!!
-                Log.d("leave_response_exp","From:${_payloadSender.value}. Latency = ${_latencyMap[_payloadSender.value!!]} ")
+                Log.d("leave_response_exp","${_payloadSender.value} = ${_latencyMap[_payloadSender.value!!]} ")
             }
         }
 
@@ -231,7 +231,6 @@ class ConnectionManagerService : LifecycleService() {
                     sendByteArray(endpoint.key,ByteArrayEncoderDecoder.encodeTimestampByteArray(getCurrentTimeWithOffset(),type))
                     //catet waktu untuk slave itu
                     _leaveMap[endpoint.key] = getCurrentTimeWithOffset()
-                    Log.d("leave_time_exp","send to ${endpoint.key}. LeaveTime = ${_leaveMap[endpoint.key]}")
                 }
             }
             PayloadType.PING_RESPONSE_EXP -> {
