@@ -99,6 +99,7 @@ class PayloadSizes {
         const val PING = 3
         const val PING_RESPONSE = 3
         const val PING_PRE_START_LATENCY = 3
+        const val SIZE_OF_TEST = 1000
     }
 }
 

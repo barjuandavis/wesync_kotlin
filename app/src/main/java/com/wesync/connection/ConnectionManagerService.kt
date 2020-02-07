@@ -21,6 +21,9 @@ import com.wesync.util.*
 import com.wesync.util.ServiceUtil.Companion.SERVICE_ID
 import com.wesync.util.service.ForegroundNotification
 import com.wesync.util.service.ForegroundServiceLauncher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class ConnectionManagerService : LifecycleService() {
@@ -44,8 +47,6 @@ class ConnectionManagerService : LifecycleService() {
     private lateinit var advertiserConnectionCallback : SessionConnectionLifecycleCallback
     var ntpOffset : Long = 0
 
-
-
     private val _payload                               = MutableLiveData<Payload>()
         val payload: LiveData<Payload>                     = _payload //INI YANG DITERIMA, BUKAN YANG DIKIRIM
     private val _payloadSender                         = MutableLiveData<String>()
@@ -58,15 +59,14 @@ class ConnectionManagerService : LifecycleService() {
     private val _connectedSlaves = MutableLiveData<MutableMap<String,ReceivedEndpoint>>()
     private val _latencyMap = mutableMapOf<String, Long>()
     private val _leaveMap = mutableMapOf<String, Long>()
+
     private val _isDiscovering = MutableLiveData<Boolean>(false)
         val isDiscovering: LiveData<Boolean>  = _isDiscovering
 
     private val _preStartLatency = MutableLiveData<Long>()
         val preStartLatency: LiveData<Long> = _preStartLatency
 
-    private val _pingTestLeaveTimes: Array<Long> = Array(30) { 0.toLong() }
-
-
+    private val _pingTestLeaveTimes = mutableMapOf<String, Array<Long>>()
 
     inner class LocalBinder : Binder() {
         fun getService() : ConnectionManagerService {
@@ -159,12 +159,13 @@ class ConnectionManagerService : LifecycleService() {
                 /**
                     implemented FOR TESTING PURPOSES
                  */
-                Log.d("leave_response_exp","bales!")
-                sendTimestampedByteArray(0,PayloadType.PING_RESPONSE_EXP) // langsung bales
+                Log.d("response_exp","this is test #$time")
+                sendTimestampedByteArray(time = time,type = PayloadType.PING_RESPONSE_EXP)
             }
             PayloadType.PING_RESPONSE_EXP -> {
-                _latencyMap[_payloadSender.value!!] = getCurrentTimeWithOffset() - _leaveMap[_payloadSender.value!!]!!
-                Log.d("leave_response_exp","${_payloadSender.value} = ${_latencyMap[_payloadSender.value!!]} ")
+                _pingTestLeaveTimes[_payloadSender.value]!![time.toInt()] = getCurrentTimeWithOffset() - _pingTestLeaveTimes[_payloadSender.value]!![time.toInt()]
+                val p = _pingTestLeaveTimes[_payloadSender.value]!![time.toInt()]
+                Log.d("leave_response_exp","${time.toInt()}:${_payloadSender.value}:$p")
             }
         }
 
@@ -182,27 +183,35 @@ class ConnectionManagerService : LifecycleService() {
         }
     }
     private fun observePayloadEndpointsAndCallbacks() {
-        payloadCallback.payload.observe(this , Observer {
-            this@ConnectionManagerService._payload.value = it // oper Config Payload ke MutableLiveData (observed by VM)
+        payloadCallback.payload.observe(this, Observer {
+            this._payload.value = it
         })
         payloadCallback.payloadSender.observe(this, Observer {
-          _payloadSender.value = it
-            unpackPingPayload(this@ConnectionManagerService._payload.value!!)
+            this._payloadSender.value = it
+            unpackPingPayload(_payload.value!!)
         })
         endpointCallback.sessions.observe(this, Observer {
-            this@ConnectionManagerService._foundSessions.value = it
-            Log.d("onEndpointFound","DiscoveredEndpoint added. List in ConnectionManagerService updated")})
-
+            this._foundSessions.value = it
+        })
         connectionCallback.connectedSessionId.observe(this, Observer {
-            this@ConnectionManagerService._connectedEndpointId.value = it})
+            this._connectedEndpointId.value = it
+        })
         connectionCallback.connectionStatus.observe(this, Observer {
-            this@ConnectionManagerService._connectionStatus.value = it })
+            this._connectionStatus.value = it
+        })
         advertiserConnectionCallback.connectedSlaves.observe(this, Observer {
-            this@ConnectionManagerService._connectedSlaves.value = it
-            if (it.isNotEmpty()) sendTimestampedByteArray(type = PayloadType.PING)
+            this._connectedSlaves.value = it
+            if (it.isNotEmpty()) {
+                sendTimestampedByteArray(type = PayloadType.PING)
+                for (i in it) {
+                    _pingTestLeaveTimes[i.key] = Array(PayloadSizes.SIZE_OF_TEST){ 0.toLong() }
+                }
+            }
         })
     }
-    fun sendTimestampedByteArray(time: Long? = 0, type: Byte, to: String? = null) {
+
+
+    fun sendTimestampedByteArray(time: Long? = 0, type: Byte, to: String? = null, whichTest: Int = 0) {
         when (type) {
             PayloadType.PING -> {
                 for (endpoint in _connectedSlaves.value!!) {
@@ -228,15 +237,16 @@ class ConnectionManagerService : LifecycleService() {
             }
             PayloadType.PING_EXP -> {
                 for (endpoint in _connectedSlaves.value!!) {
-                    sendByteArray(endpoint.key,ByteArrayEncoderDecoder.encodeTimestampByteArray(getCurrentTimeWithOffset(),type))
+                    sendByteArray(endpoint.key,ByteArrayEncoderDecoder.encodeTimestampByteArray(whichTest.toLong(),type))
                     //catet waktu untuk slave itu
-                    _leaveMap[endpoint.key] = getCurrentTimeWithOffset()
+                    _pingTestLeaveTimes[endpoint.key]!![whichTest] = getCurrentTimeWithOffset()
+                    Log.d("leave_time_exp","$whichTest:${_pingTestLeaveTimes[endpoint.key]!![whichTest]}")
                 }
             }
             PayloadType.PING_RESPONSE_EXP -> {
                 sendByteArray(_connectedEndpointId.value!!,
                     ByteArrayEncoderDecoder
-                        .encodeTimestampByteArray(0,PayloadType.PING_RESPONSE_EXP))
+                        .encodeTimestampByteArray(time!!,PayloadType.PING_RESPONSE_EXP))
             }
         }
     }
@@ -303,7 +313,12 @@ class ConnectionManagerService : LifecycleService() {
         _preStartLatency.value = 0
     }
     fun pingTest() {
-        sendTimestampedByteArray(0,PayloadType.PING_EXP)
+        GlobalScope.launch {
+            for (i in 0 until PayloadSizes.SIZE_OF_TEST) {
+                sendTimestampedByteArray(whichTest = i, type = PayloadType.PING_EXP)
+                delay(1000)
+            }
+        }
     }
 
 }
