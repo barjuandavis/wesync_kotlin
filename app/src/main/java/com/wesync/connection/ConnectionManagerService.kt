@@ -184,23 +184,23 @@ class ConnectionManagerService : LifecycleService() {
     }
     private fun observePayloadEndpointsAndCallbacks() {
         payloadCallback.payload.observe(this, Observer {
-            this._payload.value = it
+            this@ConnectionManagerService._payload.value = it
         })
         payloadCallback.payloadSender.observe(this, Observer {
-            this._payloadSender.value = it
+            this@ConnectionManagerService._payloadSender.value = it
             unpackPingPayload(_payload.value!!)
         })
         endpointCallback.sessions.observe(this, Observer {
-            this._foundSessions.value = it
+            this@ConnectionManagerService._foundSessions.value = it
         })
         connectionCallback.connectedSessionId.observe(this, Observer {
-            this._connectedEndpointId.value = it
+            this@ConnectionManagerService._connectedEndpointId.value = it
         })
         connectionCallback.connectionStatus.observe(this, Observer {
-            this._connectionStatus.value = it
+            this@ConnectionManagerService._connectionStatus.value = it
         })
         advertiserConnectionCallback.connectedSlaves.observe(this, Observer {
-            this._connectedSlaves.value = it
+            this@ConnectionManagerService._connectedSlaves.value = it
             if (it.isNotEmpty()) {
                 sendTimestampedByteArray(type = PayloadType.PING)
                 for (i in it) {
@@ -316,7 +316,7 @@ class ConnectionManagerService : LifecycleService() {
         GlobalScope.launch {
             for (i in 0 until PayloadSizes.SIZE_OF_TEST) {
                 sendTimestampedByteArray(whichTest = i, type = PayloadType.PING_EXP)
-                delay(1000)
+                delay(30)
             }
         }
     }
